@@ -8,9 +8,7 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "routes": [
-    { "pattern": "kdpnichefinder.net/*", "zone_name": "kdpnichefinder.net" }
-  ],
+
   "vars": {
     "NEXT_PUBLIC_APP_ORIGIN": "https://kdpnichefinder.net"
   }
