@@ -28,7 +28,7 @@ export default function LoginPage() {
 
         <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 16, padding: 32 }}>
           <a
-            href="/api/auth/google"
+            href="/api/auth/login"
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
               background: 'white', border: '1px solid var(--color-border)', borderRadius: 10,
