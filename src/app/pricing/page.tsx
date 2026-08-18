@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: 'Pricing — Free, Starter $9.99, Pro $29.99 per Month | KDPNicheFinder',
   description: 'Simple pricing for AI-powered KDP niche research. Free preview available. Starter $9.99/mo, Pro $29.99/mo. Cancel anytime. 7-day refund window.',
   alternates: { canonical: '/pricing' },
+  openGraph: { url: 'https://kdpnichefinder.net/pricing' },
 }
 
 const plans = [

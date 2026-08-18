@@ -5,6 +5,8 @@ export const metadata: Metadata = {
   title: 'Sign In — KDP Niche Finder',
   description: 'Sign in to your KDP Niche Finder account to access saved analyses and unlimited searches.',
   alternates: { canonical: '/login' },
+  robots: { index: false, follow: true },
+  openGraph: { url: 'https://kdpnichefinder.net/login' },
 }
 
 export default function LoginPage() {

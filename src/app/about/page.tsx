@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: 'About KDP Niche Finder',
   description: 'Learn about KDP Niche Finder — AI-powered niche research tool for KDP authors.',
   alternates: { canonical: '/about' },
+  openGraph: { url: 'https://kdpnichefinder.net/about' },
 }
 
 export default function AboutPage() {

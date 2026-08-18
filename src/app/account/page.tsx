@@ -5,6 +5,8 @@ export const metadata: Metadata = {
   title: 'Your Account — KDP Niche Finder',
   description: 'Manage your KDP Niche Finder account, view your subscription, and purchase credits.',
   alternates: { canonical: '/account' },
+  robots: { index: false, follow: true },
+  openGraph: { url: 'https://kdpnichefinder.net/account' },
 }
 
 export default function AccountPage() {

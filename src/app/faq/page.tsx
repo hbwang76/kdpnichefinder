@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: 'FAQ — KDP Niche Finder',
   description: 'Frequently asked questions about KDP Niche Finder.',
   alternates: { canonical: '/faq' },
+  openGraph: { url: 'https://kdpnichefinder.net/faq' },
 }
 
 const faqs = [

@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: 'Contact — KDP Niche Finder',
   description: 'Get in touch with the KDP Niche Finder team.',
   alternates: { canonical: '/contact' },
+  openGraph: { url: 'https://kdpnichefinder.net/contact' },
 }
 
 export default function ContactPage() {
