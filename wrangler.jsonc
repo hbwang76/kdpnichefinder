@@ -1,11 +1,17 @@
-name = "kdpnichefinder"
-compatibility_date = "2025-01-09"
-pages_build_output_dir = ".open-next/worker"
-
-# Custom domain routes
-routes = [
-  { pattern = "kdpnichefinder.net/*", zone_name = "kdpnichefinder.net" },
-]
-
-[vars]
-NEXT_PUBLIC_APP_ORIGIN = "https://kdpnichefinder.net"
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kdpnichefinder",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-01-09",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "routes": [
+    { "pattern": "kdpnichefinder.net/*", "zone_name": "kdpnichefinder.net" }
+  ],
+  "vars": {
+    "NEXT_PUBLIC_APP_ORIGIN": "https://kdpnichefinder.net"
+  }
+}
