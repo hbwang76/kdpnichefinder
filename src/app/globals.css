@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors - Signal & Shelf palette */
+  --color-canvas: #F7F5F0;
+  --color-surface: #FFFFFF;
+  --color-border: #E5E0D5;
+  --color-ink: #1C1917;
+  --color-ink-2: #57534E;
+  --color-ink-3: #A8A29E;
+  --color-signal: #EA580C;
+  --color-signal-hover: #C2410C;
+  --color-signal-tint: #FFF1E8;
+  --color-pine: #0F766E;
+  --color-pine-tint: #F0FDFA;
+  --color-amber: #D97706;
+  --color-amber-tint: #FFF7E8;
+  --color-rust: #B91C1C;
+  --color-rust-tint: #FEF2F2;
+  --color-footer: #1C1917;
+
+  /* Typography */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Spacing */
+  --spacing-section: 96px;
+  --spacing-section-mobile: 56px;
+}
+
+/* Base */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  line-height: 1.6;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+/* Score ring colors */
+.score-high { color: var(--color-pine); }
+.score-mid  { color: var(--color-amber); }
+.score-low  { color: var(--color-rust); }
+
+/* Legal text block */
+.legal-113 {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-ink-2);
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-canvas); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-ink-3); }
+
+/* Focus states */
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-signal-tint);
+  color: var(--color-signal);
+}

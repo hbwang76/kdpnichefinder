@@ -1,20 +1,11 @@
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "kdpnichefinder-api",
-  "main": "src/index.ts",
-  "compatibility_date": "2024-12-01",
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "kdpnichefinder-db",
-      "database_id": "[SET VIA: wrangler d1 create kdpnichefinder-db]"
-    }
-  ],
-  "vars": {
-    "APP_ORIGIN": "https://kdpnichefinder.net",
-    "GOOGLE_REDIRECT_URI": "https://kdpnichefinder.net/api/auth/callback/google",
-    "CREEM_API_BASE": "https://api.creem.io",
-    "FREE_DAILY_LIMIT": "1"
-  }
-}
+name = "kdpnichefinder"
+compatibility_date = "2025-01-09"
+pages_build_output_dir = ".open-next/worker"
 
+# Custom domain routes
+routes = [
+  { pattern = "kdpnichefinder.net/*", zone_name = "kdpnichefinder.net" },
+]
+
+[vars]
+NEXT_PUBLIC_APP_ORIGIN = "https://kdpnichefinder.net"

@@ -1,0 +1,406 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Terms of Service',
+  description: 'Terms and conditions for using KDP Niche Finder. Governed by the laws of the Republic of Estonia.',
+  alternates: { canonical: '/terms-of-service' },
+}
+
+function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  return (
+    <section id={id} style={{ marginBottom: '3rem' }}>
+      <h2 style={{
+        fontFamily: 'var(--font-display)',
+        fontSize: '1.25rem',
+        fontWeight: 700,
+        color: 'var(--color-ink)',
+        marginBottom: '1rem',
+        paddingBottom: '0.5rem',
+        borderBottom: '1px solid var(--color-border)',
+      }}>
+        {title}
+      </h2>
+      {children}
+    </section>
+  )
+}
+
+function H3({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 style={{
+      fontFamily: 'var(--font-display)',
+      fontSize: '1rem',
+      fontWeight: 600,
+      color: 'var(--color-ink)',
+      marginTop: '1.5rem',
+      marginBottom: '0.5rem',
+    }}>
+      {children}
+    </h3>
+  )
+}
+
+function P({ children }: { children: React.ReactNode }) {
+  return <p style={{ fontSize: '0.9375rem', color: 'var(--color-ink-2)', lineHeight: 1.7, marginBottom: '0.75rem' }}>{children}</p>
+}
+
+function Ul({ items }: { items: React.ReactNode[] }) {
+  return (
+    <ul style={{ paddingLeft: '1.5rem', marginBottom: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+      {items.map((item, i) => (
+        <li key={i} style={{ fontSize: '0.9375rem', color: 'var(--color-ink-2)', lineHeight: 1.6 }}>{item}</li>
+      ))}
+    </ul>
+  )
+}
+
+function DocTable({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
+  return (
+    <div style={{ overflowX: 'auto', marginBottom: '1rem' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8125rem' }}>
+        <thead>
+          <tr>
+            {headers.map((h, i) => (
+              <th key={i} style={{ textAlign: 'left', padding: '0.5rem 0.75rem', background: 'var(--color-canvas)', borderBottom: '2px solid var(--color-border)', fontWeight: 600, color: 'var(--color-ink)', whiteSpace: 'nowrap' }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
+              {row.map((cell, j) => (
+                <td key={j} style={{ padding: '0.5rem 0.75rem', color: 'var(--color-ink-2)', verticalAlign: 'top' }}>{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+export default function TermsOfServicePage() {
+  return (
+    <div style={{ background: 'var(--color-canvas)', minHeight: '100vh' }}>
+      {/* Hero */}
+      <section style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)', padding: '64px 48px 48px' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <Link href="/" style={{ color: 'var(--color-signal)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>← Back to KDP Niche Finder</Link>
+          </div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 700, color: 'var(--color-ink)', marginBottom: '1rem' }}>
+            Terms of Service
+          </h1>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', fontSize: '0.8125rem', color: 'var(--color-ink-2)' }}>
+            <span><strong>Last updated:</strong> 2026-08-17</span>
+            <span><strong>Effective date:</strong> 2026-08-17</span>
+            <span><strong>Operator:</strong> kdpnichefinder</span>
+            <span><strong>Contact:</strong> legal@kdpnichefinder.net</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <section style={{ padding: '56px 48px 80px' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+
+          <Section id="acceptance" title="1. Acceptance of Terms">
+            <P>
+              By accessing or using KDP Niche Finder (the &quot;Service&quot;) at <strong>kdpnichefinder.net</strong>, you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you do not agree, do not use the Service.
+            </P>
+            <P>
+              We may update these Terms at any time. Material changes will be notified by email and/or Site banner. Continued use constitutes acceptance.
+            </P>
+          </Section>
+
+          <Section id="description" title="2. Service Description">
+            <P>
+              KDP Niche Finder is an AI-powered research tool that helps Amazon Kindle Direct Publishing (KDP) authors identify and evaluate book publishing niches. We provide:
+            </P>
+            <Ul items={[
+              <><strong>Niche recommendations</strong> generated by artificial intelligence (OpenAI and Anthropic)</>,
+              <><strong>Niche scoring</strong> based on Best Sellers Rank (BSR), competition, seasonality, pricing, and trends</>,
+              <><strong>Action suggestions</strong> for selected niches</>,
+              <><strong>Historical analysis</strong> (paid plans only)</>,
+            ]} />
+            <P>
+              The Service is provided &quot;as is&quot; and is intended for <strong>informational purposes only</strong>. It does not constitute financial, legal, or business advice.
+            </P>
+          </Section>
+
+          <Section id="eligibility" title="3. Eligibility">
+            <P>You must be:</P>
+            <Ul items={[
+              'At least 18 years old (or the age of majority in your jurisdiction)',
+              'Legally able to enter a binding contract',
+              'Not prohibited from using the Service under your local laws',
+            ]} />
+            <P>
+              If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization to these Terms.
+            </P>
+          </Section>
+
+          <Section id="accounts" title="4. Accounts">
+            <Ul items={[
+              'You may optionally create an account (sign-in is only required for paid features)',
+              'You are responsible for safeguarding your password and your Google account credentials',
+              'You are responsible for all activity under your account',
+              'Notify us immediately at security@kdpnichefinder.net if you suspect unauthorized access',
+              'We are not liable for losses caused by unauthorized account use',
+            ]} />
+          </Section>
+
+          <Section id="plans" title="5. Plans and Pricing">
+            <H3>5.1 Current plans (subject to change with 30 days&apos; notice)</H3>
+            <P>Pricing reflects the R3 pricing calibration (FINAL, dated 2026-08-17).</P>
+            <DocTable
+              headers={['Plan', 'Monthly', 'Annual', 'Daily AI Quota', 'Monthly AI Quota', 'Features']}
+              rows={[
+                ['Free', '$0', '—', '0 (data only)', '5 data-only analyses', 'Niche preview, no AI interpretation'],
+                ['Starter', '$9.99', '$79/yr', '10/day', '300', 'AI analysis + 5 niche recommendations'],
+                ['Pro', '$29.99', '$229/yr', '30/day', '900', 'Higher AI quota + scoring + action plans + history'],
+                ['Credit Mini', '$4.99 (one-time)', '—', '—', '35 credits (6-mo validity)', 'Top-up credits usable any time'],
+                ['Credit Standard', '$9.99 (one-time)', '—', '—', '75 credits (12-mo validity)', 'Top-up credits usable any time'],
+              ]}
+            />
+
+            <H3>5.2 Subscription terms</H3>
+            <Ul items={[
+              <><strong>Subscriptions auto-renew</strong> monthly or annually until cancelled</>,
+              <><strong>Prices are in US dollars</strong>; <strong>Creem</strong> (as Merchant of Record) calculates and adds VAT, GST, sales tax per Buyer&apos;s billing address</>,
+              "We may change pricing with 30 days' email notice for the next billing cycle",
+              <><strong>No lifetime plans or one-time subscription purchases</strong> at this time</>,
+              'AI usage is metered against the daily quota; over-quota usage is blocked (Starter/Pro) or charged via credit top-up',
+              'AI Prompt data and AI outputs are subject to the Privacy Policy (Art. 6(1)(b) contract performance; OpenAI/Anthropic 30-day retention for abuse monitoring, no training use)',
+            ]} />
+
+            <H3>5.3 Free tier</H3>
+            <Ul items={[
+              'Limited to 5 data-only analyses per calendar month',
+              'Subject to fair-use limits; we may throttle or block abusive use',
+              'No AI interpretation on free tier (data only)',
+              'Email signup is not required to access the free preview',
+            ]} />
+
+            <H3>5.4 Credit Packs (one-time purchases)</H3>
+            <Ul items={[
+              <><strong>Credit Packs are not subscriptions</strong> and do not auto-renew</>,
+              'Credits are consumed after subscription daily quotas are exhausted',
+              'Credits expire per the validity period shown in §5.1',
+              'Unused credits are non-refundable after 7 days from purchase (consumer protection laws in your jurisdiction may grant additional rights — see Refund Policy)',
+              'Credits do not stack across multiple purchases into a higher tier',
+            ]} />
+
+            <H3>5.5 Annual subscriptions</H3>
+            <Ul items={[
+              'Annual plans are charged once at signup and renew automatically each year',
+              'Annual subscribers receive a discounted effective monthly rate (Starter ≈ $6.58/mo, Pro ≈ $19.08/mo)',
+              <><strong>Annual plans are refundable on a pro-rata basis only within the first 14 days</strong> (and only for new annual subscribers who have not exceeded 100 AI runs) — see Refund Policy §3.4</>,
+            ]} />
+          </Section>
+
+          <Section id="payment" title="6. Payment">
+            <H3>6.1 Payment Processor — Merchant of Record</H3>
+            <P>
+              Payments are processed by <strong>Creem</strong> (Armitage Labs OÜ, registry code 16977866, Rotermanni 14, Tallinn 10111, Estonia), acting as the <strong>merchant of record</strong>.
+            </P>
+            <P>What this means for you (Buyer):</P>
+            <Ul items={[
+              <><strong>Creem is the legal seller</strong> of the Product to you</>,
+              <><strong>Creem</strong> handles payment processing, invoicing, fraud prevention, and tax calculation/remittance</>,
+              <><strong>kdpnichefinder</strong> provides and delivers the Product to you; we are the underlying service provider, not the seller of record</>,
+            ]} />
+            <P>
+              Your purchase is governed by the <a href="https://www.creem.io/buyer-terms" style={{ color: 'var(--color-signal)' }}>Creem Buyer Terms of Service</a> in addition to these Terms. In case of conflict between these Terms and the Creem Buyer Terms, the <strong>Creem Buyer Terms prevail</strong> for payment and sale-related matters.
+            </P>
+
+            <H3>6.2 Recurring charges</H3>
+            <Ul items={[
+              'You authorize recurring charges for subscription plans (monthly or annual, depending on your selected plan)',
+              'One-time Credit Pack purchases are charged once at purchase; they do not auto-renew',
+              'Provide a valid payment method and keep it current',
+              'Failed payments may result in service suspension after a grace period',
+            ]} />
+
+            <H3>6.3 Refunds</H3>
+            <P>
+              See our <Link href="/refund-policy" style={{ color: 'var(--color-signal)' }}>Refund Policy</Link> for the full terms. Refund requests for the Product are handled by kdpnichefinder in coordination with Creem.
+            </P>
+          </Section>
+
+          <Section id="acceptable-use" title="7. Acceptable Use">
+            <P>You agree <strong>not to</strong>:</P>
+            <Ul items={[
+              'Use the Service for any unlawful purpose',
+              'Reverse-engineer, decompile, or attempt to extract source code',
+              'Resell, sublicense, or commercially exploit the Service without written permission',
+              'Use automated bots, scrapers, or scripts to access the Service (except as we provide via API)',
+              'Abuse rate limits or attempt to circumvent usage restrictions',
+              'Submit content that is illegal, infringing, harmful, or violates third-party rights',
+              "Interfere with security features or other users' enjoyment of the Service",
+              'Misrepresent your identity or affiliation',
+            ]} />
+            <P>We may suspend or terminate your account for violations.</P>
+          </Section>
+
+          <Section id="ai-content" title="8. AI-Generated Content">
+            <H3>8.1 Nature of AI output</H3>
+            <P>
+              Our niche recommendations, scores, and action plans are generated by third-party large language models (OpenAI and Anthropic). AI output:
+            </P>
+            <Ul items={[
+              "Is <strong>not verified</strong> against Amazon's official data",
+              'Is <strong>not financial, legal, or business advice</strong>',
+              'May contain errors, outdated information, or hallucinations',
+              'Should be <strong>independently verified</strong> before you rely on it',
+            ]} />
+
+            <H3>8.2 No guarantees</H3>
+            <P>We do not guarantee:</P>
+            <Ul items={[
+              'The accuracy of any niche score or recommendation',
+              'That following our recommendations will produce any specific income',
+              "That Amazon BSR data is current or error-free",
+              'Uninterrupted, error-free, or secure operation of the Service',
+            ]} />
+          </Section>
+
+          <Section id="third-party-brands" title="9. Third-Party Brands and Trademarks">
+            <P>
+              The Service may reference, compare, or link to third-party tools and brands including but not limited to: <strong>Publisher Rocket, Book Bolt, BookBeam, Helium 10, KDPSpy, Pubscout, NicheCatch, KDP Builder, KDPEasy</strong>, and others.
+            </P>
+            <Ul items={[
+              'All such references are for <strong>informational and comparison purposes only</strong>',
+              'All trademarks are the property of their respective owners',
+              'We are <strong>not affiliated with, endorsed by, or sponsored by</strong> any of these brands',
+              'We do not represent that our features, pricing, or accuracy match any third party',
+            ]} />
+          </Section>
+
+          <Section id="amazon-disclaimer" title="10. Amazon and KDP Disclaimer">
+            <Ul items={[
+              <><strong>Amazon</strong>, <strong>Kindle Direct Publishing</strong>, <strong>KDP</strong>, and <strong>Kindle</strong> are trademarks of <strong>Amazon.com, Inc.</strong></>,
+              'We are <strong>not affiliated with Amazon.com, Inc.</strong> in any way',
+              "We do not have access to Amazon's official seller data, only publicly available BSR information",
+              'BSR data is sourced from public pages via third-party proxies; data may be delayed 24–72 hours',
+              "Your KDP account, sales, royalties, and publisher standing are governed solely by Amazon's agreements",
+              "We are not responsible for changes in Amazon's policies, API access, or scraping restrictions",
+            ]} />
+          </Section>
+
+          <Section id="ip" title="11. Intellectual Property">
+            <Ul items={[
+              'The Service, including its design, code, content, and AI prompts, is our property or that of our licensors',
+              'You retain ownership of content you submit to the Service',
+              'You grant us a worldwide, non-exclusive license to use submitted content to operate and improve the Service',
+              'You may not copy, distribute, or create derivative works of our Service without permission',
+            ]} />
+          </Section>
+
+          <Section id="termination" title="12. Termination">
+            <Ul items={[
+              'You may cancel your subscription at any time from your account settings or via the Creem Customer Portal',
+              'We may suspend or terminate your access for any violation of these Terms',
+              'Upon termination, your right to use the Service ceases immediately',
+              'We may retain your data as required by law or for legitimate business purposes (see Privacy Policy)',
+              'Provisions that should survive termination (payment obligations, disclaimers, limitations of liability) will survive',
+            ]} />
+          </Section>
+
+          <Section id="disclaimers" title="13. Disclaimers and Limitation of Liability">
+            <H3>13.1 &quot;AS IS&quot; disclaimer</H3>
+            <P>
+              THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+            </P>
+
+            <H3>13.2 Limitation of liability</H3>
+            <P>
+              TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR TOTAL LIABILITY FOR ALL CLAIMS ARISING FROM OR RELATED TO THE SERVICE SHALL NOT EXCEED THE GREATER OF (A) THE AMOUNTS YOU PAID US IN THE 12 MONTHS PRECEDING THE CLAIM, OR (B) $100 USD.
+            </P>
+            <P>
+              WE SHALL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, EXEMPLARY, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS, LOST DATA, OR BUSINESS INTERRUPTION.
+            </P>
+            <P>
+              Some jurisdictions do not allow limitations on implied warranties or damages; in such cases, the above limitations apply to the maximum extent permitted.
+            </P>
+          </Section>
+
+          <Section id="indemnification" title="14. Indemnification">
+            <P>
+              You agree to indemnify and hold us harmless from claims arising out of your violation of these Terms, your use of the Service, or your violation of any third-party rights.
+            </P>
+          </Section>
+
+          <Section id="governing-law" title="15. Governing Law and Dispute Resolution">
+            <Ul items={[
+              <>These Terms are governed by the laws of the <strong>Republic of Estonia</strong> (the country of our Merchant of Record, Creem — Armitage Labs OÜ), without regard to conflict of law principles</>,
+              <><strong>EU consumers retain rights</strong> under their local consumer protection laws, including the <strong>EU Consumer Rights Directive 2011/83/EU</strong> and the right to bring claims in their local courts</>,
+              <><strong>Creem&apos;s Merchant Terms</strong> are governed by the laws of the Republic of Estonia; disputes with Creem are resolved in the Harju County Court</>,
+              'Nothing in this section limits your right to bring a claim in your local courts',
+            ]} />
+          </Section>
+
+          <Section id="changes-service" title="16. Changes to Service">
+            <P>We reserve the right to:</P>
+            <Ul items={[
+              'Modify, suspend, or discontinue any part of the Service at any time',
+              'Change features, pricing, or limits with reasonable notice',
+              'Refuse service to anyone for any lawful reason',
+            ]} />
+            <P>We are not liable for any modification, suspension, or discontinuation of the Service.</P>
+          </Section>
+
+          <Section id="miscellaneous" title="17. Miscellaneous">
+            <Ul items={[
+              'If any provision of these Terms is held unenforceable, the remaining provisions remain in effect',
+              'Our failure to enforce any right or provision is not a waiver of that right',
+              'These Terms, together with the Privacy Policy, Refund Policy, Cookie Policy, and Disclaimer, constitute the entire agreement between you and us',
+            ]} />
+          </Section>
+
+          <Section id="contact" title="18. Contact">
+            <Ul items={[
+              <><strong>Email (Legal):</strong> legal@kdpnichefinder.net</>,
+              <><strong>Email (Transactions / Refunds):</strong> transaction@kdpnichefinder.net</>,
+              <><strong>Operator:</strong> kdpnichefinder (operated as kdpnichefinder)</>,
+              <><strong>Payment Processor (Merchant of Record):</strong> Creem — Armitage Labs OÜ — support@creem.io</>,
+            ]} />
+          </Section>
+
+          {/* Source references */}
+          <section style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-border)' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Source References</h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+              {([
+                ['Creem Merchant Terms of Service V2.0', 'creem.io/terms'],
+                ['Creem Buyer Terms of Service V2.0', 'creem.io/buyer-terms'],
+                ['Creem Privacy Notice V2.0', 'creem.io/privacy'],
+                ['Google API Services User Data Policy', 'developers.google.com/terms/api-services-user-data-policy'],
+              ] as [string, string][]).map(([label, url]) => (
+                <li key={label} style={{ fontSize: '0.8125rem' }}>
+                  <a href={`https://${url}`} style={{ color: 'var(--color-signal)' }} target="_blank" rel="noopener noreferrer">{label}</a>
+                  <span style={{ color: 'var(--color-ink-3)', marginLeft: '0.375rem' }}>— {url}</span>
+                </li>
+              ))}
+            </ul>
+            <p style={{ marginTop: '1rem', fontSize: '0.8125rem', color: 'var(--color-ink-3)', fontStyle: 'italic' }}>
+              This is a draft legal page for compliance review. Final wording must be approved by a licensed attorney before production deployment.
+            </p>
+          </section>
+
+        </div>
+      </section>
+
+      <style>{`
+        @media (max-width: 768px) {
+          section[style*="padding: 56px"] { padding: 32px 16px 48px !important; }
+          section[style*="padding: 64px 48px"] { padding: 40px 16px 32px !important; }
+        }
+        h2 { scroll-margin-top: 80px; }
+        h3 { scroll-margin-top: 80px; }
+        a { word-break: break-word; }
+      `}</style>
+    </div>
+  )
+}
