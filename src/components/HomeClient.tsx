@@ -196,10 +196,10 @@ export function HomeClient() {
 
   return (
     <>
-      {/* ── S1: Hero ─────────────────────────────────── */}
+      {/* ── S1: Hero — 2-column grid matching design truth ─── */}
       <section
         style={{
-          padding: '40px 24px 96px',
+          padding: '40px 24px 0',
           maxWidth: 1280,
           margin: '0 auto',
           position: 'relative',
@@ -212,24 +212,25 @@ export function HomeClient() {
             position: 'absolute',
             inset: 0,
             pointerEvents: 'none',
-            backgroundImage: "url('/assets/hero-contour-map.png')",
+            backgroundImage: "url('/assets/hero-contour-map.webp')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             opacity: 0.1,
           }}
         />
 
+        {/* 2-column grid */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(2, 1fr)',
             gap: 48,
             alignItems: 'start',
             position: 'relative',
             zIndex: 1,
           }}
         >
-          {/* Left: copy + form */}
+          {/* ── Left col: copy + form + badges ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <h1
               style={{
@@ -366,9 +367,58 @@ export function HomeClient() {
               was built for Amazon FBA, not KDP. KDP Niche Finder is free to try —
               Starter starts at $9.99/mo, Pro at $29.99/mo.
             </p>
+
+            {/* Feature badges — matching design truth */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.6875rem',
+                  color: 'var(--color-ink)',
+                  background: '#fff',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                12 MARKETPLACES
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.6875rem',
+                  color: 'var(--color-ink)',
+                  background: '#fff',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                5 RANKED NICHES
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.6875rem',
+                  color: 'var(--color-ink)',
+                  background: '#fff',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                3-STEP ACTION PLAN
+              </span>
+            </div>
           </div>
 
-          {/* Right: illustration + niche cards */}
+          {/* ── Right col: illustration + niche cards (stacked/floating) ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative' }}>
             {/* Hero illustration */}
             <div
@@ -382,13 +432,13 @@ export function HomeClient() {
               }}
             >
               <img
-                src="/assets/hero-illustration.png"
+                src="/assets/hero-illustration.webp"
                 alt="KDP niche research — books with signal radar and data gauges"
                 style={{ width: '100%', height: 'auto', display: 'block' }}
               />
             </div>
 
-            {/* Niche result cards */}
+            {/* Niche result cards — floating stack with negative margin */}
             {SAMPLE_NICHES.map((niche, i) => (
               <div
                 key={niche.id}
@@ -535,7 +585,227 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── S2: GEO — What is a KDP niche finder? ──── */}
+      {/* ── S2: Result Preview Strip — 3 niche cards + dashed CTA ─── */}
+      <section
+        style={{
+          padding: '0 24px 96px',
+          maxWidth: 1280,
+          margin: '0 auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 24,
+          alignItems: 'stretch',
+        }}
+      >
+        {SAMPLE_NICHES.map((niche, i) => (
+          <div
+            key={`strip-${niche.id}`}
+            style={{
+              background: '#fff',
+              border: '1px solid var(--color-border)',
+              borderRadius: '12px',
+              padding: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              marginTop: i === 0 ? '-24px' : i === 1 ? '-24px' : '-24px',
+              marginLeft: i === 1 ? '8px' : i === 2 ? '16px' : 0,
+              opacity: i === 1 ? 0.9 : i === 2 ? 0.8 : 1,
+              transform: 'translateY(-4px)',
+              transition: 'transform 0.15s',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                borderBottom: '1px solid var(--color-border)',
+                paddingBottom: 12,
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.6875rem',
+                    color: 'var(--color-ink-3)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    display: 'block',
+                    marginBottom: 4,
+                  }}
+                >
+                  Niche #{niche.id}
+                </span>
+                <h3
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    color: 'var(--color-ink)',
+                    margin: 0,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {niche.name}
+                </h3>
+              </div>
+              <ScoreBadge score={niche.score} color={niche.scoreColor} />
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: 8,
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.6875rem',
+                    color: 'var(--color-ink-3)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    display: 'block',
+                    marginBottom: 4,
+                  }}
+                >
+                  Competition
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.9375rem',
+                    fontWeight: 600,
+                    color: niche.scoreColor,
+                  }}
+                >
+                  {niche.competition}
+                </span>
+              </div>
+              <div>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.6875rem',
+                    color: 'var(--color-ink-3)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    display: 'block',
+                    marginBottom: 4,
+                  }}
+                >
+                  BSR
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.9375rem',
+                    fontWeight: 600,
+                    color: 'var(--color-ink)',
+                  }}
+                >
+                  {niche.bsr}
+                </span>
+              </div>
+              <div>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.6875rem',
+                    color: 'var(--color-ink-3)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    display: 'block',
+                    marginBottom: 4,
+                  }}
+                >
+                  Est. Price
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.875rem',
+                    color: 'var(--color-ink)',
+                  }}
+                >
+                  {niche.priceRange}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Dashed CTA card */}
+        <div
+          style={{
+            background: '#fff',
+            border: '2px dashed var(--color-signal)',
+            borderRadius: '12px',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            textAlign: 'center',
+            marginTop: '-24px',
+          }}
+        >
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            style={{ color: 'var(--color-signal)' }}
+          >
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+            <path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          <h3
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '1rem',
+              fontWeight: 700,
+              color: 'var(--color-ink)',
+              margin: 0,
+            }}
+          >
+            Your niche could be next
+          </h3>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.875rem',
+              color: 'rgba(28,25,23,0.7)',
+              margin: 0,
+              lineHeight: 1.5,
+            }}
+          >
+            One line of input. Five ranked niches with a written action plan.
+          </p>
+          <Link
+            href="/tools/kdp-niche-finder"
+            style={{
+              background: 'var(--color-signal)',
+              color: '#fff',
+              borderRadius: '4px',
+              padding: '10px 20px',
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+              transition: 'opacity 0.15s',
+            }}
+          >
+            Try the Niche Finder — Free Preview
+          </Link>
+        </div>
+      </section>
+
+      {/* ── S3: GEO — What is a KDP niche finder? ──── */}
       <section
         style={{
           padding: '0 24px 96px',
@@ -582,7 +852,7 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── S3: Data Table ──────────────────────────── */}
+      {/* ── S4: Data Table ──────────────────────────── */}
       <section
         style={{
           padding: '0 24px 96px',
@@ -695,7 +965,7 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── S4: Why KDP Niche Finder ───────────────── */}
+      {/* ── S5: Why KDP Niche Finder ───────────────── */}
       <section
         style={{
           padding: '0 24px 96px',
@@ -868,7 +1138,7 @@ export function HomeClient() {
         </p>
       </section>
 
-      {/* ── S5: How it works ─────────────────────────── */}
+      {/* ── S6: How it works ─────────────────────────── */}
       <section
         style={{
           padding: '0 24px 96px',
@@ -953,7 +1223,7 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── S6: FAQ ─────────────────────────────────── */}
+      {/* ── S7: FAQ ─────────────────────────────────── */}
       <section
         style={{
           padding: '0 24px 96px',
@@ -981,7 +1251,7 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── S7: Final CTA ───────────────────────────── */}
+      {/* ── S8: Final CTA ───────────────────────────── */}
       <section
         style={{
           padding: '0 24px 96px',
@@ -1059,6 +1329,16 @@ export function HomeClient() {
 
       <style>{`
         @media (max-width: 768px) {
+          section > div[style*="gridTemplateColumns: repeat(2"] {
+            grid-template-columns: 1fr !important;
+          }
+          section > div[style*="gap: 48px"] {
+            gap: 24px !important;
+          }
+          section > div[style*="gap: 24px"][style*="alignItems: stretch"] {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+          }
           section,
           section > * {
             padding-left: 16px !important;
