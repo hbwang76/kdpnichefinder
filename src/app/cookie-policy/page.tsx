@@ -109,7 +109,7 @@ export default function CookiePolicyPage() {
               Cookies are small text files placed on your device when you visit a website. They are widely used to make websites work more efficiently and to provide information to site operators.
             </P>
             <P>
-              This Cookie Policy explains how <strong>kdpnichefinder.net</strong> (the &quot;Site&quot;) uses cookies and similar technologies. It should be read alongside our <Link href="/privacy-policy" style={{ color: 'var(--color-signal)' }}>Privacy Policy</Link>.
+              This Cookie Policy explains how <strong>kdpnichefinder.net</strong> (the &quot;Site&quot;) uses cookies and similar technologies. It should be read alongside our <Link href="/privacy" style={{ color: 'var(--color-signal)' }}>Privacy Policy</Link>.
             </P>
           </Section>
 

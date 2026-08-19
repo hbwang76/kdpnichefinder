@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_ORIGIN: process.env.NEXT_PUBLIC_APP_ORIGIN || 'https://kdpnichefinder.net',
   },
+  async redirects() {
+    return [
+      { source: '/terms-of-service', destination: '/terms', permanent: true },
+      { source: '/privacy-policy', destination: '/privacy', permanent: true },
+    ]
+  },
   async headers() {
     return [
       {
