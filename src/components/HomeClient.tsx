@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const SAMPLE_NICHES = [
@@ -82,6 +84,18 @@ function TrendIcon({ name, color }: { name: string; color: string }) {
 }
 
 export function HomeClient() {
+  const router = useRouter()
+  const [keyword, setKeyword] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (keyword.trim()) {
+      router.push(`/tools/kdp-niche-finder?niche=${encodeURIComponent(keyword.trim())}`)
+    } else {
+      router.push('/tools/kdp-niche-finder')
+    }
+  }
+
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────── */}
