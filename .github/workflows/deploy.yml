@@ -23,26 +23,14 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: Deploy Backend Worker
-        run: |
-          cd backend
-          npx wrangler deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GOOGLE_REDIRECT_URI: https://kdpnichefinder.net/api/auth/callback/google
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-          APP_ORIGIN: https://kdpnichefinder.net
           CREEM_API_KEY: ${{ secrets.CREEM_API_KEY }}
           CREEM_WEBHOOK_SECRET: ${{ secrets.CREEM_WEBHOOK_SECRET }}
-          CREEM_API_BASE: https://api.creem.io
           CREEM_STARTER_MONTHLY_PRICE_ID: ${{ secrets.CREEM_STARTER_MONTHLY_PRICE_ID }}
           CREEM_STARTER_YEARLY_PRICE_ID: ${{ secrets.CREEM_STARTER_YEARLY_PRICE_ID }}
           CREEM_PRO_MONTHLY_PRICE_ID: ${{ secrets.CREEM_PRO_MONTHLY_PRICE_ID }}
           CREEM_PRO_YEARLY_PRICE_ID: ${{ secrets.CREEM_PRO_YEARLY_PRICE_ID }}
           CREEM_CREDIT_MINI_PRICE_ID: ${{ secrets.CREEM_CREDIT_MINI_PRICE_ID }}
           CREEM_CREDIT_STANDARD_PRICE_ID: ${{ secrets.CREEM_CREDIT_STANDARD_PRICE_ID }}
-          FREE_DAILY_LIMIT: "1"

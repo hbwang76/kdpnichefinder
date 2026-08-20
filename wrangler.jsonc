@@ -14,6 +14,10 @@
     { "pattern": "www.kdpnichefinder.net/*", "zone_name": "kdpnichefinder.net" }
   ],
   "vars": {
-    "NEXT_PUBLIC_APP_ORIGIN": "https://kdpnichefinder.net"
+    "NEXT_PUBLIC_APP_ORIGIN": "https://kdpnichefinder.net",
+    "APP_ORIGIN": "https://kdpnichefinder.net",
+    "GOOGLE_REDIRECT_URI": "https://kdpnichefinder.net/api/auth/callback/google",
+    "CREEM_API_BASE": "https://api.creem.io",
+    "FREE_DAILY_LIMIT": "1"
   }
 }
