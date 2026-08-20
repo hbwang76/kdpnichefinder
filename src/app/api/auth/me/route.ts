@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cookie, now } from '@/lib/api-helpers'
+import { cookie, generateId, now } from '@/lib/api-helpers'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
-export const runtime = 'edge'
+interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
+
+interface MeSessionUser { id: string; user_id: string; email: string; name: string; plan: string; google_sub: string }
 
 export async function GET(request: NextRequest) {
-  interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null> } } }
-  interface MeSessionUser { id: string; user_id: string; email: string; name: string; plan: string; google_sub: string }
-  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
+  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
+  const db: DbClient = env.DB
   if (!db) return NextResponse.json({ authenticated: false })
 
   const sessionId = cookie(request, 'session_id')

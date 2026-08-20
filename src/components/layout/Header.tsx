@@ -1,10 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+
+type Me = { id: string; email: string; name: string; plan: string }
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [me, setMe] = useState<Me | null>(null)
+
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then(async (response) => response.ok ? await response.json() as { user: Me } : null)
+      .then((data) => setMe(data?.user || null))
+  }, [])
+
+  const initials = me ? (me.name || me.email).split(/\s+/).map((p) => p[0]).join("").slice(0, 2).toUpperCase() : null
 
   return (
     <header style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}>
@@ -31,7 +42,18 @@ export function Header() {
 
         {/* Desktop CTA */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="desktop-nav">
-          <Link href="/login" style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-ink-2)', textDecoration: 'none', padding: '8px 12px' }}>Sign in</Link>
+          {me ? (
+            <>
+              <Link href="/account" style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-ink-2)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 32, height: 32, borderRadius: '50%', background: '#0F766E', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}>
+                  {initials}
+                </span>
+                <span>{me.name || me.email}</span>
+              </Link>
+            </>
+          ) : (
+            <Link href="/login" style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-ink-2)', textDecoration: 'none', padding: '8px 12px' }}>Sign in</Link>
+          )}
           <Link href="/pricing" style={{ background: 'var(--color-signal)', color: 'white', padding: '8px 16px', borderRadius: 10, fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none' }}>
             Buy Credits
           </Link>
@@ -61,7 +83,16 @@ export function Header() {
           <Link href="/blog" style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'var(--color-ink)', textDecoration: 'none', padding: '8px 0' }}>Blog</Link>
           <Link href="/about" style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'var(--color-ink)', textDecoration: 'none', padding: '8px 0' }}>About</Link>
           <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <Link href="/login" style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'var(--color-ink-2)', textDecoration: 'none' }}>Sign in</Link>
+            {me ? (
+              <Link href="/account" style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'var(--color-ink)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 32, height: 32, borderRadius: '50%', background: '#0F766E', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}>
+                  {initials}
+                </span>
+                <span>{me.name || me.email}</span>
+              </Link>
+            ) : (
+              <Link href="/login" style={{ fontSize: '0.9375rem', fontWeight: 500, color: 'var(--color-ink-2)', textDecoration: 'none' }}>Sign in</Link>
+            )}
             <Link href="/pricing" style={{ background: 'var(--color-signal)', color: 'white', padding: '12px 16px', borderRadius: 10, fontWeight: 600, textDecoration: 'none', textAlign: 'center' }}>Buy Credits</Link>
           </div>
         </div>

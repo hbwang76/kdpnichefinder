@@ -25,7 +25,18 @@ export function clearCookie(name: string): string {
 
 export async function sha256(value: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
-  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+  // PKCE requires base64url encoding (no + / =)
+  // Use manual encoding to avoid Terser eliminating chained .replace() calls
+  const bytes = new Uint8Array(digest)
+  const base64 = btoa(String.fromCharCode(...bytes))
+  let result = ''
+  for (let i = 0; i < base64.length; i++) {
+    const c = base64.charAt(i)
+    if (c === '+') result += '-'
+    else if (c === '/') result += '_'
+    else if (c !== '=') result += c
+  }
+  return result
 }
 
 export function json(data: unknown, status = 200): Response {

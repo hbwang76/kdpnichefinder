@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookie, generateId, now, setCookie, sha256 } from '@/lib/api-helpers'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
-export const runtime = 'edge'
+interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
 
 export async function GET(request: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID
@@ -11,8 +12,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Google OAuth not configured' }, { status: 503 })
   }
 
-  interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
-  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
+  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
+  const db: DbClient = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const state = generateId('st_')

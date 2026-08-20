@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookie, now } from '@/lib/api-helpers'
-
-export const runtime = 'edge'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 export async function GET(request: NextRequest) {
   interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null> } } }
   interface BalanceSession { id: string; user_id: string }
-  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
+
+  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
+  const db = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const sessionId = cookie(request, 'session_id')

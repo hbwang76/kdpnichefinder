@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateId, now } from '@/lib/api-helpers'
 
-export const runtime = 'edge'
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text()

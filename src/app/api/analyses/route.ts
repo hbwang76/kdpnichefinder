@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookie, generateId, now } from '@/lib/api-helpers'
-
-export const runtime = 'edge'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown>; all<T>(): Promise<{ results: T[] }> } } }
-
 interface SessionUser { id: string; user_id: string; email: string; name: string; plan: string; google_sub: string }
 
 async function getSessionUser(db: DbClient, request: NextRequest): Promise<SessionUser | null> {
@@ -18,7 +16,8 @@ async function getSessionUser(db: DbClient, request: NextRequest): Promise<Sessi
 }
 
 export async function POST(request: NextRequest) {
-  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
+  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
+  const db = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const user = await getSessionUser(db, request)
@@ -77,16 +76,17 @@ export async function POST(request: NextRequest) {
   }
 
   const analysisId = generateId('a_')
-  const storedQuery = (user as any)?.user_id ? query : `free_ip_${ip}_${ts - (ts % 86400)}`
+  const storedQuery = user?.user_id ? query : `free_ip_${ip}_${ts - (ts % 86400)}`
   await db.prepare('INSERT INTO analyses (id, user_id, query, result, tier, created_at) VALUES (?, ?, ?, ?, ?, ?)')
-    .bind(analysisId, (user as any)?.user_id ?? null, storedQuery, JSON.stringify(analysis), tier, ts)
+    .bind(analysisId, user?.user_id ?? null, storedQuery, JSON.stringify(analysis), tier, ts)
     .run()
 
   return NextResponse.json({ id: analysisId, ...analysis })
 }
 
 export async function GET(request: NextRequest) {
-  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
+  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
+  const db = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const user = await getSessionUser(db, request)
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
 
   const { results } = await db
     .prepare('SELECT id, query, tier, created_at FROM analyses WHERE user_id = ? ORDER BY created_at DESC LIMIT ?')
-    .bind((user as any).user_id, limit)
+    .bind(user.user_id, limit)
     .all()
 
   return NextResponse.json({ analyses: results ?? [] })
