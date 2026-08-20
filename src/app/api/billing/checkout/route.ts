@@ -5,13 +5,15 @@ export const runtime = 'edge'
 
 interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
 
-async function getSessionUser(db: DbClient, request: NextRequest) {
+interface CheckoutSessionUser { id: string; user_id: string; email: string; name: string; plan: string }
+
+async function getSessionUser(db: DbClient, request: NextRequest): Promise<CheckoutSessionUser | null> {
   const sessionId = cookie(request, 'session_id')
   if (!sessionId) return null
   const session = await db
     .prepare('SELECT s.id, s.user_id, u.email, u.name, u.plan FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = ? AND s.expires_at > ?')
     .bind(sessionId, now())
-    .first()
+    .first<CheckoutSessionUser>()
   return session || null
 }
 

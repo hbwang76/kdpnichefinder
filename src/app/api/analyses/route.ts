@@ -5,13 +5,15 @@ export const runtime = 'edge'
 
 interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown>; all<T>(): Promise<{ results: T[] }> } } }
 
-async function getSessionUser(db: DbClient, request: NextRequest) {
+interface SessionUser { id: string; user_id: string; email: string; name: string; plan: string; google_sub: string }
+
+async function getSessionUser(db: DbClient, request: NextRequest): Promise<SessionUser | null> {
   const sessionId = cookie(request, 'session_id')
   if (!sessionId) return null
   const session = await db
     .prepare('SELECT s.id, s.user_id, u.email, u.name, u.plan, u.google_sub FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = ? AND s.expires_at > ?')
     .bind(sessionId, now())
-    .first()
+    .first<SessionUser>()
   return session || null
 }
 
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
   // Free tier limit
   if (!user || tier === 'free') {
     const dayStart = ts - (ts % 86400)
-    const uid = (user as any).user_id
+    const uid = user?.user_id
     const existing = uid
       ? await db.prepare('SELECT id FROM analyses WHERE user_id = ? AND created_at >= ? LIMIT 1').bind(uid, dayStart).first()
       : await db.prepare('SELECT id FROM analyses WHERE query = ? AND created_at >= ? AND tier = ?').bind(`free_ip_${ip}_${dayStart}`, dayStart, 'free').first()
