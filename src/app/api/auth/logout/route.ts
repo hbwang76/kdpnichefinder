@@ -3,8 +3,10 @@ import { cookie, clearCookie } from '@/lib/api-helpers'
 
 export const runtime = 'edge'
 
+interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> }; all<T>(): Promise<{ results: T[] }> } }
+
 export async function POST(request: NextRequest) {
-  const db = (request as any).env?.DB
+  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const sessionId = cookie(request, 'session_id')

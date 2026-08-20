@@ -27,7 +27,8 @@ export async function POST(request: NextRequest) {
   const valid = await crypto.subtle.verify('HMAC', key, sigBytes, bodyBytes)
   if (!valid) return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
 
-  const db = (request as any).env?.DB
+  interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
+  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   let event: { id?: string; type?: string; data?: Record<string, unknown> }

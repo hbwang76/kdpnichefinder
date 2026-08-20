@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
   const googleUser = await userInfoRes.json() as { sub: string; email: string; name: string; picture: string }
   const ts = now()
 
-  const db = (request as any).env?.DB
+  const db = (request as NextRequest & { env: { DB: D1Database } }).env?.DB
   if (!db) {
     return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
   }

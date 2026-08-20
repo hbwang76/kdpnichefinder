@@ -3,7 +3,9 @@ import { cookie, generateId, now } from '@/lib/api-helpers'
 
 export const runtime = 'edge'
 
-async function getSessionUser(db: any, request: NextRequest) {
+interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown>; all<T>(): Promise<{ results: T[] }> } } }
+
+async function getSessionUser(db: DbClient, request: NextRequest) {
   const sessionId = cookie(request, 'session_id')
   if (!sessionId) return null
   const session = await db
@@ -14,7 +16,7 @@ async function getSessionUser(db: any, request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const db = (request as any).env?.DB
+  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const user = await getSessionUser(db, request)
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const db = (request as any).env?.DB
+  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const user = await getSessionUser(db, request)

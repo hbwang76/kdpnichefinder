@@ -4,7 +4,8 @@ import { cookie, now } from '@/lib/api-helpers'
 export const runtime = 'edge'
 
 export async function GET(request: NextRequest) {
-  const db = (request as any).env?.DB
+  interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null> } } }
+  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const sessionId = cookie(request, 'session_id')

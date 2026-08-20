@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Google OAuth not configured' }, { status: 503 })
   }
 
-  const db = (request as any).env?.DB
+  interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
+  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const state = generateId('st_')
