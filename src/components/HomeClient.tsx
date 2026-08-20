@@ -584,160 +584,14 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── S2: Result Preview Strip — 3 niche cards + dashed CTA ─── */}
+      {/* ── S2: Dashed CTA — bridges Hero to S3 ─── */}
       <section
         style={{
           padding: '0 24px 96px',
-          maxWidth: 1280,
+          maxWidth: 400,
           margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 24,
-          alignItems: 'stretch',
         }}
       >
-        {SAMPLE_NICHES.map((niche, i) => (
-          <div
-            key={`strip-${niche.id}`}
-            style={{
-              background: '#fff',
-              border: '1px solid var(--color-border)',
-              borderRadius: '12px',
-              padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12,
-              marginTop: i === 0 ? '-24px' : i === 1 ? '-24px' : '-24px',
-              marginLeft: i === 1 ? '8px' : i === 2 ? '16px' : 0,
-              opacity: i === 1 ? 0.9 : i === 2 ? 0.8 : 1,
-              transform: 'translateY(-4px)',
-              transition: 'transform 0.15s',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                borderBottom: '1px solid var(--color-border)',
-                paddingBottom: 12,
-              }}
-            >
-              <div>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.6875rem',
-                    color: 'var(--color-ink-3)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    display: 'block',
-                    marginBottom: 4,
-                  }}
-                >
-                  Niche #{niche.id}
-                </span>
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '1rem',
-                    fontWeight: 700,
-                    color: 'var(--color-ink)',
-                    margin: 0,
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {niche.name}
-                </h3>
-              </div>
-              <ScoreBadge score={niche.score} color={niche.scoreColor} />
-            </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: 8,
-              }}
-            >
-              <div>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.6875rem',
-                    color: 'var(--color-ink-3)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    display: 'block',
-                    marginBottom: 4,
-                  }}
-                >
-                  Competition
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.9375rem',
-                    fontWeight: 600,
-                    color: niche.scoreColor,
-                  }}
-                >
-                  {niche.competition}
-                </span>
-              </div>
-              <div>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.6875rem',
-                    color: 'var(--color-ink-3)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    display: 'block',
-                    marginBottom: 4,
-                  }}
-                >
-                  BSR
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.9375rem',
-                    fontWeight: 600,
-                    color: 'var(--color-ink)',
-                  }}
-                >
-                  {niche.bsr}
-                </span>
-              </div>
-              <div>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.6875rem',
-                    color: 'var(--color-ink-3)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    display: 'block',
-                    marginBottom: 4,
-                  }}
-                >
-                  Est. Price
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.875rem',
-                    color: 'var(--color-ink)',
-                  }}
-                >
-                  {niche.priceRange}
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {/* Dashed CTA card */}
         <div
           style={{
             background: '#fff',
@@ -750,7 +604,6 @@ export function HomeClient() {
             justifyContent: 'center',
             gap: 12,
             textAlign: 'center',
-            marginTop: '-24px',
           }}
         >
           <svg
