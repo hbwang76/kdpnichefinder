@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "kdpnichefinder-api",
+  "name": "kdpnichefinder",
   "main": "src/index.ts",
   "compatibility_date": "2024-12-01",
   "d1_databases": [
@@ -9,9 +9,6 @@
       "database_name": "kdpnichefinder-db",
       "database_id": "cd4cd457-bcc8-4356-a6f3-b27d3b45074d"
     }
-  ],
-  "routes": [
-    { "pattern": "api.kdpnichefinder.net/*", "zone_name": "kdpnichefinder.net" }
   ],
   "vars": {
     "APP_ORIGIN": "https://kdpnichefinder.net",

@@ -5,7 +5,7 @@ export const config = {
   matcher: ['/api/:path*'],
 }
 
-const API_BASE = 'https://kdpnichefinder-api.hbwang2076.workers.dev'
+const API_BASE = 'https://kdpnichefinder.hbwang2076.workers.dev'
 
 export function middleware(request: NextRequest) {
   const url = new URL(request.url)
