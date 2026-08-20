@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
   if (!valid) return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
 
   interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
+  interface WebhookEvent { id: string }
   const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
 
   const eventId = event.id ?? generateId('evt_')
   const eventType = event.type ?? 'unknown'
-  const existing = await db.prepare('SELECT id FROM webhook_events WHERE id = ?').bind(eventId).first()
+  const existing = await db.prepare('SELECT id FROM webhook_events WHERE id = ?').bind(eventId).first<WebhookEvent>()
   if (existing) return NextResponse.json({ ok: true, message: 'already processed' })
 
   const ts = now()
