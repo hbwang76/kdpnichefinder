@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookie, now } from '@/lib/api-helpers'
-
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
 
@@ -17,7 +17,8 @@ async function getSessionUser(db: DbClient, request: NextRequest): Promise<Check
 }
 
 export async function POST(request: NextRequest) {
-  const db: DbClient = (request as NextRequest & { env: { DB: DbClient } }).env?.DB
+  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
+  const db: DbClient = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const user = await getSessionUser(db, request)

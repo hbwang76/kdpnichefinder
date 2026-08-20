@@ -64,11 +64,11 @@ const DATA_TABLE = [
 const FAQ_ITEMS = [
   {
     q: 'Is this KDP niche finder really free?',
-    a: 'Yes. The Free tier gives 1 data-only analysis per day with no signup required. Starter ($9.99/mo) adds 80 AI analyses per month (about 3 per day), and Pro ($29.99/mo) is 270 AI analyses per month (about 9 per day) with scoring, action plans, and history. See our pricing.',
+    a: 'Yes — 1 data-only analysis per day, no signup needed. Starter gives you 80 AI analyses/month (~$3/day). Pro gives you 270/month (~$1/day) with full scoring, action plans, and history. See our pricing.',
   },
   {
     q: 'How accurate are the niche recommendations?',
-    a: "Our scores are estimates based on publicly available Amazon BSR, Google Trends, and Reddit signals. Data may be delayed 24-72 hours and may differ from actual Amazon performance. AI-generated recommendations are for informational purposes only and do not constitute financial or business advice.",
+    a: 'Scores come from Amazon BSR, Google Trends, and Reddit signals — updated every 24-72 hours. BSR data reflects what titles are selling now, not tomorrow. No niche score is a guarantee; actual results depend on your cover, pricing, and launch timing.',
   },
   {
     q: 'Do I need an Amazon account to use the tool?',
@@ -92,7 +92,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How is this different from Publisher Rocket or Book Beam?',
-    a: "Publisher Rocket ($199 one-time) is excellent for keyword and category research, but you have to interpret the data yourself — no niche recommendations, no action plans. Book Beam ($69 one-time) adds niche scoring but no execution path. Book Bolt ($9.99/mo) focuses on puzzle book creation. KDP Niche Finder combines BSR + Trends + Reddit signals with AI-written action plans: cover style, title ideas, pricing range, and 3-step launch plan for every niche.",
+    a: 'Publisher Rocket ($199 one-time) is excellent for keyword and category research, but you have to interpret the data yourself — no niche recommendations, no action plans. Book Beam ($69 one-time) adds niche scoring but no execution path. Book Bolt ($9.99/mo) focuses on puzzle book creation. KDP Niche Finder combines BSR + Trends + Reddit signals with AI-written action plans: cover style, title ideas, pricing range, and 3-step launch plan for every niche.',
   },
 ]
 
@@ -115,66 +115,64 @@ function ScoreBadge({ score, color }: { score: number; color: string }) {
   )
 }
 
+function NicheCard({ niche, offset }: { niche: typeof SAMPLE_NICHES[0]; offset: number }) {
+  const offsets = [
+    '',
+    '-mt-4 md:-mt-6 ml-3 md:ml-4',
+    '-mt-4 md:-mt-8 ml-6 md:ml-8',
+  ]
+  const opacities = ['', 'opacity-90', 'opacity-80']
+  const zIndices = ['z-10', 'z-10', 'z-10']
+
+  return (
+    <div
+      className={`bg-white rounded-card border border-border p-4 flex flex-col gap-3 relative ${offsets[offset]} ${opacities[offset]} ${zIndices[offset]} transition-transform hover:-translate-y-1`}
+    >
+      <div className="flex justify-between items-start border-b border-border pb-3">
+        <div>
+          <span className="font-mono text-[13px] text-ink-3 uppercase tracking-widest block mb-1">
+            Niche #{niche.id}
+          </span>
+          <h3 className="font-display text-[1.125rem] font-bold text-ink leading-tight">
+            {niche.name}
+          </h3>
+        </div>
+        <ScoreBadge score={niche.score} color={niche.scoreColor} />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="flex flex-col gap-1">
+          <span className="font-mono text-[11px] text-ink-3 uppercase tracking-widest">Competition</span>
+          <span className="font-mono text-base font-semibold" style={{ color: niche.scoreColor }}>
+            {niche.competition}
+          </span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="font-mono text-[11px] text-ink-3 uppercase tracking-widest">BSR</span>
+          <span className="font-mono text-base font-semibold text-ink">{niche.bsr}</span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="font-mono text-[11px] text-ink-3 uppercase tracking-widest">Est. Price</span>
+          <span className="font-mono text-sm text-ink">{niche.priceRange}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div
-      style={{
-        background: '#fff',
-        border: '1px solid var(--color-border)',
-        borderRadius: '4px',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="bg-white rounded-card border border-border overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        style={{
-          width: '100%',
-          textAlign: 'left',
-          padding: '16px 20px',
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 16,
-        }}
+        className="w-full text-left p-4 flex justify-between items-center gap-4 cursor-pointer bg-transparent border-none"
       >
-        <span
-          style={{
-            fontFamily: 'var(--font-body)',
-            fontSize: '1rem',
-            fontWeight: 600,
-            color: 'var(--color-ink)',
-          }}
-        >
-          {q}
-        </span>
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '1.25rem',
-            color: 'var(--color-signal)',
-            flexShrink: 0,
-          }}
-        >
-          {open ? '−' : '+'}
-        </span>
+        <span className="font-body text-base font-semibold text-ink">{q}</span>
+        <span className="font-mono text-xl text-signal flex-shrink-0">{open ? '−' : '+'}</span>
       </button>
       {open && (
-        <div style={{ padding: '0 20px 16px' }}>
-          <p
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-              color: 'rgba(28,25,23,0.7)',
-              lineHeight: 1.6,
-              margin: 0,
-            }}
-          >
-            {a}
-          </p>
+        <div className="px-4 pb-4">
+          <p className="font-body text-sm text-ink/70 leading-relaxed">{a}</p>
         </div>
       )}
     </div>
@@ -196,618 +194,144 @@ export function HomeClient() {
 
   return (
     <>
-      {/* ── S1: Hero — 2-column grid matching design truth ─── */}
-      <section
-        style={{
-          padding: '40px 24px 0',
-          maxWidth: 1280,
-          margin: '0 auto',
-          position: 'relative',
-        }}
-      >
-        {/* Contour map background */}
+      {/* ── HERO ─────────────────────────────────────────── */}
+      <section className="px-4 md:px-12 pt-10 pb-0 max-w-7xl mx-auto relative">
+        {/* Contour map bg */}
         <div
           aria-hidden="true"
+          className="absolute inset-0 pointer-events-none select-none z-0"
           style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
             backgroundImage: "url('/assets/hero-contour-map.webp')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             opacity: 0.1,
           }}
         />
-
-        {/* 2-column grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 48,
-            alignItems: 'start',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
-          {/* ── Left col: copy + form + badges ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <h1
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(2rem, 4vw, 3.5rem)',
-                fontWeight: 700,
-                color: 'var(--color-ink)',
-                lineHeight: 1.1,
-                letterSpacing: '-0.02em',
-                margin: 0,
-              }}
-            >
-              Find your next profitable KDP niche in ~30 seconds.
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start relative z-10">
+          {/* Left col */}
+          <div className="flex flex-col gap-5">
+            <h1 className="font-display text-4xl md:text-[3.25rem] font-bold text-ink leading-[1.08] tracking-tight">
+              Find your next profitable KDP niche in almost 30 seconds.
             </h1>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '1.125rem',
-                color: 'rgba(28,25,23,0.75)',
-                lineHeight: 1.6,
-                margin: 0,
-              }}
-            >
+            <p className="font-body text-lg text-ink/75 leading-relaxed">
               Niche research that actually tells you what to write next. Free to try.
             </p>
-
-            <form onSubmit={handleSearch} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div
-                style={{
-                  background: '#fff',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '0 12px',
-                  transition: 'border-color 0.15s',
-                }}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  style={{ color: 'var(--color-ink-3)', flexShrink: 0 }}
-                >
+            <form onSubmit={handleSearch} className="flex flex-col gap-3">
+              <div className="bg-white rounded-card border border-border flex items-center gap-2 px-3 focus-within:border-signal focus-within:outline focus-within:outline-2 focus-within:outline-signal focus-within:outline-offset-2 transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-ink-3 flex-shrink-0">
                   <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-                  <path
-                    d="M20 20l-3.5-3.5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
+                  <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
                 <input
                   type="text"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="e.g. adhd planner, low content journal, children's coloring book"
-                  style={{
-                    width: '100%',
-                    height: 48,
-                    background: 'transparent',
-                    color: 'var(--color-ink)',
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '1rem',
-                    padding: '12px 0',
-                    border: 'none',
-                    outline: 'none',
-                  }}
+                  className="w-full h-12 bg-transparent text-ink placeholder:text-ink-3 font-body text-base border-none outline-none"
                 />
               </div>
               <button
                 type="submit"
-                style={{
-                  background: 'var(--color-signal)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '14px 24px',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'opacity 0.15s',
-                  textAlign: 'center',
-                }}
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLButtonElement).style.opacity = '0.85'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLButtonElement).style.opacity = '1'
-                }}
+                className="bg-signal text-white rounded-btn px-6 py-3.5 font-body text-base font-semibold hover:opacity-85 transition-opacity text-center"
               >
                 Try the Niche Finder — Free Preview
               </button>
             </form>
-
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                color: 'rgba(28,25,23,0.7)',
-                margin: 0,
-              }}
-            >
-              Preview without signing in · 1 free analysis every 24 hours · Cancel
-              anytime
+            <p className="font-body text-sm text-ink/70">
+              No signup needed · 1 analysis/day · Cancel anytime
             </p>
-            <p
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.75rem',
-                color: 'var(--color-ink-3)',
-                letterSpacing: '0.04em',
-                margin: 0,
-                textTransform: 'uppercase',
-              }}
-            >
-              AI-generated recommendations are estimates based on publicly available
-              data.
+            <p className="font-mono text-[11px] text-ink-3 uppercase tracking-widest">
+              AI-generated recommendations are estimates based on publicly available data.
             </p>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.8125rem',
-                color: 'rgba(28,25,23,0.6)',
-                margin: 0,
-                lineHeight: 1.55,
-              }}
-            >
-              Publisher Rocket charges $199 one-time. Helium 10 starts at $37/mo and
-              was built for Amazon FBA, not KDP. KDP Niche Finder is free to try —
-              Starter starts at $9.99/mo, Pro at $29.99/mo.
+            <p className="font-body text-[13px] text-ink/60 leading-relaxed">
+              Publisher Rocket charges $199 one-time. Helium 10 starts at $37/mo and was built for Amazon FBA, not KDP. KDP Niche Finder is free to try — Starter starts at $9.99/mo, Pro at $29.99/mo.
             </p>
-
-            {/* Feature badges — matching design truth */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.6875rem',
-                  color: 'var(--color-ink)',
-                  background: '#fff',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                12 MARKETPLACES
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.6875rem',
-                  color: 'var(--color-ink)',
-                  background: '#fff',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                5 RANKED NICHES
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.6875rem',
-                  color: 'var(--color-ink)',
-                  background: '#fff',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                3-STEP ACTION PLAN
-              </span>
+            <div className="flex flex-wrap gap-2">
+              {['12 MARKETPLACES', '5 RANKED NICHES', '3-STEP ACTION PLAN'].map((b) => (
+                <span key={b} className="font-mono text-[11px] text-ink/70 bg-white border border-border rounded-sm px-2 py-1 uppercase tracking-widest">
+                  {b}
+                </span>
+              ))}
             </div>
           </div>
 
-          {/* ── Right col: illustration + niche cards (stacked/floating) ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative' }}>
-            {/* Hero illustration */}
-            <div
-              style={{
-                borderRadius: '12px',
-                overflow: 'hidden',
-                border: '1px solid var(--color-border)',
-                background: '#fff',
-                position: 'relative',
-                zIndex: 1,
-              }}
-            >
+          {/* Right col — illustration + floating cards */}
+          <div className="flex flex-col gap-3 relative">
+            <div className="rounded-card overflow-hidden border border-border bg-white relative z-20">
               <img
                 src="/assets/hero-illustration.webp"
                 alt="KDP niche research — books with signal radar and data gauges"
-                style={{ width: '100%', height: 'auto', display: 'block' }}
+                className="w-full h-56 object-cover block"
               />
             </div>
-
-            {/* Niche result cards — floating stack with negative margin */}
-            {SAMPLE_NICHES.map((niche, i) => (
-              <div
-                key={niche.id}
-                style={{
-                  background: '#fff',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 12,
-                  position: 'relative',
-                  zIndex: 1,
-                  marginTop: i === 1 ? '-16px' : i === 2 ? '-16px' : 0,
-                  marginLeft: i === 1 ? '12px' : i === 2 ? '24px' : 0,
-                  opacity: i === 1 ? 0.9 : i === 2 ? 0.8 : 1,
-                  transform: i > 0 ? 'translateY(-4px)' : 'none',
-                  transition: 'transform 0.15s',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    borderBottom: '1px solid var(--color-border)',
-                    paddingBottom: 12,
-                  }}
-                >
-                  <div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.6875rem',
-                        color: 'var(--color-ink-3)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        display: 'block',
-                        marginBottom: 4,
-                      }}
-                    >
-                      Niche #{niche.id}
-                    </span>
-                    <h3
-                      style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '1rem',
-                        fontWeight: 700,
-                        color: 'var(--color-ink)',
-                        margin: 0,
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {niche.name}
-                    </h3>
-                  </div>
-                  <ScoreBadge score={niche.score} color={niche.scoreColor} />
-                </div>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: 8,
-                  }}
-                >
-                  <div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.6875rem',
-                        color: 'var(--color-ink-3)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        display: 'block',
-                        marginBottom: 4,
-                      }}
-                    >
-                      Competition
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.9375rem',
-                        fontWeight: 600,
-                        color: niche.scoreColor,
-                      }}
-                    >
-                      {niche.competition}
-                    </span>
-                  </div>
-                  <div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.6875rem',
-                        color: 'var(--color-ink-3)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        display: 'block',
-                        marginBottom: 4,
-                      }}
-                    >
-                      BSR
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.9375rem',
-                        fontWeight: 600,
-                        color: 'var(--color-ink)',
-                      }}
-                    >
-                      {niche.bsr}
-                    </span>
-                  </div>
-                  <div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.6875rem',
-                        color: 'var(--color-ink-3)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        display: 'block',
-                        marginBottom: 4,
-                      }}
-                    >
-                      Est. Price
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.875rem',
-                        color: 'var(--color-ink)',
-                      }}
-                    >
-                      {niche.priceRange}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <NicheCard niche={SAMPLE_NICHES[0]} offset={0} />
           </div>
         </div>
       </section>
 
-      {/* ── S2: Dashed CTA — bridges Hero to S3 ─── */}
-      <section
-        style={{
-          padding: '0 24px 96px',
-          maxWidth: 400,
-          margin: '0 auto',
-        }}
-      >
-        <div
-          style={{
-            background: '#fff',
-            border: '2px dashed var(--color-signal)',
-            borderRadius: '12px',
-            padding: '24px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            textAlign: 'center',
-          }}
-        >
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            style={{ color: 'var(--color-signal)' }}
-          >
-            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-            <path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          <h3
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1rem',
-              fontWeight: 700,
-              color: 'var(--color-ink)',
-              margin: 0,
-            }}
-          >
-            Your niche could be next
-          </h3>
-          <p
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-              color: 'rgba(28,25,23,0.7)',
-              margin: 0,
-              lineHeight: 1.5,
-            }}
-          >
-            One line of input. Five ranked niches with a written action plan.
-          </p>
-          <Link
-            href="/tools/kdp-niche-finder"
-            style={{
-              background: 'var(--color-signal)',
-              color: '#fff',
-              borderRadius: '4px',
-              padding: '10px 20px',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              textDecoration: 'none',
-              transition: 'opacity 0.15s',
-            }}
-          >
-            Try the Niche Finder — Free Preview
-          </Link>
+      {/* ── RESULT PREVIEW STRIP (S2) ───────────────────── */}
+      <section className="px-4 md:px-12 pt-6 pb-0 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+          <NicheCard niche={SAMPLE_NICHES[1]} offset={1} />
+          <NicheCard niche={SAMPLE_NICHES[2]} offset={2} />
+          <div className="rounded-card border-2 border-dashed border-signal/50 p-6 flex flex-col items-center justify-center gap-3 text-center relative z-10">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-signal">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+              <path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <h3 className="font-display text-[1.125rem] font-bold text-ink">Your niche could be next</h3>
+            <p className="font-body text-sm text-ink/70 leading-relaxed">
+              Type one niche. Get five ranked niches with a full action plan.
+            </p>
+            <button
+              onClick={() => router.push('/tools/kdp-niche-finder')}
+              className="bg-signal text-white rounded-btn px-5 py-2.5 font-body text-sm font-semibold hover:opacity-85 transition-opacity mt-1"
+            >
+              Try the Niche Finder — Free Preview
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* ── S3: GEO — What is a KDP niche finder? ──── */}
-      <section
-        style={{
-          padding: '0 24px 96px',
-          maxWidth: 1024,
-          margin: '0 auto',
-        }}
-      >
-        <div
-          style={{
-            background: '#fff',
-            border: '1px solid var(--color-border)',
-            borderLeft: '4px solid var(--color-pine)',
-            padding: 32,
-            borderRadius: '4px',
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)',
-              fontWeight: 700,
-              color: 'var(--color-ink)',
-              marginBottom: 16,
-            }}
-          >
+      {/* ── § Definition / GEO block (S3) ───────────────── */}
+      <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
+        <div className="bg-white rounded-card border border-border p-6 md:p-8 max-w-3xl border-l-4 border-l-signal">
+          <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-2">
+            § Definition
+          </span>
+          <h2 className="font-display text-xl md:text-2xl font-bold text-ink mb-3">
             What is a KDP niche finder?
           </h2>
-          <p
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '1.0625rem',
-              color: 'var(--color-ink)',
-              lineHeight: 1.7,
-              marginBottom: 16,
-            }}
-          >
-            A KDP niche finder is a tool that identifies profitable, low-competition
-            niches for Amazon Kindle Direct Publishing (KDP) books. It analyzes Amazon
-            BSR (Best Sellers Rank), Google Trends data, and community signals to
-            recommend specific niches with action plans. We give 5 ranked niches
-            in ~30 seconds based on the category and audience you want.
+          <p className="font-body text-base text-ink/80 leading-relaxed">
+            A KDP niche finder shows you which book niches have real demand and low competition on Amazon. We pull Amazon BSR, Google Trends, and Reddit discussion data, then return 5 ranked niches with an action plan in almost 30 seconds.
           </p>
         </div>
       </section>
 
-      {/* ── S4: Data Table ──────────────────────────── */}
-      <section
-        style={{
-          padding: '0 24px 96px',
-          maxWidth: 1280,
-          margin: '0 auto',
-        }}
-      >
-        <div
-          style={{
-            background: '#fff',
-            border: '1px solid var(--color-border)',
-            borderRadius: '4px',
-            overflow: 'hidden',
-            maxWidth: 1024,
-          }}
-        >
-          <div
-            style={{
-              padding: '16px 24px',
-              borderBottom: '1px solid var(--color-border)',
-              background: 'var(--color-surface)',
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: 'var(--color-ink)',
-                margin: 0,
-              }}
-            >
-              What you get with every analysis
-            </h2>
+      {/* ── DATA TABLE (S4) ─────────────────────────────── */}
+      <section className="px-4 md:px-12 pt-16 max-w-7xl mx-auto">
+        <div className="bg-white rounded-card border border-border overflow-hidden max-w-3xl">
+          <div className="p-4 border-b border-border bg-surface">
+            <h2 className="font-display text-xl font-bold text-ink">What you get with every analysis</h2>
           </div>
-          <div style={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                borderCollapse: 'collapse',
-                minWidth: 560,
-              }}
-            >
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[560px]">
               <thead>
-                <tr
-                  style={{
-                    background: '#fff',
-                    borderBottom: '1px solid var(--color-border)',
-                  }}
-                >
-                  {['Output', 'What it shows', 'Data source', 'Last updated'].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: '12px 16px',
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: '0.6875rem',
-                          color: 'var(--color-ink-3)',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
+                <tr className="bg-white border-b border-border">
+                  {['Output', 'What it shows', 'Data source', 'Last updated'].map((h) => (
+                    <th key={h} className="py-3 px-4 font-mono text-[11px] text-ink-3 uppercase tracking-widest font-medium">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', color: 'var(--color-ink)' }}>
+              <tbody className="font-body text-sm text-ink">
                 {DATA_TABLE.map((row, i) => (
-                  <tr
-                    key={i}
-                    style={{
-                      borderBottom:
-                        i < DATA_TABLE.length - 1
-                          ? '1px solid var(--color-border)'
-                          : 'none',
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: '16px 16px',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {row.output}
-                    </td>
-                    <td style={{ padding: '16px 16px' }}>{row.what}</td>
-                    <td style={{ padding: '16px 16px' }}>{row.source}</td>
-                    <td
-                      style={{
-                        padding: '16px 16px',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.875rem',
-                        color: 'var(--color-ink-3)',
-                      }}
-                    >
-                      {row.updated}
-                    </td>
+                  <tr key={i} className={`border-b border-border ${i < DATA_TABLE.length - 1 ? '' : 'border-b-0'}`}>
+                    <td className="py-4 px-4 font-mono text-sm font-semibold">{row.output}</td>
+                    <td className="py-4 px-4">{row.what}</td>
+                    <td className="py-4 px-4">{row.source}</td>
+                    <td className="py-4 px-4 font-mono text-sm text-ink-3">{row.updated}</td>
                   </tr>
                 ))}
               </tbody>
@@ -816,387 +340,151 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── S5: Why KDP Niche Finder ───────────────── */}
-      <section
-        style={{
-          padding: '0 24px 96px',
-          maxWidth: 1280,
-          margin: '0 auto',
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <h2
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
-              fontWeight: 700,
-              color: 'var(--color-ink)',
-              margin: '0 0 8px',
-            }}
-          >
+      {/* ── WHY-US (S5) ─────────────────────────────────── */}
+      <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
+        <div className="mb-6 max-w-2xl">
+          <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-1">
+            § Field comparison
+          </span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight tracking-tight">
             Why KDP Niche Finder
           </h2>
-          <p
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '1rem',
-              color: 'rgba(28,25,23,0.7)',
-              margin: 0,
-            }}
-          >
+          <p className="font-body text-base text-ink/70 mt-2">
             Data without a plan is just a spreadsheet.
           </p>
         </div>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: 24,
-          }}
-        >
-          {/* Traditional */}
-          <div
-            style={{
-              background: '#fff',
-              border: '1px solid var(--color-border)',
-              borderRadius: '4px',
-              padding: 24,
-            }}
-          >
-            <h3
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.125rem',
-                fontWeight: 700,
-                color: 'var(--color-ink)',
-                marginBottom: 8,
-              }}
-            >
-              Traditional research tools
-            </h3>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                color: 'rgba(28,25,23,0.7)',
-                lineHeight: 1.6,
-                margin: 0,
-              }}
-            >
-              Publisher Rocket, Helium 10, and similar tools give you keyword and
-              category data. You still have to interpret the numbers and decide what
-              to do.
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+          {/* Card 01 */}
+          <div className="bg-white rounded-card border border-border p-6 border-l-4 border-l-ink/15">
+            <span className="font-mono text-[13px] text-ink-3 block mb-3">01</span>
+            <h3 className="font-display text-lg font-bold text-ink mb-2">Traditional research tools</h3>
+            <p className="font-body text-sm text-ink/70 leading-relaxed">
+              Publisher Rocket and Helium 10 give you keyword data. You interpret the numbers yourself.
             </p>
           </div>
-
-          {/* Niche-only */}
-          <div
-            style={{
-              background: '#fff',
-              border: '1px solid var(--color-border)',
-              borderRadius: '4px',
-              padding: 24,
-            }}
-          >
-            <h3
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.125rem',
-                fontWeight: 700,
-                color: 'var(--color-ink)',
-                marginBottom: 8,
-              }}
-            >
-              Niche-only tools
-            </h3>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                color: 'rgba(28,25,23,0.7)',
-                lineHeight: 1.6,
-                margin: 0,
-              }}
-            >
-              Book Bolt and Book Beam give you niche lists and scores, but no
-              execution path. You still write the action plan yourself.
+          {/* Card 02 — staggered down */}
+          <div className="bg-white rounded-card border border-border p-6 border-l-4 border-l-ink/15 md:translate-y-6">
+            <span className="font-mono text-[13px] text-ink-3 block mb-3">02</span>
+            <h3 className="font-display text-lg font-bold text-ink mb-2">Niche-only tools</h3>
+            <p className="font-body text-sm text-ink/70 leading-relaxed">
+              Book Bolt and Book Beam give you scores. No next step included.
             </p>
           </div>
-
-          {/* KDP Niche Finder — highlighted */}
-          <div
-            style={{
-              background: '#FFF1E8',
-              border: '2px solid var(--color-signal)',
-              borderRadius: '4px',
-              padding: 24,
-            }}
-          >
-            <h3
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.125rem',
-                fontWeight: 700,
-                color: 'var(--color-signal)',
-                marginBottom: 8,
-              }}
-            >
-              KDP Niche Finder
-            </h3>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.875rem',
-                color: 'rgba(28,25,23,0.8)',
-                lineHeight: 1.6,
-                margin: 0,
-              }}
-            >
-              Data + niche + AI-written action plan. Every recommendation comes with
-              BSR sweet spot, competition score, cover style, title ideas, pricing
-              range, and a 3-step launch plan.
+          {/* Card 03 — highlighted, staggered up */}
+          <div className="bg-signal-tint rounded-card border-2 border-signal p-6 relative md:-translate-y-2">
+            <span className="absolute -top-3 right-4 bg-signal text-white font-mono text-[11px] uppercase tracking-wider px-2 py-1 rounded-full"
+              style={{ transform: 'rotate(2.5deg)' }}>
+              Data + Plan ✳
+            </span>
+            <span className="font-mono text-[13px] text-signal block mb-3">03</span>
+            <h3 className="font-display text-lg font-bold text-signal mb-2">KDP Niche Finder</h3>
+            <p className="font-body text-sm text-ink/80 leading-relaxed">
+              Every result comes with BSR sweet spot, competition score, cover style, title ideas, pricing range, and a 3-step launch plan.
             </p>
           </div>
         </div>
-
-        <p
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.75rem',
-            color: 'var(--color-ink-3)',
-            letterSpacing: '0.04em',
-            textAlign: 'center',
-            marginTop: 24,
-          }}
-        >
-          Pricing comparison: Publisher Rocket $199 one-time (research only) · Book Beam
-          $69 one-time (scores only) · Book Bolt $9.99/mo (puzzle focus) · KDP Niche
-          Finder Free preview, Pro $29.99/mo (data + AI plan).
+        <p className="font-mono text-[11px] text-ink-3 uppercase tracking-widest mt-6 text-center">
+          Pricing: Publisher Rocket $199 one-time · Book Beam $69 · Book Bolt $9.99/mo · KDP Niche Finder Free to try, Pro $29.99/mo.
         </p>
-        <p
-          style={{
-            fontFamily: 'var(--font-body)',
-            fontSize: '0.75rem',
-            color: 'rgba(28,25,23,0.5)',
-            textAlign: 'center',
-            marginTop: 4,
-          }}
-        >
-          Pricing and feature comparison based on each provider's public website as of
-          2026-08-17. Features may change without notice. We are not affiliated with any
-          brand listed above.
+        <p className="font-body text-xs text-ink/50 mt-1 text-center">
+          Prices from public pricing pages, checked 2026-08-17. No brand partnerships.
         </p>
       </section>
 
-      {/* ── S6: How it works ─────────────────────────── */}
-      <section
-        style={{
-          padding: '0 24px 96px',
-          maxWidth: 1280,
-          margin: '0 auto',
-        }}
-      >
-        <h2
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
-            fontWeight: 700,
-            color: 'var(--color-ink)',
-            textAlign: 'center',
-            marginBottom: 40,
-          }}
-        >
-          How KDP Niche Finder works
-        </h2>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: 32,
-          }}
-        >
+      {/* ── HOW IT WORKS (S6) ──────────────────────────── */}
+      <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
+        <div className="mb-6 max-w-2xl">
+          <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-1">
+            § Pipeline
+          </span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight tracking-tight">
+            How KDP Niche Finder works
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
           {[
             {
-              num: '1',
+              num: '01',
               title: 'Type any niche idea',
               body: 'Enter a topic, audience, or format — "adhd planner", "low content journal", "children\'s coloring book". One line is enough.',
             },
             {
-              num: '2',
+              num: '02',
               title: 'We analyze Amazon BSR, Google Trends, and Reddit signals',
               body: 'We pull Amazon BSR, 12-month Google Trends, and Reddit discussion volume. BSR data is 24-72 hours old.',
             },
             {
-              num: '3',
+              num: '03',
               title: 'Get 5 ranked niches + a written action plan',
               body: 'Each result includes BSR sweet spot, competition score, cover style, title ideas, pricing range, and a 3-step launch plan.',
             },
-          ].map((step) => (
-            <div key={step.num} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '2rem',
-                  fontWeight: 600,
-                  color: 'var(--color-signal)',
-                  lineHeight: 1,
-                }}
-              >
+          ].map((step, i) => (
+            <div
+              key={step.num}
+              className={`flex flex-col gap-3 border-t-2 border-dashed border-signal/40 pt-5 ${i === 1 ? 'md:mt-8' : i === 2 ? 'md:mt-16' : ''}`}
+            >
+              <span className="font-mono text-[2rem] font-semibold text-signal leading-none">
                 {step.num}
               </span>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1.125rem',
-                  fontWeight: 700,
-                  color: 'var(--color-ink)',
-                  margin: 0,
-                  lineHeight: 1.3,
-                }}
-              >
-                {step.title}
-              </h3>
-              <p
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '0.875rem',
-                  color: 'rgba(28,25,23,0.7)',
-                  lineHeight: 1.6,
-                  margin: 0,
-                }}
-              >
-                {step.body}
-              </p>
+              <h3 className="font-display text-lg font-bold text-ink leading-tight">{step.title}</h3>
+              <p className="font-body text-sm text-ink/70 leading-relaxed">{step.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── S7: FAQ ─────────────────────────────────── */}
-      <section
-        style={{
-          padding: '0 24px 96px',
-          maxWidth: 800,
-          margin: '0 auto',
-        }}
-      >
-        <h2
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
-            fontWeight: 700,
-            color: 'var(--color-ink)',
-            textAlign: 'center',
-            marginBottom: 32,
-          }}
-        >
+      {/* ── FAQ (S7) ──────────────────────────────────── */}
+      <section className="px-4 md:px-12 pt-16 pb-0 max-w-3xl mx-auto w-full">
+        <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mb-8 text-center">
           Frequently asked questions
         </h2>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="flex flex-col gap-3">
           {FAQ_ITEMS.map((item) => (
             <FAQItem key={item.q} q={item.q} a={item.a} />
           ))}
         </div>
       </section>
 
-      {/* ── S8: Final CTA ───────────────────────────── */}
-      <section
-        style={{
-          padding: '0 24px 96px',
-          maxWidth: 1280,
-          margin: '0 auto',
-        }}
-      >
+      {/* ── FINAL CTA (S8) ─────────────────────────────── */}
+      <section className="px-4 md:px-12 pt-16 pb-16 max-w-7xl mx-auto">
         <div
-          style={{
-            background: 'var(--color-signal)',
-            borderRadius: '4px',
-            padding: '40px 24px',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 16,
-          }}
+          className="rounded-card p-8 md:p-12 text-center flex flex-col items-center gap-4 relative overflow-hidden"
+          style={{ background: '#EA580C' }}
         >
-          <h2
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
-              fontWeight: 700,
-              color: '#fff',
-              margin: 0,
-            }}
-          >
-            Ready to find your niche?
-          </h2>
+          {/* hero-contour-map texture overlay */}
           <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none select-none"
             style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 16,
-              alignItems: 'center',
-              justifyContent: 'center',
+              backgroundImage: "url('/assets/hero-contour-map.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              opacity: 0.12,
+              mixBlendMode: 'luminosity',
             }}
-          >
-            <Link
-              href="/tools/kdp-niche-finder"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                background: 'transparent',
-                color: '#fff',
-                border: '2px solid #fff',
-                borderRadius: '4px',
-                padding: '14px 24px',
-                fontFamily: 'var(--font-body)',
-                fontSize: '1rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-                transition: 'background 0.15s',
-              }}
+          />
+          <span className="font-mono text-[11px] text-white/70 uppercase tracking-widest relative z-10">
+            Free preview · No signup
+          </span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-white relative z-10 leading-tight tracking-tight">
+            Stop guessing. Find your niche in 30 seconds.
+          </h2>
+          <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10">
+            <button
+              onClick={() => router.push('/tools/kdp-niche-finder')}
+              className="bg-transparent text-white border-2 border-white rounded-btn px-6 py-3.5 font-body text-base font-semibold hover:bg-white/10 transition-colors"
             >
               Try the Niche Finder — Free Preview
-            </Link>
+            </button>
             <Link
               href="/pricing"
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '1rem',
-                color: 'rgba(255,255,255,0.9)',
-                textDecoration: 'underline',
-                textUnderlineOffset: 4,
-              }}
+              className="font-body text-base text-white/90 underline underline-offset-4 hover:text-white"
             >
               View pricing →
             </Link>
           </div>
         </div>
       </section>
-
-      <style>{`
-        @media (max-width: 768px) {
-          section > div[style*="gridTemplateColumns: repeat(2"] {
-            grid-template-columns: 1fr !important;
-          }
-          section > div[style*="gap: 48px"] {
-            gap: 24px !important;
-          }
-          section > div[style*="gap: 24px"][style*="alignItems: stretch"] {
-            grid-template-columns: 1fr !important;
-            gap: 16px !important;
-          }
-          section,
-          section > * {
-            padding-left: 16px !important;
-            padding-right: 16px !important;
-          }
-        }
-      `}</style>
     </>
   )
 }

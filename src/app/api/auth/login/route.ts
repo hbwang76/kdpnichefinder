@@ -21,8 +21,8 @@ export async function GET(request: NextRequest) {
   const challenge = await sha256(verifier)
 
   await db
-    .prepare('INSERT INTO webhook_events (id, event_type, processed_at) VALUES (?, ?, ?)')
-    .bind(state, `oauth_state:${verifier}`, now() + 600)
+    .prepare('INSERT INTO oauth_states (id, verifier, expires_at) VALUES (?, ?, ?)')
+    .bind(state, verifier, now() + 600)
     .run()
 
   const url = new URL('https://accounts.google.com/o/oauth2/v2/auth')
