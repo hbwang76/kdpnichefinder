@@ -1,0 +1,44 @@
+# KDP Niche Finder
+
+KDP Niche Finder is a niche research tool for Amazon Kindle Direct Publishing (KDP) authors. Enter one niche idea, get 5 ranked niche recommendations with BSR data, competition scores, and a written action plan. Free preview available, no signup required.
+
+## Core Tools
+
+- [KDP Niche Finder](https://kdpnichefinder.net/tools/kdp-niche-finder): Main niche research tool — enter a topic, get 5 ranked niches with BSR, competition score, and action plan in ~30 seconds.
+- [Free KDP Niche Finder](https://kdpnichefinder.net/tools/free-kdp-niche-finder): Free tier — 1 data-only analysis per day, no signup. Shows estimated BSR ranges and seasonal trends without AI recommendations.
+- [AI KDP Niche Finder](https://kdpnichefinder.net/tools/ai-kdp-niche-finder): Full AI-powered analysis with action plans.
+- [Niche Research](https://kdpnichefinder.net/tools/niche-research): Data-only niche research without AI scoring.
+- [Niche Score Checker](https://kdpnichefinder.net/tools/niche-score-checker): Score any niche 0–100 across demand, competition, and trend stability.
+
+## Pricing
+
+- [Pricing](https://kdpnichefinder.net/pricing): Free (1 data analysis/day), Starter $9.99/mo (80 AI analyses/month), Pro $29.99/mo (270 AI analyses/month). One-time credit packs also available.
+
+## Content
+
+- [Blog](https://kdpnichefinder.net/blog): Niche research, competitor comparisons, and KDP strategy posts.
+- [About](https://kdpnichefinder.net/about): About the tool and how it works.
+- [FAQ](https://kdpnichefinder.net/faq): Common questions about the tool, pricing, refunds, and data accuracy.
+
+## Legal
+
+- [Privacy Policy](https://kdpnichefinder.net/privacy)
+- [Terms of Service](https://kdpnichefinder.net/terms)
+- [Cookie Policy](https://kdpnichefinder.net/cookie-policy)
+- [Refund Policy](https://kdpnichefinder.net/refund-policy)
+- [Disclaimer](https://kdpnichefinder.net/disclaimer)
+
+## How Niche Scoring Works
+
+The tool pulls Amazon Best Sellers Rank (BSR), 12-month Google Trends data, and Reddit discussion volume for each niche. Scores are weighted estimates — 40% BSR, 30% Google Trends, 30% competition density. Data may be 24–72 hours old. AI-generated recommendations are for informational purposes only and do not constitute financial or business advice.
+
+## What Each Analysis Returns
+
+5 ranked niche recommendations. Each includes: niche name, estimated BSR sweet spot, competition score (0–100), suggested cover style, title ideas, pricing range, and a 3-step launch plan.
+
+## Data Sources
+
+- Amazon Best Sellers Rank from public Amazon category pages (24–72h delay)
+- Google Trends 12-month search interest
+- Reddit community discussion volume
+- OpenAI GPT-4o-mini and Anthropic Claude for action plan generation
