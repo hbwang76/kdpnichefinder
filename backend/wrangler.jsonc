@@ -7,7 +7,7 @@
     {
       "binding": "DB",
       "database_name": "kdpnichefinder-db",
-      "database_id": "[SET VIA: wrangler d1 create kdpnichefinder-db]"
+      "database_id": "cd4cd457-bcc8-4356-a6f3-b27d3b45074d"
     }
   ],
   "vars": {
