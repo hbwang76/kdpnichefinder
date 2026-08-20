@@ -49,8 +49,7 @@ export function Footer() {
               </span>
             </div>
             <p style={{ fontSize: '0.8125rem', color: '#A8A29E', lineHeight: 1.6 }}>
-              AI-powered niche research for KDP authors. Find your next bestseller in
-              almost 30 seconds.
+              AI-powered niche research for KDP authors. Find your next bestseller in ~30 seconds.
             </p>
           </div>
 

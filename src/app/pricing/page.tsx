@@ -15,7 +15,7 @@ export default function PricingPage() {
       <section style={{ background: 'var(--color-canvas)', padding: '80px 48px 64px', textAlign: 'center' }}>
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 700, marginBottom: 16 }}>
-            Simple pricing. Try it free. Upgrade when you need more.
+            Pick a plan. Start free. Go further when you're ready.
           </h1>
           <p style={{ fontSize: '1.0625rem', color: 'var(--color-ink-2)' }}>
             Monthly subscriptions only. No hidden fees. Cancel anytime. 7-day refund window on all paid plans.

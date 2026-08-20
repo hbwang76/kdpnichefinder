@@ -243,7 +243,7 @@ export function HomeClient() {
                 margin: 0,
               }}
             >
-              Find your next profitable KDP niche in almost 30 seconds.
+              Find your next profitable KDP niche in ~30 seconds.
             </h1>
             <p
               style={{
@@ -254,8 +254,7 @@ export function HomeClient() {
                 margin: 0,
               }}
             >
-              AI-powered niche research for Amazon KDP authors. Free preview, no
-              signup.
+              Niche research that actually tells you what to write next. Free to try.
             </p>
 
             <form onSubmit={handleSearch} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -845,9 +844,8 @@ export function HomeClient() {
             A KDP niche finder is a tool that identifies profitable, low-competition
             niches for Amazon Kindle Direct Publishing (KDP) books. It analyzes Amazon
             BSR (Best Sellers Rank), Google Trends data, and community signals to
-            recommend specific niches with action plans. Our AI-powered niche finder
-            gives 5 ranked recommendations in almost 30 seconds based on the category
-            and audience you want to target.
+            recommend specific niches with action plans. We give 5 ranked niches
+            in ~30 seconds based on the category and audience you want.
           </p>
         </div>
       </section>
@@ -993,7 +991,7 @@ export function HomeClient() {
               margin: 0,
             }}
           >
-            Most KDP research tools stop at data. We go further.
+            Data without a plan is just a spreadsheet.
           </p>
         </div>
 
@@ -1175,12 +1173,12 @@ export function HomeClient() {
             {
               num: '2',
               title: 'We analyze Amazon BSR, Google Trends, and Reddit signals',
-              body: 'Our pipeline pulls Best Sellers Rank from Amazon, 12-month search interest from Google Trends, and community discussion volume from Reddit. Data is sourced from public pages and may be delayed 24-72 hours.',
+              body: 'We pull Amazon BSR, 12-month Google Trends, and Reddit discussion volume. BSR data is 24-72 hours old.',
             },
             {
               num: '3',
               title: 'Get 5 ranked niches + a written action plan',
-              body: 'Each recommendation includes BSR sweet spot, competition score, suggested cover style, title ideas, pricing range, and a 3-step launch plan. AI output is for informational purposes only.',
+              body: 'Each result includes BSR sweet spot, competition score, cover style, title ideas, pricing range, and a 3-step launch plan.',
             },
           ].map((step) => (
             <div key={step.num} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
