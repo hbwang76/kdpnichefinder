@@ -40,18 +40,18 @@ export async function POST(request: NextRequest) {
   const priceId = priceIdMap[plan]
   if (!priceId) return NextResponse.json({ error: 'plan not configured' }, { status: 503 })
 
-  const apiBase = process.env.CREEM_API_BASE || 'https://api.creem.io'
+  const isTestMode = process.env.CREEM_TEST_MODE === 'true'
+  const apiBase = isTestMode ? 'https://test-api.creem.io' : (process.env.CREEM_API_BASE || 'https://api.creem.io')
   const appOrigin = process.env.APP_ORIGIN || 'https://kdpnichefinder.net'
 
   const checkoutRes = await fetch(`${apiBase}/v1/checkouts`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${process.env.CREEM_API_KEY}`,
+      'x-api-key': process.env.CREEM_API_KEY!,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       product_id: priceId,
-      customer_email: user.email,
       metadata: { referenceId: user.user_id },
       success_url: `${appOrigin}/account?checkout=success`,
       cancel_url: `${appOrigin}/pricing?checkout=cancelled`,
