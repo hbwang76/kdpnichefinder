@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => ({}))
   const plan = body.plan
-  const validPlans = ['starter_monthly', 'starter_yearly', 'pro_monthly', 'pro_yearly', 'credit_mini', 'credit_standard']
+  const validPlans = ['starter_monthly', 'starter_yearly', 'pro_monthly', 'pro_yearly', 'credit_mini', 'credit_standard', 'credit_large']
   if (!plan || !validPlans.includes(plan)) {
     return NextResponse.json({ error: 'invalid plan' }, { status: 400 })
   }
@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      price_id: priceId,
-      customer_email: (user as any).email,
-      customer_id: (user as any).user_id,
+      product_id: priceId,
+      customer_email: user.email,
+      metadata: { referenceId: user.user_id },
       success_url: `${appOrigin}/account?checkout=success`,
       cancel_url: `${appOrigin}/pricing?checkout=cancelled`,
     }),

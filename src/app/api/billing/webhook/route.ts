@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   const db: DbClient = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
-  let event: { id?: string; type?: string; data?: Record<string, unknown> }
+  let event: { id?: string; eventType?: string; object?: Record<string, unknown>; metadata?: Record<string, unknown> }
   try {
     event = JSON.parse(rawBody)
   } catch {
@@ -41,49 +41,54 @@ export async function POST(request: NextRequest) {
   }
 
   const eventId = event.id ?? generateId('evt_')
-  const eventType = event.type ?? 'unknown'
+  const eventType = event.eventType ?? 'unknown'
   const existing = await db.prepare('SELECT id FROM webhook_events WHERE id = ?').bind(eventId).first<WebhookEvent>()
   if (existing) return NextResponse.json({ ok: true, message: 'already processed' })
 
   const ts = now()
-  const d = event.data ?? {}
+  const obj = event.object ?? {}
 
-  if (eventType === 'order.completed') {
-    const customerId = d.customer_id as string
-    const orderId = d.order_id as string
-    const priceId = d.price_id as string
-    const credits = priceId === process.env.CREEM_CREDIT_MINI_PRICE_ID ? 15 : 35
+  if (eventType === 'checkout.completed') {
+    const userId = event.metadata?.referenceId as string | undefined
+    const productId = obj.product_id as string | undefined
+    const credits =
+      productId === process.env.CREEM_CREDIT_MINI_PRICE_ID ? 35
+      : productId === process.env.CREEM_CREDIT_STANDARD_PRICE_ID ? 80
+      : productId === process.env.CREEM_CREDIT_LARGE_PRICE_ID ? 270
+      : 0
 
-    if (customerId && orderId) {
+    if (userId && credits > 0) {
       await db.prepare('INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at) VALUES (?, ?, ?, ?, ?, ?)')
-        .bind(generateId('cp_'), customerId, orderId, credits, 'active', ts).run()
-      const balanceRow = await db.prepare('SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?').bind(customerId).first<{ balance: number }>()
+        .bind(generateId('cp_'), userId, eventId, credits, 'active', ts).run()
+      const balanceRow = await db.prepare('SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?').bind(userId).first<{ balance: number }>()
+      const newBalance = (balanceRow?.balance ?? 0) + credits
       await db.prepare('INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-        .bind(generateId('cl_'), customerId, credits, (balanceRow?.balance ?? 0) + credits, 'purchase', orderId, ts).run()
+        .bind(generateId('cl_'), userId, credits, newBalance, 'purchase', eventId, ts).run()
     }
-  } else if (eventType === 'subscription.created' || eventType === 'subscription.updated') {
-    const customerId = d.customer_id as string
-    const subscriptionId = d.subscription_id as string
-    const planStr = ((d.plan as string) ?? '').toLowerCase()
-    const plan = planStr.includes('pro') ? 'pro' : 'starter'
-    const status = (d.status as string) ?? 'active'
-    const periodEnd = (d.current_period_end as number) ?? ts
-    if (customerId && subscriptionId) {
+  } else if (eventType === 'subscription.active' || eventType === 'subscription.paid') {
+    const userId = event.metadata?.referenceId as string | undefined
+    const subscriptionId = obj.subscription_id as string | undefined
+    const productId = obj.product_id as string | undefined
+    const plan = productId === process.env.CREEM_PRO_MONTHLY_PRICE_ID || productId === process.env.CREEM_PRO_YEARLY_PRICE_ID ? 'pro' : 'starter'
+    const periodEnd = (obj.current_period_end as number) ?? ts
+
+    if (userId && subscriptionId) {
       await db.prepare(`
         INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+        VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?)
         ON CONFLICT(creem_subscription_id) DO UPDATE SET
           status = excluded.status, plan = excluded.plan, current_period_end = excluded.current_period_end, updated_at = excluded.updated_at
-      `).bind(generateId('sub_'), customerId, plan, subscriptionId, status, ts, periodEnd, ts, ts).run()
-      if (status === 'active') {
-        await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind(plan, ts, customerId).run()
-      }
+      `).bind(generateId('sub_'), userId, plan, subscriptionId, ts, periodEnd, ts, ts).run()
+      await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind(plan, ts, userId).run()
     }
-  } else if (eventType === 'subscription.cancelled') {
-    const subscriptionId = d.subscription_id as string
+  } else if (eventType === 'subscription.expired' || eventType === 'subscription.paused' || eventType === 'subscription.canceled') {
+    const subscriptionId = obj.subscription_id as string | undefined
     if (subscriptionId) {
+      const newPlan = eventType === 'subscription.canceled' ? 'free' : 'free'
       await db.prepare('UPDATE subscriptions SET status = ?, cancel_at_period_end = 1, updated_at = ? WHERE creem_subscription_id = ?')
-        .bind('cancelled', ts, subscriptionId).run()
+        .bind(eventType === 'subscription.canceled' ? 'cancelled' : eventType === 'subscription.paused' ? 'paused' : 'expired', ts, subscriptionId).run()
+      await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = (SELECT user_id FROM subscriptions WHERE creem_subscription_id = ?)')
+        .bind(newPlan, ts, subscriptionId).run()
     }
   }
 
