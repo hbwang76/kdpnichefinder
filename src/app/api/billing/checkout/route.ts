@@ -38,7 +38,9 @@ export async function POST(request: NextRequest) {
     pro_yearly: process.env.CREEM_PRO_YEARLY_PRICE_ID,
     credit_mini: process.env.CREEM_CREDIT_MINI_PRICE_ID,
     credit_standard: process.env.CREEM_CREDIT_STANDARD_PRICE_ID,
+    credit_large: process.env.CREEM_CREDIT_LARGE_PRICE_ID,
   }
+  const validPlans = Object.keys(priceIdMap)
   const priceId = priceIdMap[plan]
   if (!priceId) return NextResponse.json({ error: 'plan not configured' }, { status: 503 })
 
