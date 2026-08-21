@@ -48,7 +48,7 @@ const plans = [
       'No CSV export',
     ],
     highlight: false,
-    planId: 'starter',
+    planId: 'starter_monthly',
   },
   {
     name: 'Pro',
@@ -71,14 +71,13 @@ const plans = [
     ],
     limitations: [],
     highlight: true,
-    planId: 'pro',
+    planId: 'pro_monthly',
   },
 ]
 
 const creditPacks = [
   { name: 'Credit Mini', credits: 35, price: 4.99, cta: 'Buy 35 Credits — $4.99' },
   { name: 'Credit Standard', credits: 80, price: 9.99, cta: 'Buy 80 Credits — $9.99' },
-  { name: 'Credit Large', credits: 270, price: 29.99, cta: 'Buy 270 Credits — $29.99' },
 ]
 
 async function handleCheckout(planId: string) {
