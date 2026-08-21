@@ -161,7 +161,7 @@ export default function TermsOfServicePage() {
                 ['Starter', '$9.99', '$79/yr', '10/day', '300', 'AI analysis + 5 niche recommendations'],
                 ['Pro', '$29.99', '$229/yr', '30/day', '900', 'Higher AI quota + scoring + action plans + history'],
                 ['Credit Mini', '$4.99 (one-time)', '—', '—', '35 credits (6-mo validity)', 'Top-up credits usable any time'],
-                ['Credit Standard', '$9.99 (one-time)', '—', '—', '75 credits (12-mo validity)', 'Top-up credits usable any time'],
+                ['Credit Standard', '$9.99 (one-time)', '—', '—', '80 credits (12-mo validity)', 'Top-up credits usable any time'],
               ]}
             />
 
