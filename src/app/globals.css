@@ -51,6 +51,10 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-ink);
 }
 
+/* Card elevation — micro shadows from design tokens */
+.card-shadow { box-shadow: 0 1px 2px rgba(28,25,23,0.05); }
+.card-shadow-pop { box-shadow: 0 4px 16px rgba(28,25,23,0.08); }
+
 /* Score ring colors */
 .score-high { color: var(--color-pine); }
 .score-mid  { color: var(--color-amber); }

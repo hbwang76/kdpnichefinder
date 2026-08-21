@@ -126,7 +126,7 @@ function NicheCard({ niche, offset }: { niche: typeof SAMPLE_NICHES[0]; offset: 
 
   return (
     <div
-      className={`bg-white rounded-card border border-border p-4 flex flex-col gap-3 relative ${offsets[offset]} ${opacities[offset]} ${zIndices[offset]} transition-transform hover:-translate-y-1`}
+      className={`bg-white rounded-card border border-border p-4 flex flex-col gap-3 relative ${offsets[offset]} ${opacities[offset]} ${zIndices[offset]} transition-transform hover:-translate-y-1 card-shadow`}
     >
       <div className="flex justify-between items-start border-b border-border pb-3">
         <div>
@@ -195,7 +195,7 @@ export function HomeClient() {
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="px-4 md:px-12 pt-10 pb-0 max-w-7xl mx-auto relative">
+      <section className="px-4 md:px-12 pt-10 pb-24 max-w-7xl mx-auto relative">
         {/* Contour map bg */}
         <div
           aria-hidden="true"
@@ -210,14 +210,14 @@ export function HomeClient() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start relative z-10">
           {/* Left col */}
           <div className="flex flex-col gap-5">
-            <h1 className="font-display text-4xl md:text-[3.25rem] font-bold text-ink leading-[1.08] tracking-tight">
+            <h1 className="font-display text-4xl md:text-[3.5rem] font-bold text-ink leading-[1.05] tracking-tight">
               Find your next profitable KDP niche in almost 30 seconds.
             </h1>
             <p className="font-body text-lg text-ink/75 leading-relaxed">
               Niche research that actually tells you what to write next. Free to try.
             </p>
             <form onSubmit={handleSearch} className="flex flex-col gap-3">
-              <div className="bg-white rounded-card border border-border flex items-center gap-2 px-3 focus-within:border-signal focus-within:outline focus-within:outline-2 focus-within:outline-signal focus-within:outline-offset-2 transition-colors">
+              <div className="bg-white rounded-card border border-border flex items-center gap-2 px-4 py-1 card-shadow focus-within:border-signal focus-within:outline focus-within:outline-2 focus-within:outline-signal focus-within:outline-offset-2 transition-colors">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-ink-3 flex-shrink-0">
                   <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
                   <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -227,12 +227,12 @@ export function HomeClient() {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="e.g. adhd planner, low content journal, children's coloring book"
-                  className="w-full h-12 bg-transparent text-ink placeholder:text-ink-3 font-body text-base border-none outline-none"
+                  className="w-full h-14 bg-transparent text-ink placeholder:text-ink-3 font-body text-base border-none outline-none"
                 />
               </div>
               <button
                 type="submit"
-                className="bg-signal text-white rounded-btn px-6 py-3.5 font-body text-base font-semibold hover:opacity-85 transition-opacity text-center"
+                className="bg-signal text-white rounded-btn px-6 py-4 font-body text-base font-semibold hover:opacity-85 transition-opacity text-center card-shadow"
               >
                 Try the Niche Finder — Free Preview
               </button>
@@ -248,7 +248,7 @@ export function HomeClient() {
             </p>
             <div className="flex flex-wrap gap-2">
               {['12 MARKETPLACES', '5 RANKED NICHES', '3-STEP ACTION PLAN'].map((b) => (
-                <span key={b} className="font-mono text-[11px] text-ink/70 bg-white border border-border rounded-sm px-2 py-1 uppercase tracking-widest">
+                <span key={b} className="font-mono text-[11px] text-ink/70 bg-white border border-border rounded-sm px-2 py-1 uppercase tracking-widest card-shadow">
                   {b}
                 </span>
               ))}
@@ -256,12 +256,13 @@ export function HomeClient() {
           </div>
 
           {/* Right col — illustration + floating cards */}
-          <div className="flex flex-col gap-3 relative">
-            <div className="rounded-card overflow-hidden border border-border bg-white relative z-20">
+          <div className="flex flex-col gap-4 relative">
+            <div className="rounded-card overflow-hidden border border-border bg-white relative z-20 card-shadow">
               <img
                 src="/assets/hero-illustration.webp"
                 alt="KDP niche research — books with signal radar and data gauges"
-                className="w-full h-56 object-cover block"
+                className="w-full h-auto block"
+                style={{ height: '240px', objectFit: 'cover' }}
               />
             </div>
             <NicheCard niche={SAMPLE_NICHES[0]} offset={0} />
@@ -270,7 +271,7 @@ export function HomeClient() {
       </section>
 
       {/* ── RESULT PREVIEW STRIP (S2) ───────────────────── */}
-      <section className="px-4 md:px-12 pt-6 pb-0 max-w-7xl mx-auto">
+      <section className="px-4 md:px-12 pt-8 pb-0 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
           <NicheCard niche={SAMPLE_NICHES[1]} offset={1} />
           <NicheCard niche={SAMPLE_NICHES[2]} offset={2} />
@@ -294,7 +295,7 @@ export function HomeClient() {
       </section>
 
       {/* ── § Definition / GEO block (S3) ───────────────── */}
-      <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
+      <section className="px-4 md:px-12 pt-24 pb-0 max-w-7xl mx-auto">
         <div className="bg-white rounded-card border border-border p-6 md:p-8 max-w-3xl border-l-4 border-l-signal">
           <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-2">
             § Definition
@@ -309,7 +310,7 @@ export function HomeClient() {
       </section>
 
       {/* ── DATA TABLE (S4) ─────────────────────────────── */}
-      <section className="px-4 md:px-12 pt-16 max-w-7xl mx-auto">
+      <section className="px-4 md:px-12 pt-24 max-w-7xl mx-auto">
         <div className="bg-white rounded-card border border-border overflow-hidden max-w-3xl">
           <div className="p-4 border-b border-border bg-surface">
             <h2 className="font-display text-xl font-bold text-ink">What you get with every analysis</h2>
@@ -341,7 +342,7 @@ export function HomeClient() {
       </section>
 
       {/* ── WHY-US (S5) ─────────────────────────────────── */}
-      <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
+      <section className="px-4 md:px-12 pt-24 pb-0 max-w-7xl mx-auto">
         <div className="mb-6 max-w-2xl">
           <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-1">
             § Field comparison
@@ -392,7 +393,7 @@ export function HomeClient() {
       </section>
 
       {/* ── HOW IT WORKS (S6) ──────────────────────────── */}
-      <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
+      <section className="px-4 md:px-12 pt-24 pb-0 max-w-7xl mx-auto">
         <div className="mb-6 max-w-2xl">
           <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-1">
             § Pipeline
@@ -434,7 +435,7 @@ export function HomeClient() {
       </section>
 
       {/* ── FAQ (S7) ──────────────────────────────────── */}
-      <section className="px-4 md:px-12 pt-16 pb-0 max-w-3xl mx-auto w-full">
+      <section className="px-4 md:px-12 pt-24 pb-0 max-w-3xl mx-auto w-full">
         <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mb-8 text-center">
           Frequently asked questions
         </h2>

@@ -246,9 +246,6 @@ export function Footer() {
           <p style={{ fontSize: '0.8125rem', color: '#A8A29E' }}>
             © 2026 KDP Niche Finder. All rights reserved.
           </p>
-          <p style={{ fontSize: '0.8125rem', color: '#A8A29E' }}>
-            Amazon KDP is a trademark of Amazon.com, Inc. Not affiliated.
-          </p>
         </div>
 
         {/* §11.3 compliance block — exact text from COMPLIANCE.md */}
