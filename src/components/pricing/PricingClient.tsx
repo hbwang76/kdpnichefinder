@@ -173,7 +173,7 @@ export function PricingClient() {
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.75rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 8 }}>Ran out of daily analyses? Grab a credit pack.</h2>
             <p style={{ color: 'var(--color-ink-2)', fontSize: '1rem' }}>Credit Packs never expire. Use them to top up Starter or Pro when you run out of daily analyses.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24, maxWidth: 700, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, maxWidth: 800, margin: '0 auto' }}>
 
             {/* Credit Mini */}
             <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, padding: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -207,6 +207,22 @@ export function PricingClient() {
               </button>
             </div>
 
+            {/* Credit Large */}
+            <div style={{ background: '#FFF1E8', border: '2px solid var(--color-signal)', borderRadius: 12, padding: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: '1.25rem', color: 'var(--color-signal)' }}>Credit Large</h3>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-signal)' }}>
+                $29.99 <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.75rem', fontWeight: 500, color: 'var(--color-ink-2)' }}>270 credits · $0.111 per analysis</span>
+              </div>
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-ink-2)' }}>270 credits · lowest per-analysis cost · best for heavy launch weeks</p>
+              <button onClick={() => handleCheckout('credit_large')} style={{
+                width: '100%', background: 'var(--color-signal)', color: 'white',
+                padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: '0.9375rem',
+                border: 'none', cursor: 'pointer', fontFamily: "'Manrope', sans-serif", marginTop: 'auto',
+              }}>
+                Buy 270 Credits — $29.99
+              </button>
+            </div>
+
           </div>
         </div>
       </section>
@@ -214,8 +230,8 @@ export function PricingClient() {
       {/* Comparison table */}
       <section style={{ background: 'var(--color-surface)', padding: '0 48px 80px', borderTop: '1px solid var(--color-border)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.75rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 24 }}>Compare plans</h2>
-          <div style={{ overflowX: 'auto', border: '1px solid var(--color-border)', borderRadius: 12, padding: 24 }}>
+          <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, padding: 24, overflowX: 'auto' }}>
+            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.75rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 24 }}>Compare plans</h2>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
@@ -258,10 +274,10 @@ export function PricingClient() {
       </section>
 
       {/* Why Pro */}
-      <section style={{ background: 'var(--color-surface)', padding: '0 48px 80px', borderTop: '1px solid var(--color-border)' }}>
+      <section style={{ background: 'var(--color-canvas)', padding: '0 48px 80px', borderTop: '1px solid var(--color-border)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.75rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 24 }}>Why Pro over free KDP tools</h2>
-          <div style={{ overflowX: 'auto', border: '1px solid var(--color-border)', borderRadius: 12, padding: 24 }}>
+          <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, padding: 24, overflowX: 'auto' }}>
+            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.75rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 24 }}>Why Pro over free KDP tools</h2>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
@@ -327,14 +343,14 @@ export function PricingClient() {
               { q: 'Do Credit Packs expire?', a: 'Credit Mini expires 6 months from purchase. Credit Standard expires 12 months from purchase.' },
               { q: 'Can I get a refund?', a: 'New Starter and Pro subscriptions can be canceled within 7 days for a full refund. See our refund policy for details.' },
             ].map((item, i) => (
-              <details key={i} style={{ borderBottom: '1px solid var(--color-border)', padding: '20px 0' }}>
+              <details key={i} style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, padding: 16 }}>
                 <summary style={{ cursor: 'pointer', fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif", fontSize: '0.9375rem', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-ink)' }}>
                   {item.q}
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M4 6l4 4 4-4" stroke="var(--color-ink-2)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </summary>
-                <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem', lineHeight: 1.6, marginTop: 12, marginBottom: 0, fontFamily: "'Manrope', sans-serif" }}>{item.a}</p>
+                <p style={{ color: 'var(--color-ink-2)', fontSize: '0.875rem', lineHeight: 1.6, marginTop: 12, marginBottom: 0, fontFamily: "'Manrope', sans-serif" }}>{item.a}</p>
               </details>
             ))}
           </div>
