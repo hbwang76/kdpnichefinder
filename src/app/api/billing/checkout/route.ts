@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => ({}))
   const plan = body.plan
-  const validPlans = ['starter_monthly', 'starter_yearly', 'pro_monthly', 'pro_yearly', 'credit_mini', 'credit_standard', 'credit_large']
+  const validPlans = ['starter_monthly', 'starter_yearly', 'pro_monthly', 'pro_yearly', 'credit_mini', 'credit_standard']
   if (!plan || !validPlans.includes(plan)) {
     return NextResponse.json({ error: 'invalid plan' }, { status: 400 })
   }

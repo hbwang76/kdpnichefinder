@@ -157,7 +157,7 @@ export default function TermsOfServicePage() {
             <DocTable
               headers={['Plan', 'Monthly', 'Annual', 'Daily AI Quota', 'Monthly AI Quota', 'Features']}
               rows={[
-                ['Free', '$0', '—', '0 (data only)', '5 data-only analyses', 'Niche preview, no AI interpretation'],
+                ['Free', '$0', '—', '0 (data only)', '1/day (data only, no AI)', 'Niche preview, no AI interpretation'],
                 ['Starter', '$9.99', '$79/yr', '10/day', '300', 'AI analysis + 5 niche recommendations'],
                 ['Pro', '$29.99', '$229/yr', '30/day', '900', 'Higher AI quota + scoring + action plans + history'],
                 ['Credit Mini', '$4.99 (one-time)', '—', '—', '35 credits (6-mo validity)', 'Top-up credits usable any time'],
@@ -177,7 +177,7 @@ export default function TermsOfServicePage() {
 
             <H3>5.3 Free tier</H3>
             <Ul items={[
-              'Limited to 5 data-only analyses per calendar month',
+              'Limited to 1 data-only analysis per day (no signup required)',
               'Subject to fair-use limits; we may throttle or block abusive use',
               'No AI interpretation on free tier (data only)',
               'Email signup is not required to access the free preview',

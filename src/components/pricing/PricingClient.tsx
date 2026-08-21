@@ -184,7 +184,7 @@ export function PricingClient() {
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-signal)' }}>
                 $9.99 <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.75rem', fontWeight: 500, color: 'var(--color-ink-2)' }}>80 credits · $0.125 per analysis</span>
               </div>
-              <p style={{ fontSize: '0.875rem', color: 'var(--color-ink-2)' }}>80 credits · ~$0.13 per analysis · Expires in 12 months</p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-ink-2)' }}>80 credits · ~$0.12 per analysis · Expires in 12 months</p>
               <button onClick={() => handleCheckout('credit_standard')} style={{
                 width: '100%', background: 'transparent', border: '1px solid var(--color-ink)', color: 'var(--color-ink)',
                 padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: '0.9375rem',
