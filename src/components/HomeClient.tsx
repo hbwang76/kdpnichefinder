@@ -264,6 +264,12 @@ export function HomeClient() {
                 className="w-full h-auto block"
                 style={{ height: '240px', objectFit: 'cover' }}
               />
+              <span
+                className="absolute top-3 right-3 bg-white/95 border border-border rounded-sm px-2 py-1 font-mono text-[11px] text-pine uppercase tracking-wider z-30"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                Score 82 · Top pick
+              </span>
             </div>
             <NicheCard niche={SAMPLE_NICHES[0]} offset={0} />
           </div>
@@ -272,6 +278,11 @@ export function HomeClient() {
 
       {/* ── RESULT PREVIEW STRIP (S2) ───────────────────── */}
       <section className="px-4 md:px-12 pt-8 pb-0 max-w-7xl mx-auto">
+        <div className="mb-4 flex flex-col gap-1">
+          <span className="font-mono text-[11px] text-signal uppercase tracking-widest">
+            § Sample output
+          </span>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
           <NicheCard niche={SAMPLE_NICHES[1]} offset={1} />
           <NicheCard niche={SAMPLE_NICHES[2]} offset={2} />

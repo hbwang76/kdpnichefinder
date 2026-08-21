@@ -250,15 +250,12 @@ export function Footer() {
 
         {/* §11.3 compliance block — exact text from COMPLIANCE.md */}
         <div
+          className="legal-113"
           style={{
+            color: '#A8A29E',
             borderTop: '1px solid rgba(255,255,255,0.1)',
             marginTop: 24,
             paddingTop: 16,
-            fontFamily: 'var(--font-body)',
-            fontSize: '0.8125rem',
-            lineHeight: 1.7,
-            color: '#A8A29E',
-            maxWidth: '80rem',
           }}
         >
           <p style={{ margin: '0 0 12px' }}>

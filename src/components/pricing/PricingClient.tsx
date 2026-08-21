@@ -24,33 +24,46 @@ async function handleCheckout(planId: string) {
 export function PricingClient() {
   return (
     <>
-      {/* Billing selector */}
-      <section style={{ background: 'var(--color-canvas)', padding: '0 48px 0' }}>
-        <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 40 }}>
-          <button style={{
-            background: 'var(--color-surface)', border: '2px solid var(--color-signal)', borderRadius: 12,
-            padding: '16px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            cursor: 'pointer', fontFamily: "'Manrope', sans-serif",
-          }}>
-            <span style={{ fontWeight: 600, color: 'var(--color-ink)' }}>Monthly — Pay as you go</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="9" fill="var(--color-signal)"/>
-              <path d="M6.5 10l2.5 2.5 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-          <button style={{
-            background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12,
-            padding: '16px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            cursor: 'pointer', fontFamily: "'Manrope', sans-serif",
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontWeight: 600, color: 'var(--color-ink)' }}>Annual — Save up to 36%</span>
-              <span style={{ background: 'rgba(15,118,110,0.1)', color: 'var(--color-pine)', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em' }}>Best value</span>
-            </div>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="9" stroke="var(--color-border)" strokeWidth="1.5"/>
-            </svg>
-          </button>
+      {/* Billing selector — B-mode: two cards side by side */}
+      <section style={{ background: 'var(--color-canvas)', padding: '0 48px 40px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, maxWidth: 700, margin: '0 auto' }}>
+
+            {/* Monthly — selected */}
+            <button style={{
+              background: 'var(--color-surface)', border: '2px solid var(--color-signal)', borderRadius: 12,
+              padding: '16px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              cursor: 'pointer', fontFamily: "'Manrope', sans-serif",
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontWeight: 600, color: 'var(--color-ink)', fontSize: '0.9375rem' }}>Monthly</span>
+                <span style={{ fontSize: '0.8125rem', color: 'var(--color-ink-2)' }}>Pay as you go</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="9" fill="var(--color-signal)"/>
+                <path d="M6.5 10l2.5 2.5 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {/* Annual — unselected */}
+            <button style={{
+              background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12,
+              padding: '16px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              cursor: 'pointer', fontFamily: "'Manrope', sans-serif",
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontWeight: 600, color: 'var(--color-ink)', fontSize: '0.9375rem' }}>Annual</span>
+                  <span style={{ background: 'rgba(15,118,110,0.1)', color: 'var(--color-pine)', padding: '2px 8px', borderRadius: 4, fontSize: '0.6875rem', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em' }}>Best value</span>
+                </div>
+                <span style={{ fontSize: '0.8125rem', color: 'var(--color-ink-2)' }}>Save up to 36%</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="9" stroke="var(--color-border)" strokeWidth="1.5"/>
+              </svg>
+            </button>
+
+          </div>
         </div>
       </section>
 

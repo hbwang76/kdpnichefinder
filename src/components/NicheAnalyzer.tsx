@@ -155,30 +155,38 @@ export function NicheAnalyzer() {
     <>
       <style>{`@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }`}</style>
 
-      <section style={{ background: 'var(--color-canvas)', padding: '80px 48px 64px' }}>
+      <section style={{ background: 'var(--color-canvas)', padding: '48px 48px 64px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--color-signal-tint)', color: 'var(--color-signal)', padding: '6px 14px', borderRadius: 999, fontSize: '0.8125rem', fontWeight: 600, marginBottom: 24 }}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.8 3.6L13 5.3l-3 2.9.7 4.1L7 10.4l-3.7 1.9.7-4.1L1 5.3l4.2-.7z" fill="currentColor"/></svg>
-            AI-Powered Niche Research for KDP Authors
-          </div>
+          {/* Breadcrumb */}
+          <nav style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-ink-2)', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <a href="/tools/kdp-niche-finder" style={{ color: 'var(--color-ink-2)', textDecoration: 'none' }}>Tools</a>
+            <span>›</span>
+            <span style={{ color: 'var(--color-ink)' }}>KDP Niche Finder</span>
+          </nav>
 
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 700, color: 'var(--color-ink)', marginBottom: 16, lineHeight: 1.15 }}>
-            KDP Niche Finder — AI-Powered Amazon KDP Niche Research
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 700, color: 'var(--color-ink)', marginBottom: 12, lineHeight: 1.2 }}>
+            KDP Niche Finder
           </h1>
-          <p style={{ fontSize: '1.0625rem', color: 'var(--color-ink-2)', marginBottom: 40, lineHeight: 1.6 }}>
-            Type a niche. Get a 5-step action plan — not just a data dump. We tell you what book to write, how to position it, and where to launch it.
+          <p style={{ fontSize: '1.0625rem', color: 'var(--color-ink-2)', marginBottom: 32, lineHeight: 1.6, maxWidth: 640, margin: '0 auto 32px' }}>
+            Type a niche. Get 5 ranked niches with BSR data, a competition score, and a written action plan. Takes about 30 seconds.
           </p>
 
-          <div style={{ display: 'flex', gap: 12, maxWidth: 600, margin: '0 auto 16px' }}>
+          {/* Query bar */}
+          <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto 12px', display: 'flex', alignItems: 'center' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ position: 'absolute', left: 16, color: 'var(--color-ink-3)', pointerEvents: 'none' }}>
+              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2"/>
+              <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
             <input
               type="text"
               value={keyword}
               onChange={e => setKeyword(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAnalyze()}
-              placeholder="e.g., keto diet journals, adult coloring books..."
+              placeholder="e.g. adhd planner, low content journal, children's coloring book"
               style={{
-                flex: 1, height: 56, padding: '0 20px', border: '2px solid var(--color-border)',
-                borderRadius: 12, fontSize: '1rem', fontFamily: "'Manrope', sans-serif",
+                width: '100%', height: 56, paddingLeft: 48, paddingRight: 160,
+                border: '2px solid var(--color-border)', borderRadius: 12,
+                fontSize: '1rem', fontFamily: "'Manrope', sans-serif",
                 background: 'var(--color-surface)', color: 'var(--color-ink)', outline: 'none',
               }}
               onFocus={e => e.target.style.borderColor = 'var(--color-signal)'}
@@ -188,31 +196,38 @@ export function NicheAnalyzer() {
               onClick={handleAnalyze}
               disabled={loading || !keyword.trim()}
               style={{
-                height: 56, padding: '0 28px', background: loading ? 'var(--color-ink-3)' : 'var(--color-signal)',
-                color: 'white', border: 'none', borderRadius: 12, fontSize: '1rem', fontWeight: 700,
+                position: 'absolute', right: 4, top: 4, bottom: 4,
+                padding: '0 20px', background: loading ? 'var(--color-ink-3)' : 'var(--color-signal)',
+                color: 'white', border: 'none', borderRadius: 10, fontSize: '0.875rem', fontWeight: 700,
                 cursor: loading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif",
-                display: 'flex', alignItems: 'center', gap: 8,
               }}
             >
-              {loading ? (
-                <>
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
-                    <circle cx="9" cy="9" r="7" stroke="white" strokeWidth="2" strokeDasharray="30" strokeDashoffset="10"/>
-                  </svg>
-                  Analyzing...
-                </>
-              ) : 'Analyze Niche'}
+              {loading ? 'Analyzing…' : 'Find My First Niche — Free'}
             </button>
           </div>
 
-          <p style={{ fontSize: '0.75rem', color: 'var(--color-ink-3)', marginBottom: 0 }}>
-            AI-generated recommendations are estimates based on publicly available data. All BSR and revenue figures are estimated.
-          </p>
-          <div style={{ marginTop: 16 }}>
-            <a href="#how-it-works" style={{ fontSize: '0.875rem', color: 'var(--color-ink-2)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
-              See how it works ↓
-            </a>
+          {/* Example chips */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginBottom: 0 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', alignSelf: 'center' }}>EXAMPLES:</span>
+            {['adhd planner', 'low content journal', "children's coloring book"].map(ex => (
+              <button
+                key={ex}
+                onClick={() => setKeyword(ex)}
+                style={{
+                  padding: '4px 10px', borderRadius: 6,
+                  background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                  fontSize: '0.8125rem', fontFamily: "'Manrope', sans-serif",
+                  color: 'var(--color-ink)', cursor: 'pointer',
+                }}
+              >
+                {ex}
+              </button>
+            ))}
           </div>
+
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 16 }}>
+            AI-generated recommendations are estimates based on publicly available data.
+          </p>
         </div>
       </section>
 
