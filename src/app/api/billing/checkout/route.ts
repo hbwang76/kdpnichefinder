@@ -16,15 +16,19 @@ async function getSessionUser(db: DbClient, request: NextRequest): Promise<Check
   return session || null
 }
 
+function getDb(): DbClient {
+  const ctx = getCloudflareContext() as unknown as { env: { DB: DbClient } }
+  if (!ctx.env.DB) throw new Error('DB not bound')
+  return ctx.env.DB
+}
+
 export async function POST(request: NextRequest) {
-  let env: { DB: DbClient }
+  let db: DbClient
   try {
-    const ctx = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
-    env = ctx.env
+    db = getDb()
   } catch (e) {
     return NextResponse.json({ error: 'context_error', detail: String(e) }, { status: 500 })
   }
-  const db: DbClient = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const user = await getSessionUser(db, request)
