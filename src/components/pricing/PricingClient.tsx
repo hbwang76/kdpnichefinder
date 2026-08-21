@@ -82,16 +82,22 @@ const creditPacks = [
 ]
 
 async function handleCheckout(planId: string) {
-  try {
-    const res = await fetch('/api/billing/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: planId }),
-      credentials: 'include',
-    })
-    const data = await res.json()
-    if (data.checkout_url) window.location.href = data.checkout_url
-  } catch {}
+  const res = await fetch('/api/billing/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan: planId }),
+    credentials: 'include',
+  })
+  if (res.status === 401) {
+    window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname)
+    return
+  }
+  const data = await res.json()
+  if (data.checkout_url) {
+    window.location.href = data.checkout_url
+  } else {
+    alert(data.error || 'Checkout failed. Please try again.')
+  }
 }
 
 export function PricingClient() {
