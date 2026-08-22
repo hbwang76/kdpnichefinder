@@ -44,7 +44,15 @@ export async function POST(request: NextRequest) {
   if (existing) return NextResponse.json({ ok: true, message: 'already processed' })
 
   const ts = now()
-  const obj = (event.object ?? {}) as Record<string, unknown> & { metadata?: Record<string, unknown> }
+  const obj = (event.object ?? {}) as Record<string, unknown> & { metadata?: Record<string, unknown>; customer?: Record<string, unknown> }
+
+  // Debug: log what we got for userId resolution
+  const topLevelMetaRef = event.metadata?.referenceId as string | undefined
+  const objMetaRef = (obj.metadata as Record<string, unknown> | undefined)?.referenceId as string | undefined
+  const customerMetaRef = (obj.customer as Record<string, unknown> | undefined)?.metadata as Record<string, unknown> | undefined
+  const custRefId = customerMetaRef?.referenceId as string | undefined
+  const resolvedUserId = topLevelMetaRef ?? objMetaRef ?? custRefId
+  console.error(`[webhook] eventType=${eventType} userId=${resolvedUserId ?? 'NULL'} topMetaRef=${topLevelMetaRef} objMetaRef=${objMetaRef} custRefId=${custRefId}`)
 
   if (eventType === 'checkout.completed') {
     const userId = (event.metadata?.referenceId ?? obj.metadata?.referenceId) as string | undefined
