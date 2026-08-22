@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
   if (eventType === 'subscription.active' || eventType === 'subscription.paid') {
     const subscriptionId = obj.subscription_id as string | undefined
     const productId = obj.product_id as string | undefined
-    const plan = productId === process.env.CREEM_PRO_MONTHLY_PRODUCT_ID || productId === process.env.CREEM_PRO_YEARLY_PRODUCT_ID ? 'pro' : 'starter'
+    const plan = productId === process.env.CREEM_PRO_MONTHLY_PRICE_ID || productId === process.env.CREEM_PRO_YEARLY_PRICE_ID ? 'pro' : 'starter'
     const periodEnd = (obj.current_period_end as number) ?? ts
 
     if (subscriptionId) {
