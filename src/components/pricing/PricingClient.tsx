@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 
 async function handleCheckout(planId: string) {
@@ -22,6 +23,8 @@ async function handleCheckout(planId: string) {
 }
 
 export function PricingClient() {
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
+
   return (
     <>
       {/* Billing selector — B-mode: two cards side by side */}
@@ -29,9 +32,9 @@ export function PricingClient() {
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, maxWidth: 700, margin: '0 auto' }}>
 
-            {/* Monthly — selected */}
-            <button style={{
-              background: 'var(--color-surface)', border: '2px solid var(--color-signal)', borderRadius: 12,
+            {/* Monthly */}
+            <button onClick={() => setBilling('monthly')} style={{
+              background: 'var(--color-surface)', border: billing === 'monthly' ? '2px solid var(--color-signal)' : '1px solid var(--color-border)', borderRadius: 12,
               padding: '16px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               cursor: 'pointer', fontFamily: "'Manrope', sans-serif",
             }}>
@@ -39,15 +42,21 @@ export function PricingClient() {
                 <span style={{ fontWeight: 600, color: 'var(--color-ink)', fontSize: '0.9375rem' }}>Monthly</span>
                 <span style={{ fontSize: '0.8125rem', color: 'var(--color-ink-2)' }}>Pay as you go</span>
               </div>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="10" cy="10" r="9" fill="var(--color-signal)"/>
-                <path d="M6.5 10l2.5 2.5 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              {billing === 'monthly' ? (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="9" fill="var(--color-signal)"/>
+                  <path d="M6.5 10l2.5 2.5 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="9" stroke="var(--color-border)" strokeWidth="1.5"/>
+                </svg>
+              )}
             </button>
 
-            {/* Annual — unselected */}
-            <button style={{
-              background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12,
+            {/* Annual */}
+            <button onClick={() => setBilling('annual')} style={{
+              background: 'var(--color-surface)', border: billing === 'annual' ? '2px solid var(--color-signal)' : '1px solid var(--color-border)', borderRadius: 12,
               padding: '16px', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               cursor: 'pointer', fontFamily: "'Manrope', sans-serif",
             }}>
@@ -58,9 +67,16 @@ export function PricingClient() {
                 </div>
                 <span style={{ fontSize: '0.8125rem', color: 'var(--color-ink-2)' }}>Save up to 36%</span>
               </div>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="10" cy="10" r="9" stroke="var(--color-border)" strokeWidth="1.5"/>
-              </svg>
+              {billing === 'annual' ? (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="9" fill="var(--color-signal)"/>
+                  <path d="M6.5 10l2.5 2.5 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="9" stroke="var(--color-border)" strokeWidth="1.5"/>
+                </svg>
+              )}
             </button>
 
           </div>
@@ -100,10 +116,14 @@ export function PricingClient() {
             {/* Starter */}
             <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, padding: 24, display: 'flex', flexDirection: 'column' }}>
               <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.75rem', fontWeight: 600, marginBottom: 4, color: 'var(--color-ink)' }}>Starter</h3>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 2 }}>$9.99<span style={{ fontSize: '0.875rem', fontWeight: 400, color: 'var(--color-ink-2)' }}>/mo</span></div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.75rem', color: 'var(--color-ink-2)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
-                or $79/yr ($6.58/mo) <span style={{ background: 'rgba(15,118,110,0.1)', color: 'var(--color-pine)', padding: '2px 6px', borderRadius: 4 }}>Save 34%</span>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 2 }}>
+                {billing === 'monthly' ? '$9.99' : '$79/yr'}<span style={{ fontSize: '0.875rem', fontWeight: 400, color: 'var(--color-ink-2)' }}>{billing === 'monthly' ? '/mo' : ` ($${(79/12).toFixed(2)}/mo)`}</span>
               </div>
+              {billing === 'monthly' && (
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.75rem', color: 'var(--color-ink-2)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  or $79/yr ($6.58/mo) <span style={{ background: 'rgba(15,118,110,0.1)', color: 'var(--color-pine)', padding: '2px 6px', borderRadius: 4 }}>Save 34%</span>
+                </div>
+              )}
               <p style={{ fontSize: '0.875rem', color: 'var(--color-ink-2)', marginBottom: 16, flexGrow: 1 }}>See what to write before you write it.</p>
               <div style={{ borderTop: '1px solid var(--color-border)', margin: '16px 0' }}></div>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.875rem' }}>
@@ -117,12 +137,12 @@ export function PricingClient() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => handleCheckout('starter_monthly')} style={{
+              <button onClick={() => handleCheckout(billing === 'monthly' ? 'starter_monthly' : 'starter_annual')} style={{
                 width: '100%', background: 'transparent', border: '2px solid var(--color-signal)', color: 'var(--color-signal)',
                 padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: '0.9375rem',
                 cursor: 'pointer', fontFamily: "'Manrope', sans-serif",
               }}>
-                Start With Starter — $9.99/mo
+                Start With Starter — {billing === 'monthly' ? '$9.99/mo' : '$79/yr'}
               </button>
             </div>
 
@@ -130,10 +150,14 @@ export function PricingClient() {
             <div style={{ background: '#FFF1E8', border: '2px solid var(--color-signal)', borderRadius: 12, padding: 24, display: 'flex', flexDirection: 'column', position: 'relative' }}>
               <div style={{ position: 'absolute', top: 0, right: 0, background: 'var(--color-signal)', color: 'white', padding: '4px 12px', borderRadius: '0 10px 0 10px', fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Recommended</div>
               <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.75rem', fontWeight: 600, marginBottom: 4, color: 'var(--color-signal)' }}>Pro</h3>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 2 }}>$29.99<span style={{ fontSize: '0.875rem', fontWeight: 400, color: 'var(--color-ink-2)' }}>/mo</span></div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.75rem', color: 'var(--color-ink-2)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
-                or $229/yr ($19.08/mo) <span style={{ background: 'rgba(15,118,110,0.1)', color: 'var(--color-pine)', padding: '2px 6px', borderRadius: 4 }}>Save 36%</span>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 2 }}>
+                {billing === 'monthly' ? '$29.99' : '$229/yr'}<span style={{ fontSize: '0.875rem', fontWeight: 400, color: 'var(--color-ink-2)' }}>{billing === 'monthly' ? '/mo' : ` ($${(229/12).toFixed(2)}/mo)`}</span>
               </div>
+              {billing === 'monthly' && (
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.75rem', color: 'var(--color-ink-2)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  or $229/yr ($19.08/mo) <span style={{ background: 'rgba(15,118,110,0.1)', color: 'var(--color-pine)', padding: '2px 6px', borderRadius: 4 }}>Save 36%</span>
+                </div>
+              )}
               <p style={{ fontSize: '0.875rem', color: 'var(--color-ink-2)', marginBottom: 16, flexGrow: 1 }}>For KDP authors running this like a business.</p>
               <div style={{ borderTop: '1px solid rgba(0,0,0,0.1)', margin: '16px 0', opacity: 0.5 }}></div>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.875rem' }}>
@@ -154,12 +178,12 @@ export function PricingClient() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => handleCheckout('pro_monthly')} style={{
+              <button onClick={() => handleCheckout(billing === 'monthly' ? 'pro_monthly' : 'pro_annual')} style={{
                 width: '100%', background: 'var(--color-signal)', color: 'white',
                 padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: '0.9375rem',
                 border: 'none', cursor: 'pointer', fontFamily: "'Manrope', sans-serif",
               }}>
-                Get Pro — $29.99/mo
+                Get Pro — {billing === 'monthly' ? '$29.99/mo' : '$229/yr'}
               </button>
             </div>
           </div>
