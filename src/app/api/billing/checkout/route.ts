@@ -53,6 +53,9 @@ export async function POST(request: NextRequest) {
   const isTestMode = process.env.CREEM_TEST_MODE === 'true'
   const apiBase = isTestMode ? 'https://test-api.creem.io' : (process.env.CREEM_API_BASE || 'https://api.creem.io')
   const appOrigin = process.env.APP_ORIGIN || 'https://kdpnichefinder.net'
+  const apiKey = process.env.CREEM_API_KEY
+
+  if (!apiKey) return NextResponse.json({ error: 'creem_api_key_missing', env_test_mode: isTestMode, api_base: apiBase }, { status: 500 })
 
   const checkoutRes = await fetch(`${apiBase}/v1/checkouts`, {
     method: 'POST',
