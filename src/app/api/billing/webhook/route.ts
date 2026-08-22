@@ -1,31 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac, timingSafeEqual } from 'crypto'
 import { generateId, now } from '@/lib/api-helpers'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text()
-  const signature = request.headers.get('x-creem-signature') ?? ''
+  // Creem uses 'creem-signature' header (no x- prefix)
+  const signature = request.headers.get('creem-signature') ?? ''
 
   if (!process.env.CREEM_WEBHOOK_SECRET) {
     return NextResponse.json({ error: 'webhook not configured' }, { status: 503 })
   }
 
-  // Verify HMAC
-  const encoder = new TextEncoder()
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(process.env.CREEM_WEBHOOK_SECRET),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['verify']
-  )
-  const hex = signature.replace(/^sha256=/, '')
-  if (!/^[0-9a-fA-F]{64}$/.test(hex)) return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
-  const sigBytes = new Uint8Array(hex.match(/.{2}/g)!.map((b) => parseInt(b, 16)))
-  const bodyBytes = encoder.encode(rawBody)
-  const valid = await crypto.subtle.verify('HMAC', key, sigBytes, bodyBytes)
-  if (!valid) return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
+  // Verify HMAC-SHA256 using Node.js crypto (more reliable in CF Workers than Web Crypto API)
+  const hex = signature.replace(/^sha256=/, '').trim()
+  if (!/^[0-9a-fA-F]{64}$/.test(hex)) {
+    return NextResponse.json({ error: 'invalid signature format' }, { status: 401 })
+  }
+  const expected = createHmac('sha256', process.env.CREEM_WEBHOOK_SECRET!).update(rawBody, 'utf8').digest('hex')
+  const expectedBuf = Buffer.from(expected, 'hex')
+  const receivedBuf = Buffer.from(hex, 'hex')
+  if (!timingSafeEqual(expectedBuf, receivedBuf)) {
+    return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
+  }
 
   interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
   interface WebhookEvent { id: string }
