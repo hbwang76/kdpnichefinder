@@ -71,6 +71,8 @@ export async function POST(request: NextRequest) {
       : productId === process.env.CREEM_CREDIT_LARGE_PRICE_ID ? 270
       : 0
 
+    return NextResponse.json({ ok: true, credits, productId, env_MINI: process.env.CREEM_CREDIT_MINI_PRICE_ID, env_STD: process.env.CREEM_CREDIT_STANDARD_PRICE_ID, env_LARGE: process.env.CREEM_CREDIT_LARGE_PRICE_ID, userId }, { status: 200 })
+
     if (credits > 0) {
       await db.prepare('INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(generateId('cp_'), userId, eventId, credits, 'active', ts).run()
