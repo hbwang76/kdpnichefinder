@@ -3,78 +3,75 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { generateId, now } from '@/lib/api-helpers'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
-
 export async function POST(request: NextRequest) {
   const rawBody = await request.text()
-  // Creem uses 'creem-signature' header (no x- prefix)
   const signature = request.headers.get('creem-signature') ?? ''
 
   if (!process.env.CREEM_WEBHOOK_SECRET) {
     return NextResponse.json({ error: 'webhook not configured' }, { status: 503 })
   }
 
-  // Verify HMAC-SHA256 using Node.js crypto (more reliable in CF Workers than Web Crypto API)
   const hex = signature.replace(/^sha256=/, '').trim()
   if (!/^[0-9a-fA-F]{64}$/.test(hex)) {
     return NextResponse.json({ error: 'invalid signature format' }, { status: 401 })
   }
   const expected = createHmac('sha256', process.env.CREEM_WEBHOOK_SECRET!).update(rawBody, 'utf8').digest('hex')
-  const expectedBuf = Buffer.from(expected, 'hex')
-  const receivedBuf = Buffer.from(hex, 'hex')
-  if (!timingSafeEqual(expectedBuf, receivedBuf)) {
+  if (!timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(hex, 'hex'))) {
     return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
   }
 
   interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
-  interface WebhookEvent { id: string }
   const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
   const db: DbClient = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
-  let event: { id?: string; eventType?: string; object?: Record<string, unknown>; metadata?: Record<string, unknown> }
+  let event: Record<string, unknown>
   try {
     event = JSON.parse(rawBody)
   } catch {
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 })
   }
 
-  const eventId = event.id ?? generateId('evt_')
-  const eventType = event.eventType ?? 'unknown'
-  const existing = await db.prepare('SELECT id FROM webhook_events WHERE id = ?').bind(eventId).first<WebhookEvent>()
-  if (existing) return NextResponse.json({ ok: true, message: 'already processed' })
+  const eventId = event.id as string ?? generateId('evt_')
+  const eventType = (event.eventType as string) ?? 'unknown'
+  const obj = (event.object ?? {}) as Record<string, unknown>
+  const customer = obj.customer as Record<string, unknown> | undefined
+
+  const topRef = (event.metadata as Record<string, unknown> | undefined)?.referenceId as string | undefined
+  const objRef = (obj.metadata as Record<string, unknown> | undefined)?.referenceId as string | undefined
+  const custRef = ((customer?.metadata as Record<string, unknown>) ?? (obj.customer as Record<string, unknown>))?.referenceId as string | undefined
+  const userId = topRef ?? objRef ?? custRef
+
+  const debug = {
+    eventId,
+    eventType,
+    userId: userId ?? 'NULL',
+    topRef: topRef ?? 'NULL',
+    objRef: objRef ?? 'NULL',
+    custRef: custRef ?? 'NULL',
+    objectKeys: Object.keys(obj),
+    customerKeys: customer ? Object.keys(customer) : [],
+    productId: obj.product_id ?? 'NULL',
+  }
 
   const ts = now()
-  const obj = (event.object ?? {}) as Record<string, unknown> & { metadata?: Record<string, unknown>; customer?: Record<string, unknown> }
 
-  // Debug: log what we got for userId resolution
-  const topLevelMetaRef = event.metadata?.referenceId as string | undefined
-  const objMetaRef = (obj.metadata as Record<string, unknown> | undefined)?.referenceId as string | undefined
-  const customerMetaRef = (obj.customer as Record<string, unknown> | undefined)?.metadata as Record<string, unknown> | undefined
-  const custRefId = customerMetaRef?.referenceId as string | undefined
-  const resolvedUserId = topLevelMetaRef ?? objMetaRef ?? custRefId
+  // Insert webhook event at start (no dedup check to avoid early returns blocking inserts)
+  await db.prepare('INSERT OR IGNORE INTO webhook_events (id, event_type, processed_at) VALUES (?, ?, ?)')
+    .bind(eventId, eventType, ts).run()
 
-  if (!resolvedUserId) {
-    return NextResponse.json({
-      error: 'no_user_id',
-      eventType,
-      topLevelMetaRef,
-      objMetaRef,
-      custRefId,
-      objectKeys: Object.keys(obj),
-      customerKeys: obj.customer ? Object.keys(obj.customer) : [],
-    }, { status: 200 }) // 200 so Creem doesn't retry
+  if (!userId) {
+    return NextResponse.json({ ok: false, error: 'no_user_id', ...debug }, { status: 200 })
   }
 
   if (eventType === 'checkout.completed') {
-    const userId = resolvedUserId
     const productId = obj.product_id as string | undefined
-    const credits =
-      productId === process.env.CREEM_CREDIT_MINI_PRICE_ID ? 35
+    const credits = productId === process.env.CREEM_CREDIT_MINI_PRICE_ID ? 35
       : productId === process.env.CREEM_CREDIT_STANDARD_PRICE_ID ? 80
       : productId === process.env.CREEM_CREDIT_LARGE_PRICE_ID ? 270
       : 0
 
-    if (userId && credits > 0) {
+    if (credits > 0) {
       await db.prepare('INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(generateId('cp_'), userId, eventId, credits, 'active', ts).run()
       const balanceRow = await db.prepare('SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?').bind(userId).first<{ balance: number }>()
@@ -82,14 +79,16 @@ export async function POST(request: NextRequest) {
       await db.prepare('INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
         .bind(generateId('cl_'), userId, credits, newBalance, 'purchase', eventId, ts).run()
     }
-  } else if (eventType === 'subscription.active' || eventType === 'subscription.paid') {
-    const userId = resolvedUserId
+    return NextResponse.json({ ok: true, credits, productId, userId, eventType }, { status: 200 })
+  }
+
+  if (eventType === 'subscription.active' || eventType === 'subscription.paid') {
     const subscriptionId = obj.subscription_id as string | undefined
     const productId = obj.product_id as string | undefined
     const plan = productId === process.env.CREEM_PRO_MONTHLY_PRICE_ID || productId === process.env.CREEM_PRO_YEARLY_PRICE_ID ? 'pro' : 'starter'
     const periodEnd = (obj.current_period_end as number) ?? ts
 
-    if (userId && subscriptionId) {
+    if (subscriptionId) {
       await db.prepare(`
         INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at)
         VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?)
@@ -98,19 +97,20 @@ export async function POST(request: NextRequest) {
       `).bind(generateId('sub_'), userId, plan, subscriptionId, ts, periodEnd, ts, ts).run()
       await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind(plan, ts, userId).run()
     }
-  } else if (eventType === 'subscription.expired' || eventType === 'subscription.paused' || eventType === 'subscription.canceled') {
-    const subscriptionId = obj.subscription_id as string | undefined
-    if (subscriptionId) {
-      const newPlan = eventType === 'subscription.canceled' ? 'free' : 'free'
-      await db.prepare('UPDATE subscriptions SET status = ?, cancel_at_period_end = 1, updated_at = ? WHERE creem_subscription_id = ?')
-        .bind(eventType === 'subscription.canceled' ? 'cancelled' : eventType === 'subscription.paused' ? 'paused' : 'expired', ts, subscriptionId).run()
-      await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = (SELECT user_id FROM subscriptions WHERE creem_subscription_id = ?)')
-        .bind(newPlan, ts, subscriptionId).run()
-    }
+    return NextResponse.json({ ok: true, plan, subscriptionId, userId, eventType }, { status: 200 })
   }
 
-  await db.prepare('INSERT INTO webhook_events (id, event_type, processed_at) VALUES (?, ?, ?)')
-    .bind(eventId, eventType, ts).run()
+  if (eventType === 'subscription.expired' || eventType === 'subscription.paused' || eventType === 'subscription.canceled') {
+    const subscriptionId = obj.subscription_id as string | undefined
+    const newStatus = eventType === 'subscription.canceled' ? 'cancelled' : eventType === 'subscription.paused' ? 'paused' : 'expired'
+    if (subscriptionId) {
+      await db.prepare('UPDATE subscriptions SET status = ?, cancel_at_period_end = 1, updated_at = ? WHERE creem_subscription_id = ?')
+        .bind(newStatus, ts, subscriptionId).run()
+      await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = (SELECT user_id FROM subscriptions WHERE creem_subscription_id = ?)')
+        .bind('free', ts, subscriptionId).run()
+    }
+    return NextResponse.json({ ok: true, newStatus, subscriptionId, eventType }, { status: 200 })
+  }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, eventType }, { status: 200 })
 }
