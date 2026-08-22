@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
   if (!/^[0-9a-fA-F]{64}$/.test(hex)) {
     return NextResponse.json({ error: 'invalid signature format' }, { status: 401 })
   }
-  const expected = createHmac('sha256', process.env.CREEM_WEBHOOK_SECRET!).update(rawBody, 'utf8').digest('hex')
+  const expected = createHmac('sha256', process.env.CREEM_WEBHOOK_SECRET!)
+    .update(rawBody, 'utf8').digest('hex')
   if (!timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(hex, 'hex'))) {
     return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
   }
@@ -39,39 +40,24 @@ export async function POST(request: NextRequest) {
 
   const topRef = (event.metadata as Record<string, unknown> | undefined)?.referenceId as string | undefined
   const objRef = (obj.metadata as Record<string, unknown> | undefined)?.referenceId as string | undefined
-  const custRef = ((customer?.metadata as Record<string, unknown>) ?? (obj.customer as Record<string, unknown>))?.referenceId as string | undefined
+  const custRef = ((customer?.metadata as Record<string, unknown>) ?? {})?.referenceId as string | undefined
   const userId = topRef ?? objRef ?? custRef
-
-  const debug = {
-    eventId,
-    eventType,
-    userId: userId ?? 'NULL',
-    topRef: topRef ?? 'NULL',
-    objRef: objRef ?? 'NULL',
-    custRef: custRef ?? 'NULL',
-    objectKeys: Object.keys(obj),
-    customerKeys: customer ? Object.keys(customer) : [],
-    productId: obj.product_id ?? 'NULL',
-  }
 
   const ts = now()
 
-  // Insert webhook event at start (no dedup check to avoid early returns blocking inserts)
   await db.prepare('INSERT OR IGNORE INTO webhook_events (id, event_type, processed_at) VALUES (?, ?, ?)')
     .bind(eventId, eventType, ts).run()
 
   if (!userId) {
-    return NextResponse.json({ ok: false, error: 'no_user_id', ...debug }, { status: 200 })
+    return NextResponse.json({ ok: false, error: 'no_user_id', topRef, objRef, custRef, objectKeys: Object.keys(obj) }, { status: 200 })
   }
 
   if (eventType === 'checkout.completed') {
     const productId = obj.product_id as string | undefined
-    const credits = productId === process.env.CREEM_CREDIT_MINI_PRICE_ID ? 35
-      : productId === process.env.CREEM_CREDIT_STANDARD_PRICE_ID ? 80
-      : productId === process.env.CREEM_CREDIT_LARGE_PRICE_ID ? 270
+    const credits = productId === process.env.CREEM_CREDIT_MINI_PRODUCT_ID ? 35
+      : productId === process.env.CREEM_CREDIT_STANDARD_PRODUCT_ID ? 80
+      : productId === process.env.CREEM_CREDIT_LARGER_PRODUCT_ID ? 270
       : 0
-
-    return NextResponse.json({ ok: true, credits, productId, env_MINI: process.env.CREEM_CREDIT_MINI_PRICE_ID, env_STD: process.env.CREEM_CREDIT_STANDARD_PRICE_ID, env_LARGE: process.env.CREEM_CREDIT_LARGE_PRICE_ID, userId }, { status: 200 })
 
     if (credits > 0) {
       await db.prepare('INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at) VALUES (?, ?, ?, ?, ?, ?)')
@@ -81,13 +67,13 @@ export async function POST(request: NextRequest) {
       await db.prepare('INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
         .bind(generateId('cl_'), userId, credits, newBalance, 'purchase', eventId, ts).run()
     }
-    return NextResponse.json({ ok: true, credits, productId, userId, eventType }, { status: 200 })
+    return NextResponse.json({ ok: true, credits, productId, userId }, { status: 200 })
   }
 
   if (eventType === 'subscription.active' || eventType === 'subscription.paid') {
     const subscriptionId = obj.subscription_id as string | undefined
     const productId = obj.product_id as string | undefined
-    const plan = productId === process.env.CREEM_PRO_MONTHLY_PRICE_ID || productId === process.env.CREEM_PRO_YEARLY_PRICE_ID ? 'pro' : 'starter'
+    const plan = productId === process.env.CREEM_PRO_MONTHLY_PRODUCT_ID || productId === process.env.CREEM_PRO_YEARLY_PRODUCT_ID ? 'pro' : 'starter'
     const periodEnd = (obj.current_period_end as number) ?? ts
 
     if (subscriptionId) {
@@ -99,7 +85,7 @@ export async function POST(request: NextRequest) {
       `).bind(generateId('sub_'), userId, plan, subscriptionId, ts, periodEnd, ts, ts).run()
       await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind(plan, ts, userId).run()
     }
-    return NextResponse.json({ ok: true, plan, subscriptionId, userId, eventType }, { status: 200 })
+    return NextResponse.json({ ok: true, plan, subscriptionId, userId }, { status: 200 })
   }
 
   if (eventType === 'subscription.expired' || eventType === 'subscription.paused' || eventType === 'subscription.canceled') {
@@ -111,7 +97,7 @@ export async function POST(request: NextRequest) {
       await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = (SELECT user_id FROM subscriptions WHERE creem_subscription_id = ?)')
         .bind('free', ts, subscriptionId).run()
     }
-    return NextResponse.json({ ok: true, newStatus, subscriptionId, eventType }, { status: 200 })
+    return NextResponse.json({ ok: true, newStatus, subscriptionId }, { status: 200 })
   }
 
   return NextResponse.json({ ok: true, eventType }, { status: 200 })
