@@ -52,10 +52,21 @@ export async function POST(request: NextRequest) {
   const customerMetaRef = (obj.customer as Record<string, unknown> | undefined)?.metadata as Record<string, unknown> | undefined
   const custRefId = customerMetaRef?.referenceId as string | undefined
   const resolvedUserId = topLevelMetaRef ?? objMetaRef ?? custRefId
-  console.error(`[webhook] eventType=${eventType} userId=${resolvedUserId ?? 'NULL'} topMetaRef=${topLevelMetaRef} objMetaRef=${objMetaRef} custRefId=${custRefId}`)
+
+  if (!resolvedUserId) {
+    return NextResponse.json({
+      error: 'no_user_id',
+      eventType,
+      topLevelMetaRef,
+      objMetaRef,
+      custRefId,
+      objectKeys: Object.keys(obj),
+      customerKeys: obj.customer ? Object.keys(obj.customer) : [],
+    }, { status: 200 }) // 200 so Creem doesn't retry
+  }
 
   if (eventType === 'checkout.completed') {
-    const userId = (event.metadata?.referenceId ?? obj.metadata?.referenceId) as string | undefined
+    const userId = resolvedUserId
     const productId = obj.product_id as string | undefined
     const credits =
       productId === process.env.CREEM_CREDIT_MINI_PRICE_ID ? 35
@@ -72,7 +83,7 @@ export async function POST(request: NextRequest) {
         .bind(generateId('cl_'), userId, credits, newBalance, 'purchase', eventId, ts).run()
     }
   } else if (eventType === 'subscription.active' || eventType === 'subscription.paid') {
-    const userId = (event.metadata?.referenceId ?? obj.metadata?.referenceId) as string | undefined
+    const userId = resolvedUserId
     const subscriptionId = obj.subscription_id as string | undefined
     const productId = obj.product_id as string | undefined
     const plan = productId === process.env.CREEM_PRO_MONTHLY_PRICE_ID || productId === process.env.CREEM_PRO_YEARLY_PRICE_ID ? 'pro' : 'starter'
