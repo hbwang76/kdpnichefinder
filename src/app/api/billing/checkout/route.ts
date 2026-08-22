@@ -45,6 +45,9 @@ export async function POST(request: NextRequest) {
     credit_mini: process.env.CREEM_CREDIT_MINI_PRICE_ID,
     credit_standard: process.env.CREEM_CREDIT_STANDARD_PRICE_ID,
     credit_large: process.env.CREEM_CREDIT_LARGE_PRICE_ID,
+    // aliases for frontend
+    starter_annual: process.env.CREEM_STARTER_YEARLY_PRICE_ID,
+    pro_annual: process.env.CREEM_PRO_YEARLY_PRICE_ID,
   }
   const validPlans = Object.keys(priceIdMap)
   const priceId = priceIdMap[plan]
@@ -67,11 +70,13 @@ export async function POST(request: NextRequest) {
       product_id: priceId,
       metadata: { referenceId: user.user_id },
       success_url: `${appOrigin}/account?checkout=success`,
-      cancel_url: `${appOrigin}/pricing?checkout=cancelled`,
     }),
   })
 
-  if (!checkoutRes.ok) return NextResponse.json({ error: 'creem_checkout_failed' }, { status: 502 })
-  const checkout = await checkoutRes.json() as { url?: string; id?: string }
-  return NextResponse.json({ checkout_url: checkout.url, checkout_id: checkout.id })
+  if (!checkoutRes.ok) {
+    const errBody = await checkoutRes.text().catch(() => '')
+    return NextResponse.json({ error: 'creem_checkout_failed', creem_status: checkoutRes.status, detail: errBody.slice(0, 300) }, { status: 502 })
+  }
+  const checkout = await checkoutRes.json() as { checkout_url?: string; id?: string }
+  return NextResponse.json({ checkout_url: checkout.checkout_url, checkout_id: checkout.id })
 }

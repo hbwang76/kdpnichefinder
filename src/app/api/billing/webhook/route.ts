@@ -46,10 +46,10 @@ export async function POST(request: NextRequest) {
   if (existing) return NextResponse.json({ ok: true, message: 'already processed' })
 
   const ts = now()
-  const obj = event.object ?? {}
+  const obj = (event.object ?? {}) as Record<string, unknown> & { metadata?: Record<string, unknown> }
 
   if (eventType === 'checkout.completed') {
-    const userId = event.metadata?.referenceId as string | undefined
+    const userId = (event.metadata?.referenceId ?? obj.metadata?.referenceId) as string | undefined
     const productId = obj.product_id as string | undefined
     const credits =
       productId === process.env.CREEM_CREDIT_MINI_PRICE_ID ? 35
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         .bind(generateId('cl_'), userId, credits, newBalance, 'purchase', eventId, ts).run()
     }
   } else if (eventType === 'subscription.active' || eventType === 'subscription.paid') {
-    const userId = event.metadata?.referenceId as string | undefined
+    const userId = (event.metadata?.referenceId ?? obj.metadata?.referenceId) as string | undefined
     const subscriptionId = obj.subscription_id as string | undefined
     const productId = obj.product_id as string | undefined
     const plan = productId === process.env.CREEM_PRO_MONTHLY_PRICE_ID || productId === process.env.CREEM_PRO_YEARLY_PRICE_ID ? 'pro' : 'starter'
