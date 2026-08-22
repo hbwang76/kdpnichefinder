@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 export const metadata: Metadata = {
   title: 'Your Account — KDP Niche Finder',
@@ -10,18 +11,25 @@ export const metadata: Metadata = {
   openGraph: { url: 'https://kdpnichefinder.net/account' },
 }
 
+interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null> } } }
+
 async function getUser() {
   try {
     const cookieStore = await cookies()
-    const cookieHeader = cookieStore.toString()
-    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kdpnichefinder.net'
-    const res = await fetch(`${origin}/api/auth/me`, {
-      cache: 'no-store',
-      headers: cookieHeader ? { Cookie: cookieHeader } : {},
-    })
-    if (!res.ok) return null
-    const data = await res.json()
-    return data.authenticated ? data.user : null
+    const sessionId = cookieStore.get('session_id')?.value
+    if (!sessionId) return null
+
+    const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
+    const db: DbClient = env.DB
+    if (!db) return null
+
+    const { now } = await import('@/lib/api-helpers')
+    const session = await db
+      .prepare('SELECT s.id, s.user_id, u.email, u.name, u.plan FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = ? AND s.expires_at > ?')
+      .bind(sessionId, now())
+      .first<{ id: string; user_id: string; email: string; name: string; plan: string }>()
+
+    return session ?? null
   } catch {
     return null
   }
