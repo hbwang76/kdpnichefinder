@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 
 export const metadata: Metadata = {
   title: 'Your Account — KDP Niche Finder',
@@ -9,14 +10,14 @@ export const metadata: Metadata = {
   openGraph: { url: 'https://kdpnichefinder.net/account' },
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kdpnichefinder.net'
-
 async function getUser() {
   try {
+    const cookieStore = await cookies()
+    const cookieHeader = cookieStore.toString()
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kdpnichefinder.net'
     const res = await fetch(`${origin}/api/auth/me`, {
       cache: 'no-store',
-      credentials: 'include',
+      headers: cookieHeader ? { Cookie: cookieHeader } : {},
     })
     if (!res.ok) return null
     const data = await res.json()
