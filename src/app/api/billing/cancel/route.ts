@@ -20,18 +20,17 @@ export async function POST(request: NextRequest) {
   }>()
   if (!subscription) return NextResponse.json({ error: 'No active subscription found' }, { status: 404 })
 
-  // Call Creem API to cancel subscription
+  // Call Creem API to cancel subscription (non-fatal: local update even if Creem fails)
   const apiKey = env.CREEM_API_KEY ?? ''
   const apiBase = env.CREEM_API_BASE ?? 'https://test-api.creem.io/v1'
-  const cancelRes = await fetch(`${apiBase}/subscriptions/${subscription.creem_subscription_id}/cancel`, {
-    method: 'POST',
-    headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-  })
-
-  if (!cancelRes.ok) {
-    const err = await cancelRes.text()
-    return NextResponse.json({ error: 'Failed to cancel subscription', details: err }, { status: 500 })
-  }
+  let creemCanceled = false
+  try {
+    const cancelRes = await fetch(`${apiBase}/subscriptions/${subscription.creem_subscription_id}/cancel`, {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
+    })
+    creemCanceled = cancelRes.ok
+  } catch { /* ignore network errors */ }
 
   const ts = now()
   await db.prepare('UPDATE subscriptions SET status = ?, cancel_at_period_end = 1, updated_at = ? WHERE id = ?')
@@ -39,5 +38,5 @@ export async function POST(request: NextRequest) {
   await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?')
     .bind('free', ts, session.user_id).run()
 
-  return NextResponse.json({ ok: true, canceledAt: ts, periodEnd: subscription.current_period_end })
+  return NextResponse.json({ ok: true, creemCanceled, canceledAt: ts, periodEnd: subscription.current_period_end })
 }
