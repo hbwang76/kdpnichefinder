@@ -53,6 +53,8 @@ export async function POST(request: NextRequest) {
   }
 
   if (eventType === 'checkout.completed') {
+    // Log full event structure for debugging
+    console.log('checkout.completed event:', JSON.stringify({ eventId, eventType, objKeys: Object.keys(obj), obj }))
     const productId = obj.product_id as string | undefined
     const credits = productId === process.env.CREEM_CREDIT_MINI_PRODUCT_ID ? 35
       : productId === process.env.CREEM_CREDIT_STANDARD_PRODUCT_ID ? 80
