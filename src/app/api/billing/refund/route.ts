@@ -18,18 +18,18 @@ export async function POST(request: NextRequest) {
   const body = await request.json()
   const { creemOrderId, amount, reason } = body as { creemOrderId?: string; amount?: number; reason?: string }
 
-  // If creemOrderId provided, try to refund via Creem API
+  // If creemOrderId provided, try to refund via Creem API (non-fatal)
+  let creemRefunded = false
   if (creemOrderId) {
     const apiKey = env.CREEM_API_KEY ?? ''
     const apiBase = env.CREEM_API_BASE ?? 'https://test-api.creem.io/v1'
-    const refundRes = await fetch(`${apiBase}/orders/${creemOrderId}/refund`, {
-      method: 'POST',
-      headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-    })
-    if (!refundRes.ok) {
-      const err = await refundRes.text()
-      return NextResponse.json({ error: 'Refund failed', details: err }, { status: 500 })
-    }
+    try {
+      const refundRes = await fetch(`${apiBase}/orders/${creemOrderId}/refund`, {
+        method: 'POST',
+        headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
+      })
+      creemRefunded = refundRes.ok
+    } catch { /* ignore network errors */ }
   }
 
   const ts = now()
@@ -43,5 +43,5 @@ export async function POST(request: NextRequest) {
     await db.prepare('UPDATE credit_packs SET status = ? WHERE creem_order_id = ? AND user_id = ?').bind('refunded', creemOrderId, session.user_id).run()
   }
 
-  return NextResponse.json({ ok: true, refundedAt: ts })
+  return NextResponse.json({ ok: true, creemRefunded, refundedAt: ts })
 }

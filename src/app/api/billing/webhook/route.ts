@@ -53,9 +53,12 @@ export async function POST(request: NextRequest) {
   }
 
   if (eventType === 'checkout.completed') {
-    // Log full event structure for debugging
-    console.log('checkout.completed event:', JSON.stringify({ eventId, eventType, objKeys: Object.keys(obj), obj }))
-    const productId = obj.product_id as string | undefined
+    // product_id may be at: obj.product_id OR obj.items?.[0]?.product_id
+    const items = obj.items as Array<{ product_id?: string }> | undefined
+    const productId = (obj.product_id as string | undefined)
+      ?? items?.[0]?.product_id
+      ?? (obj.metadata as Record<string, unknown> | undefined)?.product_id as string | undefined
+
     const credits = productId === process.env.CREEM_CREDIT_MINI_PRODUCT_ID ? 35
       : productId === process.env.CREEM_CREDIT_STANDARD_PRODUCT_ID ? 80
       : productId === process.env.CREEM_CREDIT_LARGER_PRODUCT_ID ? 270
@@ -74,7 +77,10 @@ export async function POST(request: NextRequest) {
 
   if (eventType === 'subscription.active' || eventType === 'subscription.paid') {
     const subscriptionId = obj.subscription_id as string | undefined
-    const productId = obj.product_id as string | undefined
+    const subItems = obj.items as Array<{ product_id?: string }> | undefined
+    const productId = (obj.product_id as string | undefined)
+      ?? subItems?.[0]?.product_id
+      ?? (obj.metadata as Record<string, unknown> | undefined)?.product_id as string | undefined
     const plan = productId === process.env.CREEM_PRO_MONTHLY_PRICE_ID || productId === process.env.CREEM_PRO_YEARLY_PRICE_ID ? 'pro' : 'starter'
     const periodEnd = (obj.current_period_end as number) ?? ts
 
