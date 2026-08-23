@@ -1,112 +1,383 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
-import { generateId, now } from '@/lib/api-helpers'
+import { generateId, now, json } from '@/lib/api-helpers'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
-export async function POST(request: NextRequest) {
-  const rawBody = await request.text()
-  const signature = request.headers.get('creem-signature') ?? ''
+// ─── Billing plan definitions (must match Creem product IDs in env) ─────────
+type BillingPlan = 'starter_monthly' | 'starter_yearly' | 'pro_monthly' | 'pro_yearly' | 'credit_mini' | 'credit_standard' | 'credit_larger'
+type AccountPlan = 'free' | 'starter' | 'pro'
+type BillingInterval = 'month' | 'year' | null
 
-  if (!process.env.CREEM_WEBHOOK_SECRET) {
-    return NextResponse.json({ error: 'webhook not configured' }, { status: 503 })
+interface BillingPlanConfig {
+  productEnvs: string[]
+  plan: AccountPlan
+  billingInterval: BillingInterval
+  pricingModel: 'subscription' | 'one_time_credits'
+  creditsGranted?: number
+}
+
+const BILLING_PLANS: Record<BillingPlan, BillingPlanConfig> = {
+  starter_monthly:  { productEnvs: ['CREEM_STARTER_MONTHLY_PRODUCT_ID'],  plan: 'starter', billingInterval: 'month',  pricingModel: 'subscription' },
+  starter_yearly:   { productEnvs: ['CREEM_STARTER_YEARLY_PRODUCT_ID'],   plan: 'starter', billingInterval: 'year',   pricingModel: 'subscription' },
+  pro_monthly:      { productEnvs: ['CREEM_PRO_MONTHLY_PRODUCT_ID'],     plan: 'pro',     billingInterval: 'month',  pricingModel: 'subscription' },
+  pro_yearly:       { productEnvs: ['CREEM_PRO_YEARLY_PRODUCT_ID'],      plan: 'pro',     billingInterval: 'year',   pricingModel: 'subscription' },
+  credit_mini:      { productEnvs: ['CREEM_CREDIT_MINI_PRODUCT_ID'],      plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 35 },
+  credit_standard:  { productEnvs: ['CREEM_CREDIT_STANDARD_PRODUCT_ID'],  plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 80 },
+  credit_larger:    { productEnvs: ['CREEM_CREDIT_LARGER_PRODUCT_ID'],    plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 270 },
+}
+
+const GRANT_EVENTS   = new Set(['checkout.completed', 'subscription.active', 'subscription.trialing', 'subscription.paid'])
+const REVOKE_EVENTS  = new Set(['subscription.canceled', 'subscription.expired', 'subscription.paused', 'refund.created', 'refund.completed'])
+const REFUND_EVENTS  = new Set(['refund.created', 'refund.completed'])
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+function asString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined
+}
+function id(): string { return generateId('id_') }
+function normalizePlan(value: unknown): BillingPlan | null {
+  return typeof value === 'string' && value in BILLING_PLANS ? value as BillingPlan : null
+}
+function accountPlan(value: unknown): AccountPlan {
+  return value === 'pro' || value === 'starter' ? value as AccountPlan : 'free'
+}
+
+// Creem webhook payload shape
+interface CreemWebhookPayload {
+  id?: string
+  eventType?: string
+  type?: string
+  object?: unknown
+  data?: unknown
+  metadata?: Record<string, unknown>
+}
+
+// Extract the checkout/subscription object from the payload
+function webhookObject(payload: CreemWebhookPayload): Record<string, unknown> {
+  return asRecord(payload.object || payload.data)
+}
+
+// Merge metadata from all possible locations (Creem nests it in different places)
+function webhookMetadata(object: Record<string, unknown>): Record<string, unknown> {
+  const order       = asRecord(object.order)
+  const subscription = asRecord(object.subscription)
+  const checkout    = asRecord(object.checkout)
+  const customer     = asRecord(object.customer)
+  return {
+    ...asRecord(checkout.metadata),
+    ...asRecord(customer.metadata),
+    ...asRecord(order.metadata),
+    ...asRecord(subscription.metadata),
+    ...asRecord(object.metadata),
+  }
+}
+
+// Get userId from metadata.referenceId (set at checkout creation)
+function webhookUserId(object: Record<string, unknown>): string | undefined {
+  const metadata = webhookMetadata(object)
+  return asString(metadata.referenceId) || asString(metadata.user_id) || asString(object.user_id)
+}
+
+// Determine the billing plan from metadata or product object
+function webhookPlan(object: Record<string, unknown>, env: Record<string, string | undefined>): BillingPlan | null {
+  const metadata = webhookMetadata(object)
+  const checkoutPlan = normalizePlan(asString(metadata.checkout_plan))
+  if (checkoutPlan) return checkoutPlan
+
+  // Fallback: match by product ID against env
+  const productId = webhookProductId(object)
+  for (const [plan, config] of Object.entries(BILLING_PLANS)) {
+    for (const envKey of config.productEnvs) {
+      const envVal = (env as Record<string, string | undefined>)[envKey]
+      if (envVal && productId === envVal) return plan as BillingPlan
+    }
   }
 
-  const hex = signature.replace(/^sha256=/, '').trim()
-  if (!/^[0-9a-fA-F]{64}$/.test(hex)) {
-    return NextResponse.json({ error: 'invalid signature format' }, { status: 401 })
+  // fallback to pro for unknown product IDs
+  const sub = asRecord(object.subscription)
+  const subItems = sub.items as Array<{ product_id?: string }> | undefined
+  const subProductId = (sub.product_id as string | undefined) ?? subItems?.[0]?.product_id
+  for (const [plan, config] of Object.entries(BILLING_PLANS)) {
+    for (const envKey of config.productEnvs) {
+      const envVal = (env as Record<string, string | undefined>)[envKey]
+      if (envVal && subProductId === envVal) return plan as BillingPlan
+    }
   }
-  const expected = createHmac('sha256', process.env.CREEM_WEBHOOK_SECRET!)
-    .update(rawBody, 'utf8').digest('hex')
-  if (!timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(hex, 'hex'))) {
-    return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
-  }
+  return null
+}
 
-  interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } } }
-  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
-  const db: DbClient = env.DB
-  if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
+// Get product ID from nested product object or flat fields
+function webhookProductId(object: Record<string, unknown>): string | undefined {
+  const product = asRecord(object.product)
+  if (product?.id) return asString(product.id)
+  const subscription = asRecord(object.subscription)
+  const subItems = subscription.items as Array<{ product_id?: string }> | undefined
+  return asString(object.product_id)
+    ?? subItems?.[0]?.product_id
+    ?? asString((object.metadata as Record<string, unknown>)?.product_id)
+}
 
-  let event: Record<string, unknown>
+// Extract transaction/payment ID for idempotency
+function webhookTransactionId(object: Record<string, unknown>): string {
+  const order = asRecord(object.order)
+  const transaction = asRecord(object.last_transaction)
+  return asString(object.transaction_id)
+    ?? asString(object.payment_id)
+    ?? asString(object.last_transaction_id)
+    ?? asString(order.transaction_id)
+    ?? asString(transaction.id)
+    ?? asString(object.id)
+    ?? id()
+}
+
+// Get amount from various possible locations
+function webhookAmount(object: Record<string, unknown>): number {
+  const order = asRecord(object.order)
+  const transaction = asRecord(object.last_transaction)
+  return Number(
+    object.amount ?? object.amount_total
+    ?? transaction.amount_paid ?? transaction.amount
+    ?? order.amount_paid ?? order.amount
+    ?? 0
+  )
+}
+
+function webhookCurrency(object: Record<string, unknown>): string {
+  const order = asRecord(object.order)
+  const transaction = asRecord(object.last_transaction)
+  return asString(object.currency)
+    ?? asString(transaction.currency)
+    ?? asString(order.currency)
+    ?? 'USD'
+}
+
+// ─── Signature verification ───────────────────────────────────────────────────
+async function verifyWebhook(request: Request, env: Record<string, string | undefined>, raw: string): Promise<boolean> {
+  const secret = (env as Record<string, string | undefined>).CREEM_WEBHOOK_SECRET
+  if (!secret) return false
+  const sig = request.headers.get('creem-signature') ?? ''
+  const hex = sig.replace(/^sha256=/, '').trim()
+  if (!/^[0-9a-fA-F]{64}$/.test(hex)) return false
   try {
-    event = JSON.parse(rawBody)
+    const expected = createHmac('sha256', secret).update(raw, 'utf8').digest('hex')
+    return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(hex, 'hex'))
   } catch {
-    return NextResponse.json({ error: 'invalid JSON' }, { status: 400 })
+    return false
   }
+}
 
-  const eventId = event.id as string ?? generateId('evt_')
-  const eventType = (event.eventType as string) ?? 'unknown'
-  const obj = (event.object ?? {}) as Record<string, unknown>
-  const customer = obj.customer as Record<string, unknown> | undefined
+// ─── DB helpers ────────────────────────────────────────────────────────────────
+type DbClient = {
+  prepare(sql: string): {
+    bind(...vals: unknown[]): {
+      first<T>(): Promise<T | null>
+      run(): Promise<{ meta: { changes: number } }>
+      all<T>(): Promise<{ results: T[] }>
+    }
+  }
+}
 
-  const topRef = (event.metadata as Record<string, unknown> | undefined)?.referenceId as string | undefined
-  const objRef = (obj.metadata as Record<string, unknown> | undefined)?.referenceId as string | undefined
-  const custRef = ((customer?.metadata as Record<string, unknown>) ?? {})?.referenceId as string | undefined
-  const userId = topRef ?? objRef ?? custRef
+// ─── Record a credit pack purchase ───────────────────────────────────────────
+async function recordPurchase(
+  db: DbClient,
+  userId: string,
+  object: Record<string, unknown>,
+  eventType: string,
+  env: Record<string, string | undefined>
+) {
+  if (eventType !== 'checkout.completed' && eventType !== 'subscription.paid') return
 
+  const plan = webhookPlan(object, env)
+  if (!plan) return
+
+  const config = BILLING_PLANS[plan]
+  const creditsGranted = config.creditsGranted ?? 0
+  const purchaseId = webhookTransactionId(object)
+  const customerId = asString((object.customer as Record<string, unknown>)?.id)
+  const checkoutId = asString((object.checkout as Record<string, unknown>)?.id)
+    ?? asString((object as Record<string, unknown>).checkout_id)
+    ?? asString(object.id)
+  const amount = webhookAmount(object)
+  const currency = webhookCurrency(object)
   const ts = now()
 
-  await db.prepare('INSERT OR IGNORE INTO webhook_events (id, event_type, processed_at) VALUES (?, ?, ?)')
-    .bind(eventId, eventType, ts).run()
-
-  if (!userId) {
-    return NextResponse.json({ ok: false, error: 'no_user_id', topRef, objRef, custRef, objectKeys: Object.keys(obj) }, { status: 200 })
-  }
-
-  if (eventType === 'checkout.completed') {
-    // product_id may be at: obj.product_id OR obj.items?.[0]?.product_id
-    const items = obj.items as Array<{ product_id?: string }> | undefined
-    const productId = (obj.product_id as string | undefined)
-      ?? items?.[0]?.product_id
-      ?? (obj.metadata as Record<string, unknown> | undefined)?.product_id as string | undefined
-
-    const credits = productId === process.env.CREEM_CREDIT_MINI_PRODUCT_ID ? 35
-      : productId === process.env.CREEM_CREDIT_STANDARD_PRODUCT_ID ? 80
-      : productId === process.env.CREEM_CREDIT_LARGER_PRODUCT_ID ? 270
-      : 0
-
-    if (credits > 0) {
-      await db.prepare('INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at) VALUES (?, ?, ?, ?, ?, ?)')
-        .bind(generateId('cp_'), userId, eventId, credits, 'active', ts).run()
-      const balanceRow = await db.prepare('SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?').bind(userId).first<{ balance: number }>()
-      const newBalance = (balanceRow?.balance ?? 0) + credits
-      await db.prepare('INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-        .bind(generateId('cl_'), userId, credits, newBalance, 'purchase', eventId, ts).run()
+  // Upsert subscription for subscription events
+  if (eventType === 'subscription.paid') {
+    const subscription = asRecord(object.subscription ?? object)
+    const subscriptionId = asString(subscription.id) ?? asString((object as Record<string, unknown>).subscription_id)
+    if (subscriptionId) {
+      await db.prepare(`
+        INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?)
+        ON CONFLICT(creem_subscription_id) DO UPDATE SET
+          status = excluded.status, plan = excluded.plan,
+          current_period_end = excluded.current_period_end, updated_at = excluded.updated_at
+      `).bind(
+        id(), userId, config.plan,
+        subscriptionId,
+        ts, asString(subscription.current_period_start_date) ?? ts,
+        asString(subscription.current_period_end_date) ?? ts,
+        ts, ts
+      ).run()
     }
-    return NextResponse.json({ ok: true, credits, productId, userId }, { status: 200 })
   }
 
-  if (eventType === 'subscription.active' || eventType === 'subscription.paid') {
-    const subscriptionId = obj.subscription_id as string | undefined
-    const subItems = obj.items as Array<{ product_id?: string }> | undefined
-    const productId = (obj.product_id as string | undefined)
-      ?? subItems?.[0]?.product_id
-      ?? (obj.metadata as Record<string, unknown> | undefined)?.product_id as string | undefined
-    const plan = productId === process.env.CREEM_PRO_MONTHLY_PRICE_ID || productId === process.env.CREEM_PRO_YEARLY_PRICE_ID ? 'pro' : 'starter'
-    const periodEnd = (obj.current_period_end as number) ?? ts
+  // Record credit pack purchase
+  if (config.pricingModel === 'one_time_credits' && creditsGranted > 0) {
+    await db.prepare(`
+      INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at)
+      VALUES (?, ?, ?, ?, 'active', ?)
+      ON CONFLICT(creem_order_id) DO NOTHING
+    `).bind(id(), userId, purchaseId, creditsGranted, ts).run()
+
+    // Update ledger
+    const ledgerRow = await db.prepare(
+      'SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?'
+    ).bind(userId).first<{ balance: number }>()
+    const newBalance = (ledgerRow?.balance ?? 0) + creditsGranted
+    await db.prepare(`
+      INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at)
+      VALUES (?, ?, ?, ?, 'purchase', ?, ?)
+    `).bind(id(), userId, creditsGranted, newBalance, purchaseId, ts).run()
+  }
+
+  // Grant subscription access for subscription plans
+  if (config.pricingModel === 'subscription') {
+    const sub = asRecord(object.subscription ?? object)
+    const subscriptionId = asString(sub.id) ?? asString((object as Record<string, unknown>).subscription_id)
+    const periodStart = asString(sub.current_period_start_date) ?? asString(sub.current_period_start) ?? String(ts)
+    const periodEnd = asString(sub.current_period_end_date) ?? asString(sub.current_period_end) ?? String(ts)
 
     if (subscriptionId) {
       await db.prepare(`
         INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at)
         VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?)
         ON CONFLICT(creem_subscription_id) DO UPDATE SET
-          status = excluded.status, plan = excluded.plan, current_period_end = excluded.current_period_end, updated_at = excluded.updated_at
-      `).bind(generateId('sub_'), userId, plan, subscriptionId, ts, periodEnd, ts, ts).run()
-      await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind(plan, ts, userId).run()
+          plan = excluded.plan, status = excluded.status,
+          current_period_end = excluded.current_period_end, updated_at = excluded.updated_at
+      `).bind(id(), userId, config.plan, subscriptionId, Number(periodStart), Number(periodEnd), ts, ts).run()
     }
-    return NextResponse.json({ ok: true, plan, subscriptionId, userId }, { status: 200 })
+
+    // Update user plan
+    await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind(config.plan, ts, userId).run()
+  }
+}
+
+// ─── Handle refund ─────────────────────────────────────────────────────────────
+async function handleRefund(
+  db: DbClient,
+  userId: string,
+  object: Record<string, unknown>,
+  eventType: string
+) {
+  if (!REFUND_EVENTS.has(eventType)) return
+  const refundId = asString(object.id) ?? asString((object as Record<string, unknown>).refund_id)
+  const orderId = asString((object as Record<string, unknown>).order_id)
+    ?? asString(asRecord(object.order)?.id)
+
+  if (!orderId) return
+
+  // Find the original credit pack
+  const pack = await db.prepare(
+    'SELECT id, user_id, credits, status FROM credit_packs WHERE creem_order_id = ?'
+  ).bind(orderId).first<{ id: string; user_id: string; credits: number; status: string }>()
+
+  if (!pack || pack.status === 'refunded') return
+
+  const ts = now()
+
+  // Deduct from ledger
+  const ledgerRow = await db.prepare(
+    'SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?'
+  ).bind(pack.user_id).first<{ balance: number }>()
+  const newBalance = Math.max(0, (ledgerRow?.balance ?? 0) - pack.credits)
+  await db.prepare(`
+    INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at)
+    VALUES (?, ?, ?, ?, 'refund', ?, ?)
+  `).bind(id(), pack.user_id, -pack.credits, newBalance, orderId, ts).run()
+
+  // Mark pack as refunded
+  await db.prepare('UPDATE credit_packs SET status = ? WHERE id = ?').bind('refunded', pack.id).run()
+}
+
+// ─── Revoke subscription access ───────────────────────────────────────────────
+async function revokeAccess(
+  db: DbClient,
+  userId: string,
+  object: Record<string, unknown>,
+  eventType: string
+) {
+  if (!REVOKE_EVENTS.has(eventType)) return
+  const subscriptionId = asString((object.subscription as Record<string, unknown>)?.id)
+    ?? asString((object as Record<string, unknown>).subscription_id)
+  const ts = now()
+  if (subscriptionId) {
+    await db.prepare(
+      'UPDATE subscriptions SET status = ?, cancel_at_period_end = 1, updated_at = ? WHERE creem_subscription_id = ?'
+    ).bind('cancelled', ts, subscriptionId).run()
+  }
+  await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind('free', ts, userId).run()
+}
+
+// ─── Main webhook handler ─────────────────────────────────────────────────────
+export async function POST(request: NextRequest) {
+  const raw = await request.text()
+  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: Record<string, string | undefined> & { DB: DbClient } }
+  const db = env.DB
+  if (!db) return json({ error: 'DB not configured' }, 500)
+
+  const valid = await verifyWebhook(request, env, raw)
+  if (!valid) return json({ error: 'invalid_signature' }, 401)
+
+  let payload: CreemWebhookPayload
+  try {
+    payload = JSON.parse(raw) as CreemWebhookPayload
+  } catch {
+    return json({ error: 'invalid_json' }, 400)
   }
 
-  if (eventType === 'subscription.expired' || eventType === 'subscription.paused' || eventType === 'subscription.canceled') {
-    const subscriptionId = obj.subscription_id as string | undefined
-    const newStatus = eventType === 'subscription.canceled' ? 'cancelled' : eventType === 'subscription.paused' ? 'paused' : 'expired'
-    if (subscriptionId) {
-      await db.prepare('UPDATE subscriptions SET status = ?, cancel_at_period_end = 1, updated_at = ? WHERE creem_subscription_id = ?')
-        .bind(newStatus, ts, subscriptionId).run()
-      await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = (SELECT user_id FROM subscriptions WHERE creem_subscription_id = ?)')
-        .bind('free', ts, subscriptionId).run()
-    }
-    return NextResponse.json({ ok: true, newStatus, subscriptionId }, { status: 200 })
+  const eventType = payload.eventType || payload.type || 'unknown'
+  const eventId = payload.id ?? `${eventType}:${generateId('evt_')}`
+
+  // Idempotency: skip already-processed events
+  const existing = await db.prepare(
+    'SELECT processed_at FROM webhook_events WHERE id = ?'
+  ).bind(eventId).first<{ processed_at: number }>()
+  if (existing?.processed_at) {
+    return json({ ok: true, duplicate: true })
   }
 
-  return NextResponse.json({ ok: true, eventType }, { status: 200 })
+  // Mark as processing (in case of crash mid-handler)
+  await db.prepare(
+    'INSERT OR IGNORE INTO webhook_events (id, event_type, processed_at) VALUES (?, ?, ?)'
+  ).bind(eventId, eventType, 0).run()
+
+  const object = webhookObject(payload)
+  const userId = webhookUserId(object)
+
+  if (userId) {
+    await recordPurchase(db, userId, object, eventType, env)
+    await handleRefund(db, userId, object, eventType)
+    await revokeAccess(db, userId, object, eventType)
+
+    // Grant/revoke subscription plan for subscription events
+    if (GRANT_EVENTS.has(eventType)) {
+      const plan = webhookPlan(object, env)
+      if (plan) {
+        const config = BILLING_PLANS[plan]
+        if (config.pricingModel === 'subscription') {
+          await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?')
+            .bind(config.plan, now(), userId).run()
+        }
+      }
+    }
+  }
+
+  // Mark processed
+  await db.prepare('UPDATE webhook_events SET processed_at = ? WHERE id = ?').bind(now(), eventId).run()
+
+  return json({ ok: true, eventType, userId })
 }
