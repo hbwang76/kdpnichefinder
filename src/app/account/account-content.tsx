@@ -12,16 +12,18 @@ interface User {
 
 export default function AccountContent() {
   const [user, setUser] = useState<User | null>(null)
+  const [credits, setCredits] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(r => r.json())
-      .then(data => {
-        if (data.authenticated) setUser(data.user)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch('/api/auth/me').then(r => r.json()),
+      fetch('/api/credits/balance').then(r => r.json()),
+    ]).then(([userData, creditsData]) => {
+      if (userData.authenticated) setUser(userData.user)
+      if (creditsData.balance !== undefined) setCredits(creditsData.balance)
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [])
 
   if (loading) {
@@ -118,7 +120,7 @@ export default function AccountContent() {
           <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 16, padding: 28 }}>
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.125rem', fontWeight: 700, marginBottom: 16 }}>Credit Balance</h2>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 20 }}>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '3rem', fontWeight: 700, color: 'var(--color-ink)' }}>—</span>
+              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '3rem', fontWeight: 700, color: 'var(--color-ink)' }}>{credits ?? '—'}</span>
             </div>
             <p style={{ fontSize: '0.875rem', color: 'var(--color-ink-2)', marginBottom: 20 }}>
               Purchase credit packs for one-time analyses without a subscription.
