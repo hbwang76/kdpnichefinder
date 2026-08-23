@@ -81,43 +81,40 @@ function webhookUserId(object: Record<string, unknown>): string | undefined {
   return asString(metadata.referenceId) || asString(metadata.user_id) || asString(object.user_id)
 }
 
+// Get product ID from nested product object or flat fields
+function webhookProductId(object: Record<string, unknown>): string | undefined {
+  const product = asRecord(object.product)
+  if (product?.id) return asString(product.id)
+
+  const subscription = asRecord(object.subscription)
+  // subscription.product can be a string (subscription.* events) or object
+  const subProduct = subscription?.product
+  if (typeof subProduct === 'string') return subProduct
+  if (subProduct && typeof subProduct === 'object') return asString((subProduct as Record<string, unknown>).id)
+
+  // Fallback to flat fields
+  return asString(object.product_id)
+    ?? (subscription as Record<string, unknown>)?.product_id as string | undefined
+    ?? (subscription?.items as Array<{ product_id?: string }>)?.[0]?.product_id
+    ?? asString((object.metadata as Record<string, unknown>)?.product_id)
+}
+
 // Determine the billing plan from metadata or product object
 function webhookPlan(object: Record<string, unknown>, env: Record<string, string | undefined>): BillingPlan | null {
   const metadata = webhookMetadata(object)
   const checkoutPlan = normalizePlan(asString(metadata.checkout_plan))
   if (checkoutPlan) return checkoutPlan
 
-  // Fallback: match by product ID against env
   const productId = webhookProductId(object)
-  for (const [plan, config] of Object.entries(BILLING_PLANS)) {
-    for (const envKey of config.productEnvs) {
-      const envVal = (env as Record<string, string | undefined>)[envKey]
-      if (envVal && productId === envVal) return plan as BillingPlan
-    }
-  }
-
-  // fallback to pro for unknown product IDs
-  const sub = asRecord(object.subscription)
-  const subItems = sub.items as Array<{ product_id?: string }> | undefined
-  const subProductId = (sub.product_id as string | undefined) ?? subItems?.[0]?.product_id
-  for (const [plan, config] of Object.entries(BILLING_PLANS)) {
-    for (const envKey of config.productEnvs) {
-      const envVal = (env as Record<string, string | undefined>)[envKey]
-      if (envVal && subProductId === envVal) return plan as BillingPlan
+  if (productId) {
+    for (const [plan, config] of Object.entries(BILLING_PLANS)) {
+      for (const envKey of config.productEnvs) {
+        const envVal = (env as Record<string, string | undefined>)[envKey]
+        if (envVal && productId === envVal) return plan as BillingPlan
+      }
     }
   }
   return null
-}
-
-// Get product ID from nested product object or flat fields
-function webhookProductId(object: Record<string, unknown>): string | undefined {
-  const product = asRecord(object.product)
-  if (product?.id) return asString(product.id)
-  const subscription = asRecord(object.subscription)
-  const subItems = subscription.items as Array<{ product_id?: string }> | undefined
-  return asString(object.product_id)
-    ?? subItems?.[0]?.product_id
-    ?? asString((object.metadata as Record<string, unknown>)?.product_id)
 }
 
 // Extract transaction/payment ID for idempotency
