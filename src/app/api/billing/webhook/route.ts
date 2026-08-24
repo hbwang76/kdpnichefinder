@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHmac, timingSafeEqual } from 'crypto'
 import { generateId, now, json } from '@/lib/api-helpers'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
@@ -152,18 +151,25 @@ function webhookCurrency(object: Record<string, unknown>): string {
 }
 
 // ─── Signature verification ───────────────────────────────────────────────────
+function timingSafeEqualHex(a: string, b: string): boolean {
+  const left = a.startsWith('sha256=') ? a.slice(7) : a
+  const right = b.startsWith('sha256=') ? b.slice(7) : b
+  if (left.length !== right.length) return false
+  let result = 0
+  for (let i = 0; i < left.length; i += 1) result |= left.charCodeAt(i) ^ right.charCodeAt(i)
+  return result === 0
+}
+
 async function verifyWebhook(request: Request, env: Record<string, string | undefined>, raw: string): Promise<boolean> {
   const secret = (env as Record<string, string | undefined>).CREEM_WEBHOOK_SECRET
   if (!secret) return false
-  const sig = request.headers.get('creem-signature') ?? ''
-  const hex = sig.replace(/^sha256=/, '').trim()
-  if (!/^[0-9a-fA-F]{64}$/.test(hex)) return false
-  try {
-    const expected = createHmac('sha256', secret).update(raw, 'utf8').digest('hex')
-    return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(hex, 'hex'))
-  } catch {
-    return false
-  }
+  const sig = request.headers.get('creem-signature') || request.headers.get('x-creem-signature') || ''
+  if (!sig) return false
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const digest = await crypto.subtle.sign('HMAC', key, encoder.encode(raw))
+  const expected = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
+  return timingSafeEqualHex(sig, expected)
 }
 
 // ─── DB helpers ────────────────────────────────────────────────────────────────
@@ -321,60 +327,66 @@ async function revokeAccess(
 
 // ─── Main webhook handler ─────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
-  const raw = await request.text()
-  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: Record<string, string | undefined> & { DB: DbClient } }
-  const db = env.DB
-  if (!db) return json({ error: 'DB not configured' }, 500)
-
-  const valid = await verifyWebhook(request, env, raw)
-  if (!valid) return json({ error: 'invalid_signature' }, 401)
-
-  let payload: CreemWebhookPayload
   try {
-    payload = JSON.parse(raw) as CreemWebhookPayload
-  } catch {
-    return json({ error: 'invalid_json' }, 400)
-  }
+    const raw = await request.text()
+    const { env } = await getCloudflareContext({ async: true }) as unknown as { env: Record<string, string | undefined> & { DB: DbClient } }
+    const db = env.DB
+    if (!db) return json({ error: 'DB not configured' }, 500)
 
-  const eventType = payload.eventType || payload.type || 'unknown'
-  const eventId = payload.id ?? `${eventType}:${generateId('evt_')}`
+    const valid = await verifyWebhook(request, env, raw)
+    if (!valid) return json({ error: 'invalid_signature' }, 401)
 
-  // Idempotency: skip already-processed events
-  const existing = await db.prepare(
-    'SELECT processed_at FROM webhook_events WHERE id = ?'
-  ).bind(eventId).first<{ processed_at: number }>()
-  if (existing?.processed_at) {
-    return json({ ok: true, duplicate: true })
-  }
+    let payload: CreemWebhookPayload
+    try {
+      payload = JSON.parse(raw) as CreemWebhookPayload
+    } catch {
+      return json({ error: 'invalid_json' }, 400)
+    }
 
-  // Mark as processing (in case of crash mid-handler)
-  await db.prepare(
-    'INSERT OR IGNORE INTO webhook_events (id, event_type, processed_at) VALUES (?, ?, ?)'
-  ).bind(eventId, eventType, 0).run()
+    const eventType = payload.eventType || payload.type || 'unknown'
+    const eventId = payload.id ?? `${eventType}:${generateId('evt_')}`
 
-  const object = webhookObject(payload)
-  const userId = webhookUserId(object)
+    // Idempotency: skip already-processed events
+    const existing = await db.prepare(
+      'SELECT processed_at FROM webhook_events WHERE id = ?'
+    ).bind(eventId).first<{ processed_at: number }>()
+    if (existing?.processed_at) {
+      return json({ ok: true, duplicate: true })
+    }
 
-  if (userId) {
-    await recordPurchase(db, userId, object, eventType, env)
-    await handleRefund(db, userId, object, eventType)
-    await revokeAccess(db, userId, object, eventType)
+    // Mark as processing (in case of crash mid-handler)
+    await db.prepare(
+      'INSERT OR IGNORE INTO webhook_events (id, event_type, processed_at) VALUES (?, ?, ?)'
+    ).bind(eventId, eventType, 0).run()
 
-    // Grant/revoke subscription plan for subscription events
-    if (GRANT_EVENTS.has(eventType)) {
-      const plan = webhookPlan(object, env)
-      if (plan) {
-        const config = BILLING_PLANS[plan]
-        if (config.pricingModel === 'subscription') {
-          await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?')
-            .bind(config.plan, now(), userId).run()
+    const object = webhookObject(payload)
+    const userId = webhookUserId(object)
+
+    if (userId) {
+      await recordPurchase(db, userId, object, eventType, env)
+      await handleRefund(db, userId, object, eventType)
+      await revokeAccess(db, userId, object, eventType)
+
+      // Grant/revoke subscription plan for subscription events
+      if (GRANT_EVENTS.has(eventType)) {
+        const plan = webhookPlan(object, env)
+        if (plan) {
+          const config = BILLING_PLANS[plan]
+          if (config.pricingModel === 'subscription') {
+            await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?')
+              .bind(config.plan, now(), userId).run()
+          }
         }
       }
     }
+
+    // Mark processed
+    await db.prepare('UPDATE webhook_events SET processed_at = ? WHERE id = ?').bind(now(), eventId).run()
+
+    return json({ ok: true, eventType, userId })
+  } catch (err) {
+    console.error('Webhook handler error:', err)
+    // Return 200 so Creem doesn't retry
+    return json({ ok: false, error: String(err) }, 200)
   }
-
-  // Mark processed
-  await db.prepare('UPDATE webhook_events SET processed_at = ? WHERE id = ?').bind(now(), eventId).run()
-
-  return json({ ok: true, eventType, userId })
 }
