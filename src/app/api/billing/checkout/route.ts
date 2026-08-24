@@ -37,21 +37,21 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}))
   const plan = body.plan
 
-  const priceIdMap: Record<string, string | undefined> = {
-    starter_monthly: process.env.CREEM_STARTER_MONTHLY_PRICE_ID,
-    starter_yearly: process.env.CREEM_STARTER_YEARLY_PRICE_ID,
-    pro_monthly: process.env.CREEM_PRO_MONTHLY_PRICE_ID,
-    pro_yearly: process.env.CREEM_PRO_YEARLY_PRICE_ID,
-    credit_mini: process.env.CREEM_CREDIT_MINI_PRICE_ID,
-    credit_standard: process.env.CREEM_CREDIT_STANDARD_PRICE_ID,
-    credit_large: process.env.CREEM_CREDIT_LARGE_PRICE_ID,
+  const productIdMap: Record<string, string | undefined> = {
+    starter_monthly: process.env.CREEM_STARTER_MONTHLY_PRODUCT_ID,
+    starter_yearly: process.env.CREEM_STARTER_YEARLY_PRODUCT_ID,
+    pro_monthly: process.env.CREEM_PRO_MONTHLY_PRODUCT_ID,
+    pro_yearly: process.env.CREEM_PRO_YEARLY_PRODUCT_ID,
+    credit_mini: process.env.CREEM_CREDIT_MINI_PRODUCT_ID,
+    credit_standard: process.env.CREEM_CREDIT_STANDARD_PRODUCT_ID,
+    credit_large: process.env.CREEM_CREDIT_LARGER_PRODUCT_ID,
     // aliases for frontend
-    starter_annual: process.env.CREEM_STARTER_YEARLY_PRICE_ID,
-    pro_annual: process.env.CREEM_PRO_YEARLY_PRICE_ID,
+    starter_annual: process.env.CREEM_STARTER_YEARLY_PRODUCT_ID,
+    pro_annual: process.env.CREEM_PRO_YEARLY_PRODUCT_ID,
   }
-  const validPlans = Object.keys(priceIdMap)
-  const priceId = priceIdMap[plan]
-  if (!priceId) return NextResponse.json({ error: 'plan not configured' }, { status: 503 })
+  const validPlans = Object.keys(productIdMap)
+  const productId = productIdMap[plan]
+  if (!productId) return NextResponse.json({ error: 'plan not configured' }, { status: 503 })
 
   const isTestMode = process.env.CREEM_TEST_MODE === 'true'
   const apiBase = isTestMode ? 'https://test-api.creem.io' : (process.env.CREEM_API_BASE || 'https://api.creem.io')
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      product_id: priceId,
+      product_id: productId,
       metadata: { referenceId: user.user_id },
       success_url: `${appOrigin}/account?checkout=success`,
     }),
