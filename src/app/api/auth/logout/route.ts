@@ -18,8 +18,10 @@ export async function POST(request: NextRequest) {
     await db.prepare('DELETE FROM sessions WHERE id = ?').bind(sessionId).run()
   }
 
-  return NextResponse.redirect(new URL('/account', request.url), {
+  return new NextResponse(null, {
+    status: 302,
     headers: {
+      location: '/account',
       'Set-Cookie': clearCookie('session_id'),
     },
   })
