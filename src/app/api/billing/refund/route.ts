@@ -30,14 +30,13 @@ export async function POST(request: NextRequest) {
 
   if (!creemOrderId) return NextResponse.json({ error: 'order_id_required' }, { status: 400 })
 
-  // Look up the credit pack
-  const pack = await db.prepare(
-    'SELECT id, credits, status, user_id FROM credit_packs WHERE creem_order_id = ? AND user_id = ?'
-  ).bind(creemOrderId, session.user_id).first<{ id: string; credits: number; status: string; user_id: string }>()
-  if (!pack) return NextResponse.json({ error: 'pack_not_found' }, { status: 404 })
-  if (pack.status === 'refunded') return NextResponse.json({ error: 'already_refunded' }, { status: 409 })
+  const packRow = await db.prepare(
+    'SELECT id, credits, status, user_id, gateway_checkout_id FROM credit_packs WHERE creem_order_id = ? AND user_id = ?'
+  ).bind(creemOrderId, session.user_id).first<{ id: string; credits: number; status: string; user_id: string; gateway_checkout_id: string | null }>()
+  if (!packRow) return NextResponse.json({ error: 'pack_not_found' }, { status: 404 })
+  if (packRow.status === 'refunded') return NextResponse.json({ error: 'already_refunded' }, { status: 409 })
 
-  const creditsToRefund = pack.credits
+  const creditsToRefund = packRow.credits
 
   const apiKey = env.CREEM_API_KEY ?? ''
   const isTestMode = env.CREEM_TEST_MODE === 'true'
@@ -51,21 +50,28 @@ export async function POST(request: NextRequest) {
     }, { status: 503 })
   }
 
-  // creemOrderId is now stored as gateway_payment_id (tran_...) since fix
-  // Use it directly for refund
-  const refundTransactionId = creemOrderId
-  const refundRes = await fetch(`${apiBase}/v1/refunds`, {
+  // creemOrderId now stores tran_... for new purchases, ord_... for old ones
+  // Try refund with creemOrderId first (tran_...), then fallback to checkout_id (ch_...)
+  let refundRes = await fetch(`${apiBase}/v1/refunds`, {
     method: 'POST',
     headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ transaction_id: refundTransactionId }),
+    body: JSON.stringify({ transaction_id: creemOrderId }),
   })
 
+  let refundBody = ''
+  if (!refundRes.ok && packRow.gateway_checkout_id) {
+    refundRes = await fetch(`${apiBase}/v1/refunds`, {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transaction_id: packRow.gateway_checkout_id }),
+    })
+  }
+
+  refundBody = await refundRes.text().catch(() => '')
   const refundStatus = refundRes.status
-  const refundBody = await refundRes.text().catch(() => '')
-  console.log('REFUND_DEBUG', { status: refundStatus, transactionId: refundTransactionId, body: refundBody.slice(0, 300) })
+  console.log('REFUND_DEBUG', { status: refundStatus, transactionId: creemOrderId, checkoutId: packRow.gateway_checkout_id, body: refundBody.slice(0, 300) })
 
   if (refundRes.ok) {
-    // Creem refunded — deduct credits locally
     const ts = now()
     const ledgerRow = await db.prepare(
       'SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?'
@@ -74,11 +80,12 @@ export async function POST(request: NextRequest) {
     await db.prepare(
       'INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
     ).bind(generateId('cl_'), session.user_id, -creditsToRefund, newBalance, `refund: ${reason ?? 'creem'}`, `creem_refund:${creemOrderId}`, ts).run()
-    await db.prepare('UPDATE credit_packs SET status = ? WHERE id = ?').bind('refunded', pack.id).run()
+    await db.prepare('UPDATE credit_packs SET status = ? WHERE id = ?').bind('refunded', packRow.id).run()
     return NextResponse.json({ ok: true, creditsDeducted: creditsToRefund, refundedAt: ts })
   }
 
-  // Refund failed — do NOT deduct credits locally
   const errData = await refundRes.json().catch(() => ({}))
-  return NextResponse.json({ ok: false, error: 'creem_refund_failed', detail: errData }, { status: 502 })
+  const creemError = (errData as { message?: string[] })?.message
+  const errorMsg = Array.isArray(creemError) ? creemError[0] : (errData as { message?: string })?.message ?? refundBody
+  return NextResponse.json({ ok: false, error: 'creem_refund_failed', detail: errorMsg }, { status: 200 })
 }

@@ -95,7 +95,7 @@ export default function AccountContent() {
       } else if (data.error === 'refund_via_dashboard') {
         alert('Refunds must be requested through Creem directly. Please visit your Creem customer portal or email support@kdpnichefinder.net. Your credits will be restored automatically once the refund is processed.')
       } else {
-        alert('Refund failed: ' + (data.error ?? 'Unknown error'))
+        alert('Refund failed: ' + (data.detail ?? data.error ?? 'Unknown error'))
       }
     } finally {
       setActionLoading(false)
