@@ -4,6 +4,10 @@ import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 interface DbClient { prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> }; all<T>(): Promise<{ results: T[] }> } }
 
+export async function GET(request: NextRequest) {
+  return POST(request)
+}
+
 export async function POST(request: NextRequest) {
   const { env } = await getCloudflareContext({ async: true }) as unknown as { env: { DB: DbClient } }
   const db = env.DB
