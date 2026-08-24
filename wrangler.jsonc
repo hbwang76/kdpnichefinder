@@ -24,7 +24,7 @@
     "NEXT_PUBLIC_APP_ORIGIN": "https://kdpnichefinder.net",
     "APP_ORIGIN": "https://kdpnichefinder.net",
     "GOOGLE_REDIRECT_URI": "https://kdpnichefinder.net/api/auth/callback/google",
-    "CREEM_API_BASE": "https://api.creem.io",
+    "CREEM_API_BASE": "https://test-api.creem.io",
     "CREEM_TEST_MODE": "true",
     "CREEM_API_KEY": "creem_test_5mNTmpYkYzbbyntSbLBdnF",
     "CREEM_WEBHOOK_SECRET": "whsec_6eC2YlIkJMWDX5UMrn6Mi7",
