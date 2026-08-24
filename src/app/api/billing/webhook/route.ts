@@ -140,11 +140,13 @@ function webhookPlan(object: Record<string, unknown>, env: Record<string, string
 function webhookTransactionId(object: Record<string, unknown>): string {
   const order = asRecord(object.order)
   const transaction = asRecord(object.last_transaction)
+  const paymentTransactions = Array.isArray(order?.payment_transactions) ? order.payment_transactions : []
   return asString(object.transaction_id)
     ?? asString(object.payment_id)
     ?? asString(object.last_transaction_id)
     ?? asString(order.transaction_id)
     ?? asString(transaction.id)
+    ?? (paymentTransactions[0] as Record<string, unknown>)?.id as string | undefined
     ?? asString(order.id)       // checkout.completed: object.order.id = order ID (ord_...)
     ?? asString(object.id)      // event ID (evt_...) — last because not useful for refund
     ?? id()
