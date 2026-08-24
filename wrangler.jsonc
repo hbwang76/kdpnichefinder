@@ -25,6 +25,16 @@
     "APP_ORIGIN": "https://kdpnichefinder.net",
     "GOOGLE_REDIRECT_URI": "https://kdpnichefinder.net/api/auth/callback/google",
     "CREEM_API_BASE": "https://api.creem.io",
+    "CREEM_TEST_MODE": "true",
+    "CREEM_API_KEY": "creem_test_5mNTmpYkYzbbyntSbLBdnF",
+    "CREEM_WEBHOOK_SECRET": "whsec_6eC2YlIkJMWDX5UMrn6Mi7",
+    "CREEM_PRO_YEARLY_PRODUCT_ID": "prod_4UJFV6pX7ZK9ceEG6crg5T",
+    "CREEM_PRO_MONTHLY_PRODUCT_ID": "prod_1e10FYWt6bFqUngvXgJDxM",
+    "CREEM_STARTER_YEARLY_PRODUCT_ID": "prod_JhltwyXrbks2Z7BIxJ6ku",
+    "CREEM_STARTER_MONTHLY_PRODUCT_ID": "prod_7L2u8uqjrezrMBim4PnflF",
+    "CREEM_CREDIT_LARGER_PRODUCT_ID": "prod_3OopZ3UwnVko9Rlg1CXnaV",
+    "CREEM_CREDIT_STANDARD_PRODUCT_ID": "prod_5qVBLHjQnDBv8bmj3cUMPZ",
+    "CREEM_CREDIT_MINI_PRODUCT_ID": "prod_30Kj3FoScTsh26aW57tnd",
     "FREE_DAILY_LIMIT": "1"
   }
 }
