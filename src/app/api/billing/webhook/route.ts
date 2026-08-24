@@ -331,10 +331,12 @@ async function handleRefund(
 
   if (!orderId) return
 
-  // Find the original credit pack
-  const pack = await db.prepare(
-    'SELECT id, user_id, credits, status FROM credit_packs WHERE creem_order_id = ?'
-  ).bind(orderId).first<{ id: string; user_id: string; credits: number; status: string }>()
+  // Find the original credit pack — creem_order_id may be tran_... (new) or ord_... (old)
+  // Also check gateway_checkout_id as fallback
+  const pack = await db.prepare(`
+    SELECT id, user_id, credits, status FROM credit_packs
+    WHERE creem_order_id = ? OR gateway_checkout_id = ?
+  `).bind(orderId, orderId).first<{ id: string; user_id: string; credits: number; status: string }>()
 
   if (!pack || pack.status === 'refunded') return
 
