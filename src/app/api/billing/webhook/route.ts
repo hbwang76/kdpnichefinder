@@ -213,21 +213,24 @@ async function recordPurchase(
   if (eventType === 'subscription.paid') {
     const sub = asRecord(object.subscription ?? object)
     const subscriptionId = asString(sub.id) ?? asString((object as Record<string, unknown>).subscription_id)
-    const periodStart = asString(sub.current_period_start_date) ?? asString(sub.current_period_start) ?? String(ts)
-    const periodEnd   = asString(sub.current_period_end_date)   ?? asString(sub.current_period_end)   ?? String(ts)
+    const periodStart = asString(sub.current_period_start_date) ?? asString(sub.current_period_start) ?? null
+    const periodEnd   = asString(sub.current_period_end_date)   ?? asString(sub.current_period_end)   ?? null
 
     if (subscriptionId) {
       await db.prepare(`
-        INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at)
-        VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?)
+        INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, raw_json, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?, ?)
         ON CONFLICT(creem_subscription_id) DO UPDATE SET
           plan = excluded.plan, status = excluded.status,
-          current_period_end = excluded.current_period_end, updated_at = excluded.updated_at
+          current_period_end = excluded.current_period_end,
+          raw_json = excluded.raw_json,
+          updated_at = excluded.updated_at
       `).bind(
         id(), userId, config.plan,
         subscriptionId,
-        sub.current_period_start_date ?? sub.current_period_start ?? String(ts),
-        sub.current_period_end_date   ?? sub.current_period_end   ?? String(ts),
+        periodStart,
+        periodEnd,
+        JSON.stringify(object),
         ts, ts
       ).run()
     }

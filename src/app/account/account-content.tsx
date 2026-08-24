@@ -22,7 +22,7 @@ interface Subscription {
   id: string
   plan: string
   status: string
-  current_period_end: number
+  current_period_end: string | null
   cancel_at_period_end: number
   creem_subscription_id: string
 }
@@ -132,7 +132,7 @@ export default function AccountContent() {
   const isStarter = user.plan === 'starter'
   const isPro = user.plan === 'pro'
   const isCanceled = subscription?.status === 'canceled'
-  const periodEnd = subscription?.current_period_end ? new Date(subscription.current_period_end * 1000).toLocaleDateString() : null
+  const periodEnd = subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString() : null
 
   const planLabel = isPro ? 'Pro' : isStarter ? 'Starter' : 'Free'
   const planBadgeBg = isPro ? 'var(--color-signal)' : isStarter ? '#8b5cf6' : 'var(--color-ink)'

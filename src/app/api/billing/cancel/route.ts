@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const subscription = await db.prepare('SELECT * FROM subscriptions WHERE user_id = ? AND status = ?').bind(session.user_id, 'active').first<{
-    id: string; creem_subscription_id: string; plan: string; status: string; current_period_end: number
+    id: string; creem_subscription_id: string; plan: string; status: string; current_period_end: string | null
   }>()
   if (!subscription) return NextResponse.json({ error: 'No active subscription found' }, { status: 404 })
 
