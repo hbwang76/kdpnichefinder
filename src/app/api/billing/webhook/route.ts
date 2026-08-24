@@ -421,7 +421,13 @@ export async function POST(request: NextRequest) {
     const userId = webhookUserId(object)
     const productId = webhookProductId(object)
     const plan = webhookPlan(object, env as Record<string, string | undefined>)
-    console.log('WEBHOOK_DEBUG', JSON.stringify({ eventId, eventType, userId, productId, plan, objectKeys: Object.keys(object) }))
+    const productIdEnvCheck = productId ? {
+      productId,
+      CREDIT_STANDARD_PRODUCT_ID: env.CREEM_CREDIT_STANDARD_PRODUCT_ID,
+      CREDIT_MINI_PRODUCT_ID: env.CREEM_CREDIT_MINI_PRODUCT_ID,
+      CREDIT_LARGER_PRODUCT_ID: env.CREEM_CREDIT_LARGER_PRODUCT_ID,
+    } : null
+    console.log('WEBHOOK_DEBUG', JSON.stringify({ eventId, eventType, userId, productId, plan, productIdEnvCheck, objectKeys: Object.keys(object) }))
 
     if (userId) {
       await recordPurchase(db, userId, object, eventType, env)
