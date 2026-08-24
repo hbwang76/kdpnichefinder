@@ -20,9 +20,9 @@ const BILLING_PLANS: Record<BillingPlan, BillingPlanConfig> = {
   starter_yearly:   { productEnvs: ['CREEM_STARTER_YEARLY_PRODUCT_ID'],   plan: 'starter', billingInterval: 'year',   pricingModel: 'subscription' },
   pro_monthly:      { productEnvs: ['CREEM_PRO_MONTHLY_PRODUCT_ID'],     plan: 'pro',     billingInterval: 'month',  pricingModel: 'subscription' },
   pro_yearly:       { productEnvs: ['CREEM_PRO_YEARLY_PRODUCT_ID'],      plan: 'pro',     billingInterval: 'year',   pricingModel: 'subscription' },
-  credit_mini:      { productEnvs: ['CREEM_CREDIT_MINI_PRODUCT_ID'],      plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 35 },
-  credit_standard:  { productEnvs: ['CREEM_CREDIT_STANDARD_PRODUCT_ID'],  plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 80 },
-  credit_larger:    { productEnvs: ['CREEM_CREDIT_LARGER_PRODUCT_ID'],    plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 270 },
+  credit_mini:      { productEnvs: ['CREEM_CREDIT_MINI_PRICE_ID'],      plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 35 },
+  credit_standard:  { productEnvs: ['CREEM_CREDIT_STANDARD_PRICE_ID'],  plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 80 },
+  credit_larger:    { productEnvs: ['CREEM_CREDIT_LARGER_PRICE_ID'],    plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 270 },
 }
 
 const GRANT_EVENTS   = new Set(['checkout.completed', 'subscription.paid'])
