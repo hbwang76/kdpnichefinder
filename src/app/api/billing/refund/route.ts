@@ -13,7 +13,7 @@ interface DbClient {
 
 export async function POST(request: NextRequest) {
   const { env } = await getCloudflareContext({ async: true }) as unknown as {
-    env: { DB: DbClient; CREEM_API_KEY: string; CREEM_API_BASE: string }
+    env: { DB: DbClient; CREEM_API_KEY: string; CREEM_API_BASE?: string; CREEM_TEST_MODE?: string }
   }
   const db: DbClient = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
@@ -41,13 +41,13 @@ export async function POST(request: NextRequest) {
 
   // Get Creem API key (use TEST mode base if key starts with creem_test_)
   const apiKey = env.CREEM_API_KEY ?? ''
-  const isTestMode = apiKey.startsWith('creem_test_')
-  const apiBase = env.CREEM_API_BASE ?? (isTestMode ? 'https://test-api.creem.io/v1' : 'https://api.creem.io/v1')
+  const isTestMode = env.CREEM_TEST_MODE === 'true'
+  const apiBase = isTestMode ? 'https://test-api.creem.io' : (env.CREEM_API_BASE ?? 'https://api.creem.io')
 
   // Call Creem refund API — POST /v1/refunds with transaction_id
   // Only deduct credits AFTER Creem succeeds; otherwise user must go to Creem Dashboard
   if (apiKey) {
-    const refundRes = await fetch(`${apiBase}/refunds`, {
+    const refundRes = await fetch(`${apiBase}/v1/refunds`, {
       method: 'POST',
       headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({ transaction_id: creemOrderId }),
