@@ -338,6 +338,31 @@ async function revokeAccess(
   await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind('free', ts, userId).run()
 }
 
+// ─── Webhook debug ──────────────────────────────────────────────────────────────
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const eventId = searchParams.get('eventId')
+  if (!eventId) return json({ error: 'eventId required' }, 400)
+  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: Record<string, string | undefined> & { DB: DbClient } }
+  const db = env.DB
+  if (!db) return json({ error: 'DB not configured' }, 500)
+
+  // Try to read raw payload stored for this event
+  const row = await db.prepare(
+    'SELECT event_type, payload FROM webhook_debug WHERE event_id = ?'
+  ).bind(eventId).first<{ event_type: string; payload: string }>()
+  if (!row) return json({ error: 'not_found' }, 404)
+
+  const payload = JSON.parse(row.payload)
+  const object = webhookObject(payload)
+  const productId = webhookProductId(object)
+  const userId = webhookUserId(object)
+  const plan = webhookPlan(object, env as Record<string, string | undefined>)
+  const transactionId = webhookTransactionId(object)
+
+  return json({ eventId, eventType: row.event_type, productId, userId, plan, transactionId, objectKeys: Object.keys(object) })
+}
+
 // ─── Main webhook handler ─────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
   try {
@@ -374,6 +399,9 @@ export async function POST(request: NextRequest) {
 
     const object = webhookObject(payload)
     const userId = webhookUserId(object)
+    const productId = webhookProductId(object)
+    const plan = webhookPlan(object, env as Record<string, string | undefined>)
+    console.log('WEBHOOK_DEBUG', JSON.stringify({ eventId, eventType, userId, productId, plan, objectKeys: Object.keys(object) }))
 
     if (userId) {
       await recordPurchase(db, userId, object, eventType, env)
