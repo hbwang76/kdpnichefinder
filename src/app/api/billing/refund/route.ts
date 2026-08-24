@@ -51,45 +51,9 @@ export async function POST(request: NextRequest) {
     }, { status: 503 })
   }
 
-  // Step 1: Try to get transaction ID from Order API
-  let paymentId: string | null = null
-  let orderStatus = 0
-  let checkoutIdFallback: string | null = null
-
-  const orderRes = await fetch(`${apiBase}/v1/orders/${encodeURIComponent(creemOrderId)}`, {
-    method: 'GET',
-    headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-  })
-
-  if (orderRes.ok) {
-    const orderData = await orderRes.json() as Record<string, unknown>
-    orderStatus = orderRes.status
-    paymentId = (orderData.payment_id as string)
-      ?? (orderData.transaction_id as string)
-      ?? (orderData.last_transaction_id as string)
-      ?? (orderData.id as string)
-      ?? null
-    console.log('REFUND_DEBUG order lookup', { status: orderRes.status, orderId: creemOrderId, paymentId, orderKeys: Object.keys(orderData) })
-  } else {
-    const errText = await orderRes.text().catch(() => '')
-    console.log('REFUND_DEBUG order lookup failed', { status: orderRes.status, err: errText.slice(0, 100) })
-    // Test mode Order API sometimes returns 500. Fall back to checkout_id for refund.
-    checkoutIdFallback = creemOrderId // creemOrderId is stored as checkout_id in one-time purchases
-  }
-
-  // Step 2: Get checkout_id from credit_packs if we need checkout fallback
-  let refundByCheckout = false
-  if (!paymentId) {
-    const packLookup = await db.prepare(
-      'SELECT gateway_checkout_id FROM credit_packs WHERE creem_order_id = ? AND user_id = ?'
-    ).bind(creemOrderId, session.user_id).first<{ gateway_checkout_id: string | null }>()
-    if (packLookup?.gateway_checkout_id) {
-      refundByCheckout = true
-    }
-  }
-
-  // Step 3: Refund using payment ID, checkout ID, or order ID
-  const refundTransactionId = paymentId ?? (refundByCheckout ? (await db.prepare('SELECT gateway_checkout_id FROM credit_packs WHERE creem_order_id = ?').bind(creemOrderId).first<{ gateway_checkout_id: string }>())?.gateway_checkout_id : null) ?? creemOrderId
+  // creemOrderId is now stored as gateway_payment_id (tran_...) since fix
+  // Use it directly for refund
+  const refundTransactionId = creemOrderId
   const refundRes = await fetch(`${apiBase}/v1/refunds`, {
     method: 'POST',
     headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
@@ -98,7 +62,7 @@ export async function POST(request: NextRequest) {
 
   const refundStatus = refundRes.status
   const refundBody = await refundRes.text().catch(() => '')
-  console.log('REFUND_DEBUG refund response', { status: refundStatus, transactionId: refundTransactionId, body: refundBody.slice(0, 200) })
+  console.log('REFUND_DEBUG', { status: refundStatus, transactionId: refundTransactionId, body: refundBody.slice(0, 300) })
 
   if (refundRes.ok) {
     // Creem refunded — deduct credits locally
