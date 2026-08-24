@@ -145,6 +145,7 @@ function webhookTransactionId(object: Record<string, unknown>): string {
     ?? asString(object.last_transaction_id)
     ?? asString(order.transaction_id)
     ?? asString(transaction.id)
+    ?? asString(order.id)       // checkout.completed: object.order.id → checkout ID, before event ID
     ?? asString(object.id)
     ?? id()
 }
@@ -438,7 +439,20 @@ export async function POST(request: NextRequest) {
     // Mark processed
     await db.prepare('UPDATE webhook_events SET processed_at = ? WHERE id = ?').bind(now(), eventId).run()
 
-    return json({ ok: true, eventType, userId })
+    return json({
+      ok: true,
+      eventType,
+      userId,
+      productId,
+      plan,
+      productIdEnvCheck: productId ? {
+        productId,
+        CREDIT_STANDARD_PRODUCT_ID: env.CREEM_CREDIT_STANDARD_PRODUCT_ID,
+        CREDIT_MINI_PRODUCT_ID: env.CREEM_CREDIT_MINI_PRODUCT_ID,
+        CREDIT_LARGER_PRODUCT_ID: env.CREEM_CREDIT_LARGER_PRODUCT_ID,
+        PRO_MONTHLY_PRODUCT_ID: env.CREEM_PRO_MONTHLY_PRODUCT_ID,
+      } : null,
+    })
   } catch (err) {
     console.error('Webhook handler error:', err)
     // Return 200 so Creem doesn't retry
