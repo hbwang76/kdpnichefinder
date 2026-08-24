@@ -223,6 +223,17 @@ async function recordPurchase(
   const config = BILLING_PLANS[plan]
   const creditsGranted = config.creditsGranted ?? 0
   const purchaseId = webhookTransactionId(object)
+  const order = asRecord(object.order)
+  console.log('CREDIT_PACK_PURCHASE', JSON.stringify({
+    eventType,
+    plan,
+    creditsGranted,
+    transactionId: purchaseId,
+    orderId: order?.id,
+    orderTransaction: order?.transaction,
+    orderPaymentTransactions: order?.payment_transactions,
+    objectKeys: Object.keys(object),
+  }))
   const customerId = asString((object.customer as Record<string, unknown>)?.id)
   const checkoutId = asString((object.checkout as Record<string, unknown>)?.id)
     ?? asString((object as Record<string, unknown>).checkout_id)
