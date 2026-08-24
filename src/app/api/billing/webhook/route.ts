@@ -25,7 +25,7 @@ const BILLING_PLANS: Record<BillingPlan, BillingPlanConfig> = {
   credit_larger:    { productEnvs: ['CREEM_CREDIT_LARGER_PRODUCT_ID'],    plan: 'free',    billingInterval: null,    pricingModel: 'one_time_credits', creditsGranted: 270 },
 }
 
-const GRANT_EVENTS   = new Set(['checkout.completed', 'subscription.active', 'subscription.trialing', 'subscription.paid'])
+const GRANT_EVENTS   = new Set(['checkout.completed', 'subscription.paid'])
 const REVOKE_EVENTS  = new Set(['subscription.canceled', 'subscription.expired', 'subscription.paused', 'refund.created', 'refund.completed'])
 const REFUND_EVENTS  = new Set(['refund.created', 'refund.completed'])
 
@@ -207,28 +207,58 @@ async function recordPurchase(
   const currency = webhookCurrency(object)
   const ts = now()
 
-  // Upsert subscription for subscription events
+  // ── checkout.completed → one-time credit packs only, no subscription record ──
+  // ── subscription.paid    → subscription record + optional credit pack ───────
+
   if (eventType === 'subscription.paid') {
-    const subscription = asRecord(object.subscription ?? object)
-    const subscriptionId = asString(subscription.id) ?? asString((object as Record<string, unknown>).subscription_id)
+    const sub = asRecord(object.subscription ?? object)
+    const subscriptionId = asString(sub.id) ?? asString((object as Record<string, unknown>).subscription_id)
+    const periodStart = asString(sub.current_period_start_date) ?? asString(sub.current_period_start) ?? String(ts)
+    const periodEnd   = asString(sub.current_period_end_date)   ?? asString(sub.current_period_end)   ?? String(ts)
+
     if (subscriptionId) {
       await db.prepare(`
         INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at)
         VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?)
         ON CONFLICT(creem_subscription_id) DO UPDATE SET
-          status = excluded.status, plan = excluded.plan,
+          plan = excluded.plan, status = excluded.status,
           current_period_end = excluded.current_period_end, updated_at = excluded.updated_at
       `).bind(
         id(), userId, config.plan,
         subscriptionId,
-        ts, asString(subscription.current_period_start_date) ?? ts,
-        asString(subscription.current_period_end_date) ?? ts,
+        Number(periodStart), Number(periodEnd),
         ts, ts
       ).run()
     }
+
+    // subscription.paid may unlock subscription plan access
+    if (config.pricingModel === 'subscription') {
+      await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?')
+        .bind(config.plan, ts, userId).run()
+    }
+
+    // subscription.paid may also grant credits on some plans
+    if (config.pricingModel === 'one_time_credits' && creditsGranted > 0) {
+      await db.prepare(`
+        INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at)
+        VALUES (?, ?, ?, ?, 'active', ?)
+        ON CONFLICT(creem_order_id) DO NOTHING
+      `).bind(id(), userId, purchaseId, creditsGranted, ts).run()
+
+      const ledgerRow = await db.prepare(
+        'SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?'
+      ).bind(userId).first<{ balance: number }>()
+      const newBalance = (ledgerRow?.balance ?? 0) + creditsGranted
+      await db.prepare(`
+        INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at)
+        VALUES (?, ?, ?, ?, 'purchase', ?, ?)
+      `).bind(id(), userId, creditsGranted, newBalance, purchaseId, ts).run()
+    }
+
+    return
   }
 
-  // Record credit pack purchase
+  // checkout.completed → one-time credit packs only
   if (config.pricingModel === 'one_time_credits' && creditsGranted > 0) {
     await db.prepare(`
       INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at)
@@ -245,27 +275,6 @@ async function recordPurchase(
       INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at)
       VALUES (?, ?, ?, ?, 'purchase', ?, ?)
     `).bind(id(), userId, creditsGranted, newBalance, purchaseId, ts).run()
-  }
-
-  // Grant subscription access for subscription plans
-  if (config.pricingModel === 'subscription') {
-    const sub = asRecord(object.subscription ?? object)
-    const subscriptionId = asString(sub.id) ?? asString((object as Record<string, unknown>).subscription_id)
-    const periodStart = asString(sub.current_period_start_date) ?? asString(sub.current_period_start) ?? String(ts)
-    const periodEnd = asString(sub.current_period_end_date) ?? asString(sub.current_period_end) ?? String(ts)
-
-    if (subscriptionId) {
-      await db.prepare(`
-        INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at)
-        VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?)
-        ON CONFLICT(creem_subscription_id) DO UPDATE SET
-          plan = excluded.plan, status = excluded.status,
-          current_period_end = excluded.current_period_end, updated_at = excluded.updated_at
-      `).bind(id(), userId, config.plan, subscriptionId, Number(periodStart), Number(periodEnd), ts, ts).run()
-    }
-
-    // Update user plan
-    await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind(config.plan, ts, userId).run()
   }
 }
 
@@ -366,18 +375,6 @@ export async function POST(request: NextRequest) {
       await recordPurchase(db, userId, object, eventType, env)
       await handleRefund(db, userId, object, eventType)
       await revokeAccess(db, userId, object, eventType)
-
-      // Grant/revoke subscription plan for subscription events
-      if (GRANT_EVENTS.has(eventType)) {
-        const plan = webhookPlan(object, env)
-        if (plan) {
-          const config = BILLING_PLANS[plan]
-          if (config.pricingModel === 'subscription') {
-            await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?')
-              .bind(config.plan, now(), userId).run()
-          }
-        }
-      }
     }
 
     // Mark processed
