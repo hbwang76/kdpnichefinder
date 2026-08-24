@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   return new NextResponse(null, {
     status: 302,
     headers: {
-      location: '/account',
+      location: '/login',
       'Set-Cookie': clearCookie('session_id'),
     },
   })
