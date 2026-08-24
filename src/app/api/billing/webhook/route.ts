@@ -56,20 +56,25 @@ interface CreemWebhookPayload {
 
 // Extract the checkout/subscription object from the payload
 function webhookObject(payload: CreemWebhookPayload): Record<string, unknown> {
-  return asRecord(payload.object || payload.data)
+  const obj = asRecord(payload.object || payload.data)
+  // Also try top-level for test mode webhooks that flatten the structure
+  if (obj && Object.keys(obj).length === 0) {
+    return payload as Record<string, unknown>
+  }
+  return obj
 }
 
 // Merge metadata from all possible locations (Creem nests it in different places)
 function webhookMetadata(object: Record<string, unknown>): Record<string, unknown> {
-  const order       = asRecord(object.order)
+  const order        = asRecord(object.order)
   const subscription = asRecord(object.subscription)
-  const checkout    = asRecord(object.checkout)
+  const checkout     = asRecord(object.checkout)
   const customer     = asRecord(object.customer)
   return {
-    ...asRecord(checkout.metadata),
-    ...asRecord(customer.metadata),
-    ...asRecord(order.metadata),
-    ...asRecord(subscription.metadata),
+    ...asRecord(checkout?.metadata),
+    ...asRecord(customer?.metadata),
+    ...asRecord(order?.metadata),
+    ...asRecord(subscription?.metadata),
     ...asRecord(object.metadata),
   }
 }
@@ -77,10 +82,13 @@ function webhookMetadata(object: Record<string, unknown>): Record<string, unknow
 // Get userId from metadata.referenceId (set at checkout creation)
 function webhookUserId(object: Record<string, unknown>): string | undefined {
   const metadata = webhookMetadata(object)
-  return asString(metadata.referenceId) || asString(metadata.user_id) || asString(object.user_id)
+  return asString(metadata.referenceId)
+    || asString(metadata.user_id)
+    || asString(object.user_id)
+    || asString(asRecord(object.customer)?.id) // fallback: use customer ID as user ID
 }
 
-// Get product ID from nested product object or flat fields
+// Get product ID from various possible locations
 function webhookProductId(object: Record<string, unknown>): string | undefined {
   const product = asRecord(object.product)
   if (product?.id) return asString(product.id)
@@ -91,8 +99,12 @@ function webhookProductId(object: Record<string, unknown>): string | undefined {
   if (typeof subProduct === 'string') return subProduct
   if (subProduct && typeof subProduct === 'object') return asString((subProduct as Record<string, unknown>).id)
 
-  // Fallback to flat fields
+  // Fallback to flat fields — common in test mode webhooks
   return asString(object.product_id)
+    ?? asString(object.productId)
+    ?? asString((object as Record<string, unknown>).product_id)
+    ?? asString(asRecord(object.checkout)?.product_id)
+    ?? asString(asRecord(object.order)?.product_id)
     ?? (subscription as Record<string, unknown>)?.product_id as string | undefined
     ?? (subscription?.items as Array<{ product_id?: string }>)?.[0]?.product_id
     ?? asString((object.metadata as Record<string, unknown>)?.product_id)
@@ -105,14 +117,22 @@ function webhookPlan(object: Record<string, unknown>, env: Record<string, string
   if (checkoutPlan) return checkoutPlan
 
   const productId = webhookProductId(object)
+
   if (productId) {
     for (const [plan, config] of Object.entries(BILLING_PLANS)) {
       for (const envKey of config.productEnvs) {
-        const envVal = (env as Record<string, string | undefined>)[envKey]
+        const envVal = env[envKey]
         if (envVal && productId === envVal) return plan as BillingPlan
+      }
+      // Fallback: also check PRICE_ID variants if nothing matched yet
+      for (const envKey of config.productEnvs) {
+        const priceKey = envKey.replace('_PRODUCT_ID', '_PRICE_ID')
+        const priceVal = env[priceKey]
+        if (priceVal && productId === priceVal) return plan as BillingPlan
       }
     }
   }
+
   return null
 }
 
