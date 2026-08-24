@@ -145,8 +145,8 @@ function webhookTransactionId(object: Record<string, unknown>): string {
     ?? asString(object.last_transaction_id)
     ?? asString(order.transaction_id)
     ?? asString(transaction.id)
-    ?? asString(order.id)       // checkout.completed: object.order.id → checkout ID, before event ID
-    ?? asString(object.id)
+    ?? asString(order.id)       // checkout.completed: object.order.id = order ID (ord_...)
+    ?? asString(object.id)      // event ID (evt_...) — last because not useful for refund
     ?? id()
 }
 
