@@ -226,7 +226,8 @@ async function recordPurchase(
       `).bind(
         id(), userId, config.plan,
         subscriptionId,
-        Number(periodStart), Number(periodEnd),
+        sub.current_period_start_date ?? sub.current_period_start ?? String(ts),
+        sub.current_period_end_date   ?? sub.current_period_end   ?? String(ts),
         ts, ts
       ).run()
     }
