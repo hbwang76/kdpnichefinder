@@ -16,19 +16,9 @@ async function getSessionUser(db: DbClient, request: NextRequest): Promise<Check
   return session || null
 }
 
-function getDb(): DbClient {
-  const ctx = getCloudflareContext() as unknown as { env: { DB: DbClient } }
-  if (!ctx.env.DB) throw new Error('DB not bound')
-  return ctx.env.DB
-}
-
 export async function POST(request: NextRequest) {
-  let db: DbClient
-  try {
-    db = getDb()
-  } catch (e) {
-    return NextResponse.json({ error: 'context_error', detail: String(e) }, { status: 500 })
-  }
+  const { env } = await getCloudflareContext({ async: true }) as unknown as { env: Record<string, string | undefined> & { DB: DbClient } }
+  const db = env.DB
   if (!db) return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
 
   const user = await getSessionUser(db, request)
@@ -38,32 +28,31 @@ export async function POST(request: NextRequest) {
   const plan = body.plan
 
   const productIdMap: Record<string, string | undefined> = {
-    starter_monthly: process.env.CREEM_STARTER_MONTHLY_PRODUCT_ID,
-    starter_yearly: process.env.CREEM_STARTER_YEARLY_PRODUCT_ID,
-    pro_monthly: process.env.CREEM_PRO_MONTHLY_PRODUCT_ID,
-    pro_yearly: process.env.CREEM_PRO_YEARLY_PRODUCT_ID,
-    credit_mini: process.env.CREEM_CREDIT_MINI_PRODUCT_ID,
-    credit_standard: process.env.CREEM_CREDIT_STANDARD_PRODUCT_ID,
-    credit_large: process.env.CREEM_CREDIT_LARGER_PRODUCT_ID,
+    starter_monthly: env.CREEM_STARTER_MONTHLY_PRODUCT_ID,
+    starter_yearly: env.CREEM_STARTER_YEARLY_PRODUCT_ID,
+    pro_monthly: env.CREEM_PRO_MONTHLY_PRODUCT_ID,
+    pro_yearly: env.CREEM_PRO_YEARLY_PRODUCT_ID,
+    credit_mini: env.CREEM_CREDIT_MINI_PRODUCT_ID,
+    credit_standard: env.CREEM_CREDIT_STANDARD_PRODUCT_ID,
+    credit_large: env.CREEM_CREDIT_LARGER_PRODUCT_ID,
     // aliases for frontend
-    starter_annual: process.env.CREEM_STARTER_YEARLY_PRODUCT_ID,
-    pro_annual: process.env.CREEM_PRO_YEARLY_PRODUCT_ID,
+    starter_annual: env.CREEM_STARTER_YEARLY_PRODUCT_ID,
+    pro_annual: env.CREEM_PRO_YEARLY_PRODUCT_ID,
   }
-  const validPlans = Object.keys(productIdMap)
   const productId = productIdMap[plan]
   if (!productId) return NextResponse.json({ error: 'plan not configured' }, { status: 503 })
 
-  const isTestMode = process.env.CREEM_TEST_MODE === 'true'
-  const apiBase = isTestMode ? 'https://test-api.creem.io' : (process.env.CREEM_API_BASE || 'https://api.creem.io')
-  const appOrigin = process.env.APP_ORIGIN || 'https://kdpnichefinder.net'
-  const apiKey = process.env.CREEM_API_KEY
+  const isTestMode = env.CREEM_TEST_MODE === 'true'
+  const apiBase = isTestMode ? 'https://test-api.creem.io' : (env.CREEM_API_BASE || 'https://api.creem.io')
+  const appOrigin = env.APP_ORIGIN || 'https://kdpnichefinder.net'
+  const apiKey = env.CREEM_API_KEY
 
   if (!apiKey) return NextResponse.json({ error: 'creem_api_key_missing', env_test_mode: isTestMode, api_base: apiBase }, { status: 500 })
 
   const checkoutRes = await fetch(`${apiBase}/v1/checkouts`, {
     method: 'POST',
     headers: {
-      'x-api-key': process.env.CREEM_API_KEY!,
+      'x-api-key': apiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
