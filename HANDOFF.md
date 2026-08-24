@@ -93,9 +93,9 @@ backend/
 
 #### 必须读取
 - 本文件（交接摘要）
-- `backend/src/index.ts`（API 实现）
-- `backend/migrations/0001_initial.sql`（D1 schema）
-- `backend/wrangler.jsonc`（env vars 名称）
+- `src/app/api/`（API 实现，已合并为 Next.js API Routes 单体架构）
+- `migrations/0001_initial.sql`（D1 schema）
+- `wrangler.jsonc`（D1 binding + env vars 名称）
 
 #### 不能假设
 - 不能在前端存储或发送 user plan / credits / entitlements（全部从 `/api/auth/me` 和 `/api/credits/balance` 获取）
