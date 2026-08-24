@@ -51,19 +51,19 @@ export async function POST(request: NextRequest) {
     }, { status: 503 })
   }
 
-  // Step 1: Get the order to find the payment/transaction ID
+  // Step 1: Try to get transaction ID from Order API
+  let paymentId: string | null = null
+  let orderStatus = 0
+  let checkoutIdFallback: string | null = null
+
   const orderRes = await fetch(`${apiBase}/v1/orders/${encodeURIComponent(creemOrderId)}`, {
     method: 'GET',
     headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
   })
 
-  let paymentId: string | null = null
-  let orderStatus = 0
-
   if (orderRes.ok) {
     const orderData = await orderRes.json() as Record<string, unknown>
     orderStatus = orderRes.status
-    // Try various payment/transaction ID field names
     paymentId = (orderData.payment_id as string)
       ?? (orderData.transaction_id as string)
       ?? (orderData.last_transaction_id as string)
@@ -73,10 +73,23 @@ export async function POST(request: NextRequest) {
   } else {
     const errText = await orderRes.text().catch(() => '')
     console.log('REFUND_DEBUG order lookup failed', { status: orderRes.status, err: errText.slice(0, 100) })
+    // Test mode Order API sometimes returns 500. Fall back to checkout_id for refund.
+    checkoutIdFallback = creemOrderId // creemOrderId is stored as checkout_id in one-time purchases
   }
 
-  // Step 2: Refund using payment ID (or order ID as fallback)
-  const refundTransactionId = paymentId ?? creemOrderId
+  // Step 2: Get checkout_id from credit_packs if we need checkout fallback
+  let refundByCheckout = false
+  if (!paymentId) {
+    const packLookup = await db.prepare(
+      'SELECT gateway_checkout_id FROM credit_packs WHERE creem_order_id = ? AND user_id = ?'
+    ).bind(creemOrderId, session.user_id).first<{ gateway_checkout_id: string | null }>()
+    if (packLookup?.gateway_checkout_id) {
+      refundByCheckout = true
+    }
+  }
+
+  // Step 3: Refund using payment ID, checkout ID, or order ID
+  const refundTransactionId = paymentId ?? (refundByCheckout ? (await db.prepare('SELECT gateway_checkout_id FROM credit_packs WHERE creem_order_id = ?').bind(creemOrderId).first<{ gateway_checkout_id: string }>())?.gateway_checkout_id : null) ?? creemOrderId
   const refundRes = await fetch(`${apiBase}/v1/refunds`, {
     method: 'POST',
     headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },

@@ -288,10 +288,10 @@ async function recordPurchase(
   // checkout.completed → one-time credit packs only
   if (config.pricingModel === 'one_time_credits' && creditsGranted > 0) {
     await db.prepare(`
-      INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at)
-      VALUES (?, ?, ?, ?, 'active', ?)
+      INSERT INTO credit_packs (id, user_id, creem_order_id, gateway_checkout_id, credits, status, purchased_at)
+      VALUES (?, ?, ?, ?, ?, 'active', ?)
       ON CONFLICT(creem_order_id) DO NOTHING
-    `).bind(id(), userId, purchaseId, creditsGranted, ts).run()
+    `).bind(id(), userId, purchaseId, checkoutId, creditsGranted, ts).run()
 
     // Update ledger
     const ledgerRow = await db.prepare(
