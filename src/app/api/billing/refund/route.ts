@@ -39,19 +39,25 @@ export async function POST(request: NextRequest) {
 
   const creditsToRefund = pack.credits
 
-  // Get Creem API key (use TEST mode base if key starts with creem_test_)
+  // Get Creem API key (use TEST mode base if starts with creem_test_)
   const apiKey = env.CREEM_API_KEY ?? ''
   const isTestMode = env.CREEM_TEST_MODE === 'true'
   const apiBase = isTestMode ? 'https://test-api.creem.io' : (env.CREEM_API_BASE ?? 'https://api.creem.io')
+  console.log('REFUND_DEBUG', JSON.stringify({ isTestMode, apiBase, apiKeyPrefix: apiKey.slice(0, 12), creemOrderId }))
 
   // Call Creem refund API — POST /v1/refunds with transaction_id
   // Only deduct credits AFTER Creem succeeds; otherwise user must go to Creem Dashboard
   if (apiKey) {
-    const refundRes = await fetch(`${apiBase}/v1/refunds`, {
+    const refundUrl = `${apiBase}/v1/refunds`
+    console.log('REFUND_DEBUG fetch', refundUrl, { transaction_id: creemOrderId })
+    const refundRes = await fetch(refundUrl, {
       method: 'POST',
       headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({ transaction_id: creemOrderId }),
     })
+    const status = refundRes.status
+    const bodyText = await refundRes.text().catch(() => '')
+    console.log('REFUND_DEBUG response', status, bodyText.slice(0, 200))
 
     if (refundRes.ok) {
       // Creem refunded successfully — now deduct credits locally
