@@ -83,15 +83,17 @@ export default function AccountContent() {
       const r = await fetch('/api/billing/refund', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ creemOrderId: refundPack.creem_order_id, amount: refundPack.credits, reason: refundReason }),
+        body: JSON.stringify({ creemOrderId: refundPack.creem_order_id, reason: refundReason }),
       })
       const data = await r.json()
       if (data.ok) {
         setCreditPacks(packs => packs.map(p => p.id === refundPack.id ? { ...p, status: 'refunded' } : p))
-        setCredits(c => (c ?? 0) - refundPack.credits)
+        setCredits(c => (c ?? 0) - (data.creditsDeducted ?? refundPack.credits))
         setShowRefundModal(false)
         setRefundPack(null)
         setRefundReason('')
+      } else if (data.error === 'refund_via_dashboard') {
+        alert('Refunds must be requested through Creem directly. Please visit your Creem customer portal or email support@kdpnichefinder.net. Your credits will be restored automatically once the refund is processed.')
       } else {
         alert('Refund failed: ' + (data.error ?? 'Unknown error'))
       }
