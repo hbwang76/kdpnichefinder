@@ -35,8 +35,7 @@ export async function POST(request: NextRequest) {
   const ts = now()
   await db.prepare('UPDATE subscriptions SET status = ?, cancel_at_period_end = 1, updated_at = ? WHERE id = ?')
     .bind('canceled', ts, subscription.id).run()
-  await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?')
-    .bind('free', ts, session.user_id).run()
+  // NOTE: user plan stays unchanged — downgrade happens only on subscription.expired or user-initiated refund
 
   return NextResponse.json({ ok: true, creemCanceled, canceledAt: ts, periodEnd: subscription.current_period_end })
 }

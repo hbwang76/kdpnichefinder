@@ -36,6 +36,7 @@ export default function AccountContent() {
   const [showRefundModal, setShowRefundModal] = useState(false)
   const [refundPack, setRefundPack] = useState<CreditPack | null>(null)
   const [refundReason, setRefundReason] = useState('')
+  const [showSubRefundModal, setShowSubRefundModal] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
@@ -67,7 +68,6 @@ export default function AccountContent() {
       const data = await r.json()
       if (data.ok) {
         setSubscription(s => s ? { ...s, status: 'canceled', cancel_at_period_end: 1 } : null)
-        setUser(u => u ? { ...u, plan: 'free' } : null)
       } else {
         alert('Failed to cancel: ' + (data.error ?? 'Unknown error'))
       }
@@ -94,6 +94,26 @@ export default function AccountContent() {
         setRefundReason('')
       } else if (data.error === 'refund_via_dashboard') {
         alert('Refunds must be requested through Creem directly. Please visit your Creem customer portal or email support@kdpnichefinder.net. Your credits will be restored automatically once the refund is processed.')
+      } else {
+        alert('Refund failed: ' + (data.detail ?? data.error ?? 'Unknown error'))
+      }
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  async function handleSubscriptionRefund() {
+    setActionLoading(true)
+    try {
+      const r = await fetch('/api/billing/subscription-refund', { method: 'POST' })
+      const data = await r.json()
+      if (data.ok) {
+        setUser(u => u ? { ...u, plan: 'free' } : null)
+        setSubscription(null)
+        setCredits(c => (c ?? 0) - (data.creditsReclaimed ?? 0))
+        setShowSubRefundModal(false)
+      } else if (data.error === 'subscription_used') {
+        alert('Subscription refunds are only available if you have not used your subscription. Please contact support@kdpnichefinder.net for assistance.')
       } else {
         alert('Refund failed: ' + (data.detail ?? data.error ?? 'Unknown error'))
       }
@@ -149,6 +169,39 @@ export default function AccountContent() {
 
   return (
     <>
+      {showSubRefundModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+        }}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 16, padding: 32, maxWidth: 440, width: '100%' }}>
+            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>Refund Subscription</h2>
+            <p style={{ color: 'var(--color-ink-2)', fontSize: '0.875rem', marginBottom: 20 }}>
+              Your subscription will be canceled and you will be downgraded to the free plan. Credits remaining will be removed. This cannot be undone.
+            </p>
+            <p style={{ color: 'var(--color-ink-2)', fontSize: '0.8rem', marginBottom: 20 }}>
+              <strong>Note:</strong> Subscriptions that have been used are not eligible for refunds.
+            </p>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => setShowSubRefundModal(false)}
+                disabled={actionLoading}
+                style={{ flex: 1, padding: '10px', borderRadius: 8, border: '1px solid var(--color-border)', background: 'var(--color-surface)', color: 'var(--color-ink)', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubscriptionRefund}
+                disabled={actionLoading}
+                style={{ flex: 1, padding: '10px', borderRadius: 8, border: 'none', background: '#ef4444', color: 'white', fontWeight: 600, cursor: 'pointer' }}
+              >
+                {actionLoading ? 'Processing...' : 'Confirm Refund'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showRefundModal && refundPack && (
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,
@@ -232,6 +285,20 @@ export default function AccountContent() {
                   }}
                 >
                   {actionLoading ? 'Processing...' : 'Cancel Subscription'}
+                </button>
+              )}
+              {(isStarter || isPro) && !isCanceled && (
+                <button
+                  onClick={() => setShowSubRefundModal(true)}
+                  disabled={actionLoading}
+                  style={{
+                    display: 'block', marginTop: 8, width: '100%', background: 'var(--color-surface)', color: '#ef4444',
+                    padding: '10px 20px', borderRadius: 10, fontWeight: 600,
+                    textDecoration: 'none', textAlign: 'center', fontSize: '0.875rem',
+                    border: '2px solid #ef4444', cursor: 'pointer',
+                  }}
+                >
+                  Refund Subscription
                 </button>
               )}
               {isCanceled && periodEnd && (
