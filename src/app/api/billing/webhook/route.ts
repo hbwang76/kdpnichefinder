@@ -360,12 +360,13 @@ async function handleRefund(
 
   if (!orderId && !subscriptionId) return
 
-  // Find the original credit pack — creem_order_id may be tran_... (new) or ord_... (old)
-  // Also check gateway_checkout_id as fallback, and subscription_id for subscription refunds
+  // Find the original credit pack — creem_order_id may be sub_xxx (subscription) or ord_xxx/tran_xxx (checkout)
+  // Also match by creem_transaction_id (tran_xxx) which is stored in subscription refunds
+  const transactionId = webhookTransactionId(object)
   const pack = await db.prepare(`
     SELECT id, user_id, credits, status FROM credit_packs
-    WHERE creem_order_id = ? OR gateway_checkout_id = ? OR creem_order_id = ?
-  `).bind(orderId ?? '', orderId ?? '', subscriptionId ?? '').first<{ id: string; user_id: string; credits: number; status: string }>()
+    WHERE creem_order_id = ? OR gateway_checkout_id = ? OR creem_order_id = ? OR creem_transaction_id = ?
+  `).bind(orderId ?? '', orderId ?? '', subscriptionId ?? '', transactionId ?? '').first<{ id: string; user_id: string; credits: number; status: string }>()
 
   if (!pack || pack.status === 'refunded') return
 
