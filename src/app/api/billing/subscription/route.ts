@@ -16,9 +16,10 @@ export async function GET(request: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const subscription = await db.prepare(
-    'SELECT id, plan, status, current_period_start, current_period_end, cancel_at_period_end, creem_subscription_id FROM subscriptions WHERE user_id = ? AND status != ? ORDER BY created_at DESC LIMIT 1'
+    'SELECT id, plan, status, current_period_start, current_period_end, cancel_at_period_end, creem_subscription_id, last_payment_amount_cents, last_payment_net_cents, last_payment_currency FROM subscriptions WHERE user_id = ? AND status != ? ORDER BY created_at DESC LIMIT 1'
   ).bind(session.user_id, 'free').first<{
     id: string; plan: string; status: string; current_period_start: string | null; current_period_end: string | null; cancel_at_period_end: number; creem_subscription_id: string
+    last_payment_amount_cents: number | null; last_payment_net_cents: number | null; last_payment_currency: string | null
   }>()
 
   return NextResponse.json({ subscription })

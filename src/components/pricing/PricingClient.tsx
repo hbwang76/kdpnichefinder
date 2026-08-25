@@ -343,7 +343,7 @@ export function PricingClient() {
             <ul style={{ fontSize: '0.875rem', color: 'var(--color-ink-2)', display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 20, listStyle: 'disc' }}>
               <li><strong>7-day refund window.</strong> New Starter and Pro subscriptions can be canceled within 7 days for a <strong>net refund</strong> (the actual amount paid minus any platform/payment-processor fees retained by Creem). See our refund policy.</li>
               <li><strong>Cancel anytime.</strong> Cancel from your account page — no email or phone call required. Your subscription stays active until the end of the current billing period.</li>
-              <li><strong>Credit Packs are non-refundable once any credits have been used.</strong> Unused Credit Packs can be refunded within 14 days of purchase.</li>
+              <li><strong>Credit Packs are non-refundable once any credits have been used.</strong> Unused Credit Packs can be refunded within 7 days of purchase.</li>
               <li><strong>30-day notice for price changes.</strong> If we change pricing, we'll email you at least 30 days before the change applies to your subscription.</li>
             </ul>
           </div>
