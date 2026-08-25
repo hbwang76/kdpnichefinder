@@ -196,11 +196,20 @@ export function HomeClient() {
 
           {/* Left col */}
           <div className="flex flex-col gap-5">
+            {/* Tag line */}
+            <div className="flex items-center gap-2">
+              <span className="bg-signal/10 text-signal font-mono text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-widest">
+                KDP 作者专用
+              </span>
+            </div>
+
             <h1 className="font-display text-4xl md:text-[3.5rem] font-bold text-ink leading-[1.05] tracking-tight">
-              Find your next profitable KDP niche in almost 30 seconds.
+              写书前先查这个，
+              <br />
+              <span className="text-signal">30 秒知道值不值得写。</span>
             </h1>
             <p className="font-body text-lg text-ink/75 leading-relaxed">
-              Niche research that actually tells you what to write next. Free to try.
+              写下你的图书主题，我们告诉你：这个细分市场竞争大不大、能卖多少、第一件事做什么。
             </p>
             <form onSubmit={handleSearch} className="flex flex-col gap-3">
               <div className="bg-white rounded-card border border-border flex items-center gap-2 px-4 py-1 card-shadow focus-within:border-signal focus-within:outline focus-within:outline-2 focus-within:outline-signal focus-within:outline-offset-2 transition-colors">
@@ -212,7 +221,7 @@ export function HomeClient() {
                   type="text"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="e.g. adhd planner, low content journal, children's coloring book"
+                  placeholder="写下任意主题，例如：ADHD planner、露营手册、儿童填色书……"
                   className="w-full h-14 bg-transparent text-ink placeholder:text-ink-3 font-body text-base border-none outline-none"
                 />
               </div>
@@ -241,27 +250,62 @@ export function HomeClient() {
             </div>
           </div>
 
-          {/* Right col — illustration only (Niche #1 moved to result strip) */}
-          <div className="flex flex-col gap-2 relative">
-            <div className="rounded-card overflow-hidden border border-border bg-white relative z-20 card-shadow">
-              <img
-                src="/assets/hero-illustration.webp"
-                alt="KDP niche research — books with signal radar and data gauges"
-                className="w-full block"
-                style={{ height: '240px', objectFit: 'cover' }}
-              />
-              <span
-                className="absolute top-3 right-3 bg-white/95 border border-border rounded-sm px-2 py-1 font-mono text-[11px] text-pine uppercase tracking-wider z-30"
-                style={{ fontFamily: 'var(--font-mono)' }}
-              >
-                Score 82 · Top pick
-              </span>
+          {/* Right col — LIVE result preview */}
+          <div className="flex flex-col gap-2">
+            {/* Input → result flow hint */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="bg-signal text-white font-mono text-[11px] font-bold px-2 py-1 rounded">1</span>
+              <span className="text-ink/50 text-sm font-body">输入 "ADHD planner"</span>
+              <span className="text-signal mx-1">→</span>
+              <span className="bg-pine/10 text-pine font-mono text-[11px] font-bold px-2 py-1 rounded">2</span>
+              <span className="text-ink/50 text-sm font-body">获得结果</span>
             </div>
-            {/* mono caption bar below illustration */}
-            <div className="flex items-center justify-between px-3 py-2 font-mono text-[11px] text-ink-3 uppercase tracking-widest">
-              <span>Live sample · ADHD Daily Planner</span>
-              <span>BSR 8k-25k · Comp: Low</span>
+
+            {/* Sample result card */}
+            <div className="rounded-card overflow-hidden border-2 border-signal/40 bg-white relative z-20 card-shadow">
+              <div className="bg-signal text-white font-mono text-[11px] font-bold px-3 py-2 flex items-center justify-between">
+                <span>§ 真实结果示例</span>
+                <span className="bg-white/20 text-white px-2 py-0.5 rounded text-[10px]">约 30 秒生成</span>
+              </div>
+              <div className="p-5">
+                {/* Niche name + score */}
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <span className="bg-amber/10 text-amber font-mono text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest">Niche #1</span>
+                    <h3 className="font-display text-lg font-bold text-ink mt-1">ADHD Daily Planner for College Students</h3>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 rounded-full border-4 border-pine flex items-center justify-center" style={{ borderColor: '#0F766E' }}>
+                      <span className="font-mono text-sm font-bold text-pine">82</span>
+                    </div>
+                    <span className="text-[9px] font-mono text-ink/40 mt-0.5 uppercase tracking-widest">综合评分</span>
+                  </div>
+                </div>
+                {/* Data grid */}
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {[
+                    { label: 'BSR 区间', value: '8,000–25,000', sub: '越小越容易卖' },
+                    { label: '竞争程度', value: '低', sub: '新手友好' },
+                    { label: '参考定价', value: '$9.99–$14.99', sub: '' },
+                    { label: '趋势', value: '↑ 上升中', sub: '需求在涨' },
+                  ].map(item => (
+                    <div key={item.label} className="bg-surface rounded-lg px-3 py-2">
+                      <span className="font-mono text-[9px] text-ink/40 uppercase tracking-widest block">{item.label}</span>
+                      <span className="font-mono text-sm font-bold text-ink block">{item.value}</span>
+                      {item.sub && <span className="text-[9px] text-ink/50">{item.sub}</span>}
+                    </div>
+                  ))}
+                </div>
+                {/* Action plan */}
+                <div className="bg-surface rounded-lg px-3 py-2">
+                  <span className="font-mono text-[9px] text-signal uppercase tracking-widest block mb-1">✓ 第一步该做</span>
+                  <p className="text-xs text-ink leading-relaxed">用 Helium 10 查 "adhd planner" 关键词，优化封面标题和描述，第一周用 $5/天 Facebook 广告测流量。</p>
+                </div>
+              </div>
             </div>
+            <p className="font-mono text-[10px] text-ink/40 text-center uppercase tracking-widest">
+              ↑ 输入主题 → 30秒后得到这个结果
+            </p>
           </div>
 
         </div>

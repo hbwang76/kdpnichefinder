@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
@@ -35,7 +35,16 @@ function ScoreRing({ score }: { score: number }) {
   )
 }
 
-function NicheCard({ niche }: { niche: NicheResult }) {
+function InfoTip({ text }: { text: string }) {
+  return (
+    <span className="kdp-infotip" tabIndex={0} aria-label={text}>
+      i
+      <span className="kdp-tip" role="tooltip">{text}</span>
+    </span>
+  )
+}
+
+function NicheCard({ niche, showHints = false }: { niche: NicheResult; showHints?: boolean }) {
   const scoreColor = niche.score >= 75 ? 'var(--color-pine)' : niche.score >= 50 ? 'var(--color-amber)' : 'var(--color-rust)'
   return (
     <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -44,25 +53,34 @@ function NicheCard({ niche }: { niche: NicheResult }) {
           <span style={{ background: 'var(--color-signal-tint)', color: 'var(--color-signal)', fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 6, fontFamily: "'IBM Plex Mono', monospace" }}>#{niche.rank}</span>
           <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '1.125rem', margin: 0 }}>{niche.niche}</h3>
         </div>
-        <ScoreRing score={niche.score} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {showHints && <InfoTip text="Opportunity score (0-100). Combines demand, competition, and trend. 75+ is strong, 50-74 is workable, below 50 is risky." />}
+          <ScoreRing score={niche.score} />
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         {[
-          { label: 'BSR Range', value: niche.bsrRange },
-          { label: 'Competition', value: niche.competition, color: scoreColor },
-          { label: 'Est. Price', value: niche.priceRange },
-          { label: 'Trend', value: niche.trend, color: scoreColor },
+          { label: 'BSR Range', value: niche.bsrRange, tip: 'Best Sellers Rank on Amazon. Lower = more sales. A top book under ~100k BSR usually means real buyer demand.' },
+          { label: 'Competition', value: niche.competition, color: scoreColor, tip: 'How crowded the niche is. Low means fewer established books to beat — best for a first title.' },
+          { label: 'Est. Price', value: niche.priceRange, tip: 'Typical list price range for books in this niche.' },
+          { label: 'Trend', value: niche.trend, color: scoreColor, tip: 'Whether search demand for this niche is growing, stable, or fading.' },
         ].map(item => (
           <div key={item.label} style={{ background: 'var(--color-canvas)', borderRadius: 8, padding: '8px 12px' }}>
-            <div style={{ fontSize: '0.6875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-ink-3)', fontFamily: "'IBM Plex Mono', monospace" }}>{item.label}</div>
+            <div style={{ fontSize: '0.6875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-ink-3)', fontFamily: "'IBM Plex Mono', monospace", display: 'flex', alignItems: 'center', gap: 4 }}>
+              {item.label}
+              {showHints && <InfoTip text={item.tip} />}
+            </div>
             <div style={{ fontSize: '0.875rem', fontWeight: 600, color: item.color || 'var(--color-ink)', textTransform: item.label === 'Competition' ? 'capitalize' : 'none', fontFamily: "'IBM Plex Mono', monospace" }}>{item.value}</div>
           </div>
         ))}
       </div>
 
       <div>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-ink-2)', marginBottom: 8 }}>Action Plan</div>
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-ink-2)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+          Action Plan
+          {showHints && <InfoTip text="Start with step 1 today. Each step is ordered — validate demand before you design the book." />}
+        </div>
         <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
           {niche.actionPlan.map((step, i) => (
             <li key={i} style={{ fontSize: '0.8125rem', color: 'var(--color-ink-2)', lineHeight: 1.5 }}>{step}</li>
@@ -111,6 +129,92 @@ function SkeletonCard() {
   )
 }
 
+const STEPS = [
+  { n: '1', label: 'Enter any book topic' },
+  { n: '2', label: 'Click Find' },
+  { n: '3', label: 'Get 5 niche ideas' },
+]
+
+function StepIndicators() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: '20px auto 0' }}>
+      {STEPS.map((s, i) => (
+        <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 999, padding: '4px 12px 4px 4px' }}>
+            <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--color-signal)', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>{s.n}</span>
+            <span style={{ fontSize: '0.8125rem', color: 'var(--color-ink)', fontWeight: 500 }}>{s.label}</span>
+          </span>
+          {i < STEPS.length - 1 && <span style={{ color: 'var(--color-ink-3)', fontSize: '0.875rem' }} aria-hidden="true">→</span>}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const DEMO_TEXT = 'adhd planner for adults'
+const DEMO_RESULTS = [
+  { name: 'ADHD Daily Planner', score: 82, color: '#0F766E' },
+  { name: 'ADHD Planner for Women', score: 76, color: '#0F766E' },
+  { name: 'ADHD Cleaning Checklist', score: 61, color: '#D97706' },
+]
+
+function HowItWorksDemo() {
+  // phase 0 = typing, 1 = click, 2 = loading skeletons, 3 = results
+  const [phase, setPhase] = useState(0)
+  const [typed, setTyped] = useState(0)
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>
+    if (phase === 0) {
+      timer = typed < DEMO_TEXT.length
+        ? setTimeout(() => setTyped(t => t + 1), 70)
+        : setTimeout(() => setPhase(1), 600)
+    } else if (phase === 1) {
+      timer = setTimeout(() => setPhase(2), 550)
+    } else if (phase === 2) {
+      timer = setTimeout(() => setPhase(3), 2000)
+    } else {
+      timer = setTimeout(() => { setPhase(0); setTyped(0) }, 4500)
+    }
+    return () => clearTimeout(timer)
+  }, [phase, typed])
+
+  return (
+    <div style={{ maxWidth: 460, margin: '28px auto 0', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 14, padding: 16, textAlign: 'left', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-ink-3)', marginBottom: 10 }}>
+        Live demo — 10 seconds
+      </div>
+      {/* mini query bar */}
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', border: '2px solid', borderColor: phase <= 1 ? 'var(--color-signal)' : 'var(--color-border)', borderRadius: 10, height: 40, paddingLeft: 12, paddingRight: 4, background: 'var(--color-canvas)', transition: 'border-color 0.3s' }}>
+        <span style={{ fontSize: '0.875rem', color: 'var(--color-ink)', fontFamily: "'Manrope', sans-serif", overflow: 'hidden', whiteSpace: 'nowrap' }}>
+          {DEMO_TEXT.slice(0, typed)}
+          {phase === 0 && <span className="kdp-caret">|</span>}
+        </span>
+        <span style={{
+          marginLeft: 'auto', padding: '5px 14px', borderRadius: 8, fontSize: '0.75rem', fontWeight: 700,
+          background: 'var(--color-signal)', color: '#fff', whiteSpace: 'nowrap',
+          transform: phase === 1 ? 'scale(0.92)' : 'scale(1)', transition: 'transform 0.2s',
+        }}>
+          Find
+        </span>
+      </div>
+      {/* mini results area */}
+      <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8, minHeight: 108 }}>
+        {phase === 2 && [0, 1, 2].map(i => (
+          <div key={i} style={{ height: 30, borderRadius: 8, background: 'var(--color-canvas)', border: '1px solid var(--color-border)', animation: `pulse 1.2s infinite`, animationDelay: `${i * 0.2}s` }} />
+        ))}
+        {phase === 3 && DEMO_RESULTS.map((r, i) => (
+          <div key={r.name} className="kdp-demo-row" style={{ animationDelay: `${i * 0.18}s`, display: 'flex', alignItems: 'center', gap: 10, height: 30, borderRadius: 8, background: 'var(--color-canvas)', border: '1px solid var(--color-border)', padding: '0 10px' }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.6875rem', fontWeight: 700, color: 'var(--color-signal)' }}>#{i + 1}</span>
+            <span style={{ fontSize: '0.8125rem', color: 'var(--color-ink)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
+            <span style={{ marginLeft: 'auto', fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.6875rem', fontWeight: 700, color: r.color }}>{r.score}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function NicheAnalyzer() {
   const searchParams = useSearchParams()
   const initialNiche = searchParams.get('niche') || ''
@@ -153,7 +257,31 @@ export function NicheAnalyzer() {
 
   return (
     <>
-      <style>{`@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }`}</style>
+      <style>{`
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes kdp-caret-blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+        @keyframes kdp-row-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .kdp-caret { animation: kdp-caret-blink 0.9s infinite; color: var(--color-signal); }
+        .kdp-demo-row { animation: kdp-row-in 0.4s both; }
+        .kdp-infotip {
+          position: relative; display: inline-flex; align-items: center; justify-content: center;
+          width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+          background: var(--color-signal-tint); color: var(--color-signal);
+          font-size: 0.625rem; font-weight: 700; font-style: italic; font-family: 'IBM Plex Mono', monospace;
+          cursor: help;
+        }
+        .kdp-infotip .kdp-tip {
+          display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+          width: 220px; padding: 8px 10px; border-radius: 8px; z-index: 30;
+          background: #1C1917; color: #FAFAF9; font-size: 0.75rem; font-weight: 400; font-style: normal;
+          line-height: 1.45; text-transform: none; letter-spacing: normal; text-align: left;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.18); pointer-events: none;
+        }
+        .kdp-infotip:hover .kdp-tip, .kdp-infotip:focus .kdp-tip { display: block; }
+        @media (prefers-reduced-motion: reduce) {
+          .kdp-caret, .kdp-demo-row { animation: none; }
+        }
+      `}</style>
 
       <section style={{ background: 'var(--color-canvas)', padding: '48px 48px 64px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
@@ -168,7 +296,7 @@ export function NicheAnalyzer() {
             KDP Niche Finder
           </h1>
           <p style={{ fontSize: '1.0625rem', color: 'var(--color-ink-2)', marginBottom: 32, lineHeight: 1.6, maxWidth: 640, margin: '0 auto 32px' }}>
-            Type a niche. Get 5 ranked niches with BSR data, a competition score, and a written action plan. Takes about 30 seconds.
+            写下你的图书主题，我们告诉你：这个细分市场竞争大不大、能卖多少、第一件事做什么。
           </p>
 
           {/* Query bar */}
@@ -182,7 +310,7 @@ export function NicheAnalyzer() {
               value={keyword}
               onChange={e => setKeyword(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAnalyze()}
-              placeholder="e.g. adhd planner, low content journal, children's coloring book"
+              placeholder="试试：ADHD planner for adults、5x8 inch journal、habit tracker for moms……"
               style={{
                 width: '100%', height: 56, paddingLeft: 48, paddingRight: 160,
                 border: '2px solid var(--color-border)', borderRadius: 12,
@@ -202,14 +330,14 @@ export function NicheAnalyzer() {
                 cursor: loading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif",
               }}
             >
-              {loading ? 'Analyzing…' : 'Find My First Niche — Free'}
+              {loading ? '分析中…' : '立即分析 — 免费'}
             </button>
           </div>
 
           {/* Example chips */}
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginBottom: 0 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', alignSelf: 'center' }}>EXAMPLES:</span>
-            {['adhd planner', 'low content journal', "children's coloring book"].map(ex => (
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', alignSelf: 'center' }}>试试：</span>
+            {['ADHD planner for adults', '5x8 inch journal', 'habit tracker for moms'].map(ex => (
               <button
                 key={ex}
                 onClick={() => setKeyword(ex)}
@@ -225,6 +353,12 @@ export function NicheAnalyzer() {
             ))}
           </div>
 
+          {/* 3-step guidance */}
+          <StepIndicators />
+
+          {/* How-it-works micro demo — hidden once real analysis starts */}
+          {!loading && !results && <HowItWorksDemo />}
+
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 16 }}>
             AI-generated recommendations are estimates based on publicly available data.
           </p>
@@ -234,9 +368,9 @@ export function NicheAnalyzer() {
       {limitReached && (
         <section style={{ background: 'var(--color-amber-tint)', borderTop: '1px solid #FCD34D', borderBottom: '1px solid #FCD34D', padding: '20px 48px' }}>
           <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 600, color: 'var(--color-amber)' }}>Free preview limit reached — 1 analysis per 24 hours for anonymous users.</span>
+            <span style={{ fontWeight: 600, color: 'var(--color-amber)' }}>免费预览次数用完 — 未登录用户每天 1 次</span>
             <Link href="/pricing" style={{ background: 'var(--color-signal)', color: 'white', padding: '10px 20px', borderRadius: 10, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none' }}>
-              Buy Credits to Continue →
+              购买继续分析 →
             </Link>
           </div>
         </section>
@@ -256,8 +390,8 @@ export function NicheAnalyzer() {
             {loading ? (
               <>
                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>Analyzing your niche...</h2>
-                  <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem' }}>Generating 5 ranked niche recommendations with action plans</p>
+                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>正在分析你的主题...</h2>
+                  <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem' }}>生成 5 个推荐 niche，每个包含行动方案</p>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 20 }}>
                   {[1,2,3,4,5].map(i => <SkeletonCard key={i} />)}
@@ -267,19 +401,38 @@ export function NicheAnalyzer() {
               <>
                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
                   <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>
-                    {results.length} Niche{results.length !== 1 ? 's' : ''} Found for &quot;{keyword}&quot;
+                    为 "{keyword}" 找到 {results.length} 个 niche
                   </h2>
-                  <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem' }}>Ranked by opportunity score — estimated BSR, competition, and action plans</p>
+                  <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem' }}>按机会评分排序，包含 BSR 区间、竞争程度和行动方案</p>
                 </div>
+                {/* First-time guidance: what the numbers mean */}
+                <details open style={{ maxWidth: 800, margin: '0 auto 32px', background: 'var(--color-signal-tint)', border: '1px solid var(--color-signal)', borderRadius: 12, padding: '14px 20px' }}>
+                  <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--color-ink)', fontFamily: "'Space Grotesk', sans-serif", listStylePosition: 'inside' }}>
+                    这里的数据是什么意思？
+                  </summary>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginTop: 12 }}>
+                    {[
+                      { term: 'Score（综合评分）', desc: '75+ = 机会好，50-74 = 可以研究，50以下 = 慎重' },
+                      { term: 'BSR 区间', desc: '亚马逊畅销排名，越小越容易卖。8k-25k = 稳定需求' },
+                      { term: '竞争程度', desc: 'Low = 门槛低、新手友好；High = 红海，需差异化' },
+                      { term: '行动方案', desc: '按顺序执行，先验证需求，再做封面设计' },
+                    ].map(x => (
+                      <div key={x.term} style={{ background: 'var(--color-surface)', borderRadius: 8, padding: '10px 12px' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-signal)', marginBottom: 4, fontFamily: "'IBM Plex Mono', monospace" }}>{x.term}</div>
+                        <div style={{ fontSize: '0.8125rem', color: 'var(--color-ink-2)', lineHeight: 1.5 }}>{x.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 20 }}>
-                  {results.map(niche => <NicheCard key={niche.rank} niche={niche} />)}
+                  {results.map(niche => <NicheCard key={niche.rank} niche={niche} showHints={niche.rank === 1} />)}
                 </div>
                 <div style={{ marginTop: 48, background: 'var(--color-signal-tint)', border: '1px solid var(--color-signal)', borderRadius: 16, padding: '32px 40px', textAlign: 'center' }}>
-                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>Want unlimited niche analyses?</h3>
-                  <p style={{ color: 'var(--color-ink-2)', marginBottom: 20 }}>Sign up to save your history and run unlimited analyses.</p>
+                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>想要无限次分析？</h3>
+                  <p style={{ color: 'var(--color-ink-2)', marginBottom: 20 }}>登录保存历史记录，解锁无限次分析</p>
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link href="/login" style={{ background: 'var(--color-signal)', color: 'white', padding: '12px 24px', borderRadius: 10, fontWeight: 700, textDecoration: 'none' }}>Sign in to Continue →</Link>
-                    <Link href="/pricing" style={{ background: 'var(--color-surface)', color: 'var(--color-signal)', padding: '12px 24px', borderRadius: 10, fontWeight: 700, textDecoration: 'none', border: '2px solid var(--color-signal)' }}>Buy Credits</Link>
+                    <Link href="/login" style={{ background: 'var(--color-signal)', color: 'white', padding: '12px 24px', borderRadius: 10, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none' }}>登录继续 →</Link>
+                    <Link href="/pricing" style={{ background: 'var(--color-surface)', color: 'var(--color-signal)', padding: '12px 24px', borderRadius: 10, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none', border: '2px solid var(--color-signal)' }}>购买套餐</Link>
                   </div>
                 </div>
               </>
