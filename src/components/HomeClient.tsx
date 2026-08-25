@@ -199,17 +199,17 @@ export function HomeClient() {
             {/* Tag line */}
             <div className="flex items-center gap-2">
               <span className="bg-signal/10 text-signal font-mono text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-widest">
-                KDP 作者专用
+                For KDP Authors
               </span>
             </div>
 
             <h1 className="font-display text-4xl md:text-[3.5rem] font-bold text-ink leading-[1.05] tracking-tight">
-              写书前先查这个，
+              Check before you write —
               <br />
-              <span className="text-signal">30 秒知道值不值得写。</span>
+              <span className="text-signal">30 seconds to know if it's worth writing.</span>
             </h1>
             <p className="font-body text-lg text-ink/75 leading-relaxed">
-              写下你的图书主题，我们告诉你：这个细分市场竞争大不大、能卖多少、第一件事做什么。
+              Enter your book topic — we tell you how competitive the niche is, how many copies it sells, and the first thing you need to do.
             </p>
             <form onSubmit={handleSearch} className="flex flex-col gap-3">
               <div className="bg-white rounded-card border border-border flex items-center gap-2 px-4 py-1 card-shadow focus-within:border-signal focus-within:outline focus-within:outline-2 focus-within:outline-signal focus-within:outline-offset-2 transition-colors">
@@ -221,7 +221,7 @@ export function HomeClient() {
                   type="text"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="写下任意主题，例如：ADHD planner、露营手册、儿童填色书……"
+                  placeholder="Try any topic, e.g.: ADHD planner, camping guide, kids coloring book..."
                   className="w-full h-14 bg-transparent text-ink placeholder:text-ink-3 font-body text-base border-none outline-none"
                 />
               </div>
@@ -229,14 +229,14 @@ export function HomeClient() {
                 type="submit"
                 className="bg-signal text-white rounded-btn px-6 py-4 font-body text-base font-semibold hover:opacity-85 transition-opacity text-center card-shadow self-start"
               >
-                立即分析 — 免费
+                Analyze Now — Free
               </button>
             </form>
             <p className="font-body text-sm text-ink/70">
-              无需注册 · 每天 1 次免费分析 · 随时取消
+              No signup needed · 1 free analysis per day · Cancel anytime
             </p>
             <p className="font-mono text-[11px] text-ink-3 uppercase tracking-widest">
-              AI 建议仅供参考，基于公开数据
+              AI recommendations are estimates based on publicly available data
             </p>
             <p className="font-body text-[13px] text-ink/60 leading-relaxed">
               Publisher Rocket charges $199 one-time. Helium 10 starts at $37/mo and was built for Amazon FBA, not KDP. KDP Niche Finder is free to try — Starter starts at $9.99/mo, Pro at $29.99/mo.
@@ -255,17 +255,17 @@ export function HomeClient() {
             {/* Input → result flow hint */}
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-signal text-white font-mono text-[11px] font-bold px-2 py-1 rounded">1</span>
-              <span className="text-ink/50 text-sm font-body">输入 "ADHD planner"</span>
+              <span className="text-ink/50 text-sm font-body">Enter "ADHD planner"</span>
               <span className="text-signal mx-1">→</span>
               <span className="bg-pine/10 text-pine font-mono text-[11px] font-bold px-2 py-1 rounded">2</span>
-              <span className="text-ink/50 text-sm font-body">获得结果</span>
+              <span className="text-ink/50 text-sm font-body">Get results</span>
             </div>
 
             {/* Sample result card */}
             <div className="rounded-card overflow-hidden border-2 border-signal/40 bg-white relative z-20 card-shadow">
               <div className="bg-signal text-white font-mono text-[11px] font-bold px-3 py-2 flex items-center justify-between">
-                <span>§ 真实结果示例</span>
-                <span className="bg-white/20 text-white px-2 py-0.5 rounded text-[10px]">约 30 秒生成</span>
+                <span>§ Sample Results</span>
+                <span className="bg-white/20 text-white px-2 py-0.5 rounded text-[10px]">~30 seconds to generate</span>
               </div>
               <div className="p-5">
                 {/* Niche name + score */}
@@ -278,16 +278,16 @@ export function HomeClient() {
                     <div className="w-12 h-12 rounded-full border-4 border-pine flex items-center justify-center" style={{ borderColor: '#0F766E' }}>
                       <span className="font-mono text-sm font-bold text-pine">82</span>
                     </div>
-                    <span className="text-[9px] font-mono text-ink/40 mt-0.5 uppercase tracking-widest">综合评分</span>
+                    <span className="text-[9px] font-mono text-ink/40 mt-0.5 uppercase tracking-widest">Score</span>
                   </div>
                 </div>
                 {/* Data grid */}
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   {[
-                    { label: 'BSR 区间', value: '8,000–25,000', sub: '越小越容易卖' },
-                    { label: '竞争程度', value: '低', sub: '新手友好' },
-                    { label: '参考定价', value: '$9.99–$14.99', sub: '' },
-                    { label: '趋势', value: '↑ 上升中', sub: '需求在涨' },
+                    { label: 'BSR Range', value: '8,000–25,000', sub: 'Lower = easier to sell' },
+                    { label: 'Competition', value: 'Low', sub: 'Beginner-friendly' },
+                    { label: 'Est. Price', value: '$9.99–$14.99', sub: '' },
+                    { label: 'Trend', value: '↑ Rising', sub: 'Demand growing' },
                   ].map(item => (
                     <div key={item.label} className="bg-surface rounded-lg px-3 py-2">
                       <span className="font-mono text-[9px] text-ink/40 uppercase tracking-widest block">{item.label}</span>
@@ -298,13 +298,13 @@ export function HomeClient() {
                 </div>
                 {/* Action plan */}
                 <div className="bg-surface rounded-lg px-3 py-2">
-                  <span className="font-mono text-[9px] text-signal uppercase tracking-widest block mb-1">✓ 第一步该做</span>
-                  <p className="text-xs text-ink leading-relaxed">用 Helium 10 查 "adhd planner" 关键词，优化封面标题和描述，第一周用 $5/天 Facebook 广告测流量。</p>
+                  <span className="font-mono text-[9px] text-signal uppercase tracking-widest block mb-1">✓ First step to take</span>
+                  <p className="text-xs text-ink leading-relaxed">Use Helium 10 to check the "adhd planner" keyword, optimize your cover title and description, and test traffic with $5/day Facebook ads in the first week.</p>
                 </div>
               </div>
             </div>
             <p className="font-mono text-[10px] text-ink/40 text-center uppercase tracking-widest">
-              ↑ 输入主题 → 30秒后得到这个结果
+              ↑ Enter a topic → get this result in 30 seconds
             </p>
           </div>
 
@@ -316,7 +316,7 @@ export function HomeClient() {
         {/* § Sample output eyebrow */}
         <div className="mb-4">
           <span className="font-mono text-[11px] text-signal uppercase tracking-widest">
-            § 示例结果
+            § Sample Results
           </span>
         </div>
 
@@ -344,7 +344,7 @@ export function HomeClient() {
               <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
             <div className="flex flex-col gap-1">
-              <h3 className="font-display text-lg font-bold text-ink">下一个可能就是你的 niche</h3>
+              <h3 className="font-display text-lg font-bold text-ink">Your next niche could be here</h3>
               <p className="font-body text-sm text-ink/70">
                 Type one niche. Get five ranked niches with a full action plan.
               </p>
@@ -354,7 +354,7 @@ export function HomeClient() {
             onClick={() => router.push('/tools/kdp-niche-finder')}
             className="bg-signal text-white rounded-btn px-5 py-2.5 font-body text-sm font-semibold hover:opacity-85 transition-opacity shrink-0"
           >
-            立即分析 — 免费
+            Analyze Now — Free
           </button>
         </div>
       </section>
@@ -378,7 +378,7 @@ export function HomeClient() {
       <section className="px-4 md:px-12 pt-16 max-w-7xl mx-auto">
         <div className="bg-white rounded-card border border-border overflow-hidden max-w-3xl">
           <div className="p-4 border-b border-border bg-surface">
-            <h2 className="font-display text-xl font-bold text-ink">每次分析包含什么</h2>
+            <h2 className="font-display text-xl font-bold text-ink">What's in each analysis</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[560px]">
@@ -410,7 +410,7 @@ export function HomeClient() {
       <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
         <div className="mb-6 max-w-2xl">
           <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-1">
-            § 竞品对比
+            § Competitor Comparison
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight tracking-tight">
             Why KDP Niche Finder
@@ -460,7 +460,7 @@ export function HomeClient() {
       <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
         <div className="mb-6 max-w-2xl">
           <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-1">
-            § 工作流程
+            § How It Works
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight tracking-tight">
             How KDP Niche Finder works
@@ -538,7 +538,7 @@ export function HomeClient() {
               onClick={() => router.push('/tools/kdp-niche-finder')}
               className="bg-transparent text-white border-2 border-white rounded-btn px-6 py-3.5 font-body text-base font-semibold hover:bg-white/10 transition-colors"
             >
-              立即分析 — 免费
+              Analyze Now — Free
             </button>
             <Link
               href="/pricing"

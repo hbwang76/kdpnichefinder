@@ -296,7 +296,7 @@ export function NicheAnalyzer() {
             KDP Niche Finder
           </h1>
           <p style={{ fontSize: '1.0625rem', color: 'var(--color-ink-2)', marginBottom: 32, lineHeight: 1.6, maxWidth: 640, margin: '0 auto 32px' }}>
-            写下你的图书主题，我们告诉你：这个细分市场竞争大不大、能卖多少、第一件事做什么。
+            Enter your book topic — we tell you how competitive the niche is, how many copies it sells, and the first thing you need to do.
           </p>
 
           {/* Query bar */}
@@ -310,7 +310,7 @@ export function NicheAnalyzer() {
               value={keyword}
               onChange={e => setKeyword(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAnalyze()}
-              placeholder="试试：ADHD planner for adults、5x8 inch journal、habit tracker for moms……"
+              placeholder="Try: ADHD planner for adults, 5x8 inch journal, habit tracker for moms..."
               style={{
                 width: '100%', height: 56, paddingLeft: 48, paddingRight: 160,
                 border: '2px solid var(--color-border)', borderRadius: 12,
@@ -330,13 +330,13 @@ export function NicheAnalyzer() {
                 cursor: loading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif",
               }}
             >
-              {loading ? '分析中…' : '立即分析 — 免费'}
+              {loading ? 'Analyzing...' : 'Analyze Now — Free'}
             </button>
           </div>
 
           {/* Example chips */}
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginBottom: 0 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', alignSelf: 'center' }}>试试：</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em', alignSelf: 'center' }}>Try:</span>
             {['ADHD planner for adults', '5x8 inch journal', 'habit tracker for moms'].map(ex => (
               <button
                 key={ex}
@@ -368,9 +368,9 @@ export function NicheAnalyzer() {
       {limitReached && (
         <section style={{ background: 'var(--color-amber-tint)', borderTop: '1px solid #FCD34D', borderBottom: '1px solid #FCD34D', padding: '20px 48px' }}>
           <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 600, color: 'var(--color-amber)' }}>免费预览次数用完 — 未登录用户每天 1 次</span>
+            <span style={{ fontWeight: 600, color: 'var(--color-amber)' }}>Free preview limit reached — 1 per day for guests</span>
             <Link href="/pricing" style={{ background: 'var(--color-signal)', color: 'white', padding: '10px 20px', borderRadius: 10, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none' }}>
-              购买继续分析 →
+              Buy to continue →
             </Link>
           </div>
         </section>
@@ -390,8 +390,8 @@ export function NicheAnalyzer() {
             {loading ? (
               <>
                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>正在分析你的主题...</h2>
-                  <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem' }}>生成 5 个推荐 niche，每个包含行动方案</p>
+                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>Analyzing your topic...</h2>
+                  <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem' }}>Generating 5 recommended niches, each with an action plan</p>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 20 }}>
                   {[1,2,3,4,5].map(i => <SkeletonCard key={i} />)}
@@ -401,21 +401,21 @@ export function NicheAnalyzer() {
               <>
                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
                   <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>
-                    为 "{keyword}" 找到 {results.length} 个 niche
+                    {results.length} niches found for "{keyword}"
                   </h2>
-                  <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem' }}>按机会评分排序，包含 BSR 区间、竞争程度和行动方案</p>
+                  <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem' }}>Sorted by opportunity score, includes BSR range, competition level, and action plan</p>
                 </div>
                 {/* First-time guidance: what the numbers mean */}
                 <details open style={{ maxWidth: 800, margin: '0 auto 32px', background: 'var(--color-signal-tint)', border: '1px solid var(--color-signal)', borderRadius: 12, padding: '14px 20px' }}>
                   <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--color-ink)', fontFamily: "'Space Grotesk', sans-serif", listStylePosition: 'inside' }}>
-                    这里的数据是什么意思？
+                    What do these numbers mean?
                   </summary>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginTop: 12 }}>
                     {[
-                      { term: 'Score（综合评分）', desc: '75+ = 机会好，50-74 = 可以研究，50以下 = 慎重' },
-                      { term: 'BSR 区间', desc: '亚马逊畅销排名，越小越容易卖。8k-25k = 稳定需求' },
-                      { term: '竞争程度', desc: 'Low = 门槛低、新手友好；High = 红海，需差异化' },
-                      { term: '行动方案', desc: '按顺序执行，先验证需求，再做封面设计' },
+                      { term: 'Score', desc: '75+ = great opportunity, 50-74 = worth researching, below 50 = think twice' },
+                      { term: 'BSR Range', desc: 'Amazon bestseller rank — lower = easier to sell. 8k-25k = steady demand' },
+                      { term: 'Competition', desc: 'Low = low barrier, beginner-friendly; High = red ocean, needs differentiation' },
+                      { term: 'Action Plan', desc: 'Follow in order — validate demand first, then design the cover' },
                     ].map(x => (
                       <div key={x.term} style={{ background: 'var(--color-surface)', borderRadius: 8, padding: '10px 12px' }}>
                         <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-signal)', marginBottom: 4, fontFamily: "'IBM Plex Mono', monospace" }}>{x.term}</div>
@@ -428,11 +428,11 @@ export function NicheAnalyzer() {
                   {results.map(niche => <NicheCard key={niche.rank} niche={niche} showHints={niche.rank === 1} />)}
                 </div>
                 <div style={{ marginTop: 48, background: 'var(--color-signal-tint)', border: '1px solid var(--color-signal)', borderRadius: 16, padding: '32px 40px', textAlign: 'center' }}>
-                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>想要无限次分析？</h3>
-                  <p style={{ color: 'var(--color-ink-2)', marginBottom: 20 }}>登录保存历史记录，解锁无限次分析</p>
+                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>Want unlimited analyses?</h3>
+                  <p style={{ color: 'var(--color-ink-2)', marginBottom: 20 }}>Log in to save history and unlock unlimited analyses</p>
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link href="/login" style={{ background: 'var(--color-signal)', color: 'white', padding: '12px 24px', borderRadius: 10, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none' }}>登录继续 →</Link>
-                    <Link href="/pricing" style={{ background: 'var(--color-surface)', color: 'var(--color-signal)', padding: '12px 24px', borderRadius: 10, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none', border: '2px solid var(--color-signal)' }}>购买套餐</Link>
+                    <Link href="/login" style={{ background: 'var(--color-signal)', color: 'white', padding: '12px 24px', borderRadius: 10, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none' }}>Log in to continue →</Link>
+                    <Link href="/pricing" style={{ background: 'var(--color-surface)', color: 'var(--color-signal)', padding: '12px 24px', borderRadius: 10, fontWeight: 700, fontSize: '0.875rem', textDecoration: 'none', border: '2px solid var(--color-signal)' }}>Buy a plan</Link>
                   </div>
                 </div>
               </>
