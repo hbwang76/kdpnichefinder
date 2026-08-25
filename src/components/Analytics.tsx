@@ -1,10 +1,10 @@
 // src/components/Analytics.tsx
 import Script from "next/script";
 
-const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
+const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'kdpnichefinder.net';
 const PLAUSIBLE_SCRIPT_URL =
-  process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL ||
-  "https://plausible.io/js/script.js";
+  process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL ??
+  'https://plausible.shipsolo.io/js/script.js';
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? 'G-L1ZZDZHCKQ';
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID ?? 'y7y89ogod6';
