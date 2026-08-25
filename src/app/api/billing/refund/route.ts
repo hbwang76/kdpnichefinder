@@ -38,6 +38,9 @@ export async function POST(request: NextRequest) {
 
   const creditsToRefund = packRow.credits
 
+  // creemOrderId is stored as gateway_payment_id — use it directly as transaction_id
+  // For old packs it may be ord_... which is not a refundable transaction ID
+  // Try checkout API first to resolve real transaction_id from checkout_id or order_id
   const apiKey = env.CREEM_API_KEY ?? ''
   const isTestMode = env.CREEM_TEST_MODE === 'true'
   const apiBase = isTestMode ? 'https://test-api.creem.io' : (env.CREEM_API_BASE ?? 'https://api.creem.io')
@@ -50,28 +53,49 @@ export async function POST(request: NextRequest) {
     }, { status: 503 })
   }
 
-  // creemOrderId now stores tran_... for new purchases, ord_... for old ones
-  // Try refund with creemOrderId first (tran_...), then fallback to checkout_id (ch_...)
-  let refundRes = await fetch(`${apiBase}/v1/refunds`, {
-    method: 'POST',
-    headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ transaction_id: creemOrderId }),
-  })
+  // Step 1: resolve real transaction_id from Creem Checkout API
+  let resolvedTransactionId: string | null = null
+  if (packRow.gateway_checkout_id) {
+    try {
+      const checkoutRes = await fetch(`${apiBase}/v1/checkouts/${packRow.gateway_checkout_id}`, {
+        headers: { 'x-api-key': apiKey }
+      })
+      if (checkoutRes.ok) {
+        const checkoutData = await checkoutRes.json() as { order?: { transaction?: string } }
+        resolvedTransactionId = checkoutData.order?.transaction ?? null
+      }
+    } catch { /* ignore */ }
+  }
 
+  // Step 2: attempt refund with resolved transaction_id, then checkout_id as fallback
+  let refundRes: Response | null = null
   let refundBody = ''
-  if (!refundRes.ok && packRow.gateway_checkout_id) {
+
+  if (resolvedTransactionId) {
     refundRes = await fetch(`${apiBase}/v1/refunds`, {
       method: 'POST',
       headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transaction_id: packRow.gateway_checkout_id }),
+      body: JSON.stringify({ transaction_id: resolvedTransactionId }),
     })
   }
 
-  refundBody = await refundRes.text().catch(() => '')
-  const refundStatus = refundRes.status
-  console.log('REFUND_DEBUG', { status: refundStatus, transactionId: creemOrderId, checkoutId: packRow.gateway_checkout_id, body: refundBody.slice(0, 300) })
+  if (!refundRes || !refundRes.ok) {
+    // Fallback to checkout_id
+    const fallbackId = resolvedTransactionId ?? packRow.gateway_checkout_id
+    if (fallbackId) {
+      refundRes = await fetch(`${apiBase}/v1/refunds`, {
+        method: 'POST',
+        headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transaction_id: fallbackId }),
+      })
+    }
+  }
 
-  if (refundRes.ok) {
+  refundBody = await (refundRes?.text().catch(() => '') ?? Promise.resolve(''))
+  const refundStatus = refundRes?.status ?? 0
+  console.log('REFUND_DEBUG', { status: refundStatus, resolvedTransactionId, checkoutId: packRow.gateway_checkout_id, body: refundBody.slice(0, 300) })
+
+  if (refundRes?.ok) {
     const ts = now()
     const ledgerRow = await db.prepare(
       'SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?'
@@ -84,7 +108,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, creditsDeducted: creditsToRefund, refundedAt: ts })
   }
 
-  const errData = await refundRes.json().catch(() => ({}))
+  const errData = await (refundRes?.json().catch(() => ({})) ?? Promise.resolve({}))
   const creemError = (errData as { message?: string[] })?.message
   const errorMsg = Array.isArray(creemError) ? creemError[0] : (errData as { message?: string })?.message ?? refundBody
   return NextResponse.json({ ok: false, error: 'creem_refund_failed', detail: errorMsg }, { status: 200 })

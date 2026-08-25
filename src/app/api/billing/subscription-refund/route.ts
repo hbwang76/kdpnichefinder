@@ -70,20 +70,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'refund_service_unavailable', message: 'Please request refund through Creem dashboard.' }, { status: 503 })
   }
 
-  // Try subscription payments endpoint to find transaction
-  let transactionId: string | null = null
+  // Step 3: resolve real transaction_id from Creem Checkout API via subscription's checkout history
+  let resolvedTransactionId: string | null = null
   try {
-    const subRes = await fetch(`${apiBase}/subscriptions/${subscription.creem_subscription_id}/payments`, {
+    const checkoutRes = await fetch(`${apiBase}/v1/checkouts`, {
       headers: { 'x-api-key': apiKey }
     })
-    if (subRes.ok) {
-      const subData = await subRes.json() as { payments?: Array<{ id: string }> }
-      transactionId = subData.payments?.[0]?.id ?? null
+    if (checkoutRes.ok) {
+      const checkoutsData = await checkoutRes.json() as { checkouts?: Array<{ id: string; subscription?: string; order?: { transaction?: string } }> }
+      const matching = checkoutsData.checkouts?.find(c => c.subscription === subscription.creem_subscription_id)
+      resolvedTransactionId = matching?.order?.transaction ?? null
     }
   } catch { /* ignore */ }
 
-  // If no transaction found via API, try the credit pack's creem_order_id as a fallback
-  const refundTransactionId = transactionId ?? subscription.creem_subscription_id
+  // Step 4: attempt refund with resolved transaction_id, then subscription_id as fallback
+  const refundTransactionId = resolvedTransactionId ?? subscription.creem_subscription_id
 
   const refundRes = await fetch(`${apiBase}/v1/refunds`, {
     method: 'POST',

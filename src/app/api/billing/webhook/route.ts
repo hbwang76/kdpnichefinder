@@ -26,7 +26,7 @@ const BILLING_PLANS: Record<BillingPlan, BillingPlanConfig> = {
 }
 
 const GRANT_EVENTS   = new Set(['checkout.completed', 'subscription.paid'])
-const REVOKE_EVENTS  = new Set(['subscription.canceled', 'subscription.expired', 'subscription.paused'])
+const REVOKE_EVENTS  = new Set(['subscription.canceled', 'subscription.expired', 'subscription.paused', 'refund.created', 'refund.completed'])
 const REFUND_EVENTS  = new Set(['refund.created', 'refund.completed'])
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -141,15 +141,16 @@ function webhookTransactionId(object: Record<string, unknown>): string {
   const order = asRecord(object.order)
   const transaction = asRecord(object.last_transaction)
   const paymentTransactions = Array.isArray(order?.payment_transactions) ? order.payment_transactions : []
-  return asString(object.transaction_id)
+  // Prefer actual payment transaction (tran_...) — required for refund API
+  // Order ID (ord_...) is NOT a refundable transaction identifier
+  return asString(order.transaction)    // tran_... — the actual payment transaction (MOST IMPORTANT)
+    ?? asString(object.transaction_id)
     ?? asString(object.payment_id)
     ?? asString(object.last_transaction_id)
     ?? asString(order.transaction_id)
     ?? asString(transaction.id)
-    ?? asString(order.transaction)    // object.order.transaction = "tran_..." for credit_mini purchases
     ?? (paymentTransactions[0] as Record<string, unknown>)?.id as string | undefined
-    ?? asString(order.id)       // checkout.completed: object.order.id = order ID (ord_...)
-    ?? asString(object.id)      // event ID (evt_...) — last because not useful for refund
+    ?? asString(object.id)      // event ID (evt_...) — last resort, not useful for refund
     ?? id()
 }
 
@@ -298,14 +299,14 @@ async function recordPurchase(
     }
 
     // subscription.paid may also grant credits on some plans
-    // For subscription.pricingModel='one_time_credits' (rare) or any subscription: write credit_pack
-    // keyed by subscription_id so handleRefund can find it by subscription_id
+    // For subscription.paid: keyed by subscription_id, stores tran_ in creem_transaction_id
     if (subscriptionId && creditsGranted > 0) {
+      // purchaseId is the tran_... transaction ID (webhookTransactionId already picks order.transaction first)
       await db.prepare(`
-        INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at, amount_cents, fee_cents, net_cents, currency)
-        VALUES (?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)
+        INSERT INTO credit_packs (id, user_id, creem_order_id, creem_transaction_id, credits, status, purchased_at, amount_cents, fee_cents, net_cents, currency)
+        VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)
         ON CONFLICT(creem_order_id) DO NOTHING
-      `).bind(id(), userId, subscriptionId, creditsGranted, ts,
+      `).bind(id(), userId, subscriptionId, purchaseId, creditsGranted, ts,
         amount > 0 ? amount : null, amount > 0 ? feeCents : null, netCents, amount > 0 ? currency : null).run()
 
       const ledgerRow = await db.prepare(
@@ -410,8 +411,14 @@ async function revokeAccess(
 
   // subscription.canceled / subscription.paused: user keeps access until period end
   // subscription.expired / refund events: actually downgrade
-  if (eventType === 'subscription.expired') {
+  if (eventType === 'subscription.expired' || eventType === 'refund.created' || eventType === 'refund.completed') {
     await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind('free', ts, userId).run()
+    // Also update subscription status to refunded
+    if (subscriptionId) {
+      await db.prepare(
+        'UPDATE subscriptions SET status = ?, updated_at = ? WHERE creem_subscription_id = ?'
+      ).bind('refunded', ts, subscriptionId).run()
+    }
   }
 
   // For refund events, deduct credits is handled by handleRefund — no double deduction here
