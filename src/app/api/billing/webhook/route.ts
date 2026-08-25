@@ -26,7 +26,7 @@ const BILLING_PLANS: Record<BillingPlan, BillingPlanConfig> = {
 }
 
 const GRANT_EVENTS   = new Set(['checkout.completed', 'subscription.paid'])
-const REVOKE_EVENTS  = new Set(['subscription.canceled', 'subscription.expired', 'subscription.paused', 'refund.created', 'refund.completed'])
+const REVOKE_EVENTS  = new Set(['subscription.canceled', 'subscription.expired', 'subscription.paused'])
 const REFUND_EVENTS  = new Set(['refund.created', 'refund.completed'])
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -277,12 +277,14 @@ async function recordPurchase(
     }
 
     // subscription.paid may also grant credits on some plans
-    if (config.pricingModel === 'one_time_credits' && creditsGranted > 0) {
+    // For subscription.pricingModel='one_time_credits' (rare) or any subscription: write credit_pack
+    // keyed by subscription_id so handleRefund can find it by subscription_id
+    if (subscriptionId && creditsGranted > 0) {
       await db.prepare(`
         INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at)
         VALUES (?, ?, ?, ?, 'active', ?)
         ON CONFLICT(creem_order_id) DO NOTHING
-      `).bind(id(), userId, purchaseId, creditsGranted, ts).run()
+      `).bind(id(), userId, subscriptionId, creditsGranted, ts).run()
 
       const ledgerRow = await db.prepare(
         'SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?'
@@ -291,7 +293,7 @@ async function recordPurchase(
       await db.prepare(`
         INSERT INTO credit_ledger (id, user_id, amount, balance_after, reason, reference_id, created_at)
         VALUES (?, ?, ?, ?, 'purchase', ?, ?)
-      `).bind(id(), userId, creditsGranted, newBalance, purchaseId, ts).run()
+      `).bind(id(), userId, creditsGranted, newBalance, subscriptionId, ts).run()
     }
 
     return
@@ -325,18 +327,21 @@ async function handleRefund(
   eventType: string
 ) {
   if (!REFUND_EVENTS.has(eventType)) return
+  // Also look up by subscription_id (for subscription refund)
+  const subscriptionId = asString((object as Record<string, unknown>).subscription_id)
+    ?? asString(asRecord(object.subscription)?.id)
   const refundId = asString(object.id) ?? asString((object as Record<string, unknown>).refund_id)
   const orderId = asString((object as Record<string, unknown>).order_id)
     ?? asString(asRecord(object.order)?.id)
 
-  if (!orderId) return
+  if (!orderId && !subscriptionId) return
 
   // Find the original credit pack — creem_order_id may be tran_... (new) or ord_... (old)
-  // Also check gateway_checkout_id as fallback
+  // Also check gateway_checkout_id as fallback, and subscription_id for subscription refunds
   const pack = await db.prepare(`
     SELECT id, user_id, credits, status FROM credit_packs
-    WHERE creem_order_id = ? OR gateway_checkout_id = ?
-  `).bind(orderId, orderId).first<{ id: string; user_id: string; credits: number; status: string }>()
+    WHERE creem_order_id = ? OR gateway_checkout_id = ? OR creem_order_id = ?
+  `).bind(orderId ?? '', orderId ?? '', subscriptionId ?? '').first<{ id: string; user_id: string; credits: number; status: string }>()
 
   if (!pack || pack.status === 'refunded') return
 
