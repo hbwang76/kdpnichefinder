@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Refund Policy',
-  description: 'KDP Niche Finder refund policy. 7-day full refund for first-time monthly subscribers, 14-day pro-rata for annual plans, unused credit refund within 7 days.',
+  description: 'KDP Niche Finder refund policy. Net refund (actual paid amount after platform fees) within 7 days for first-time monthly subscribers, 14-day pro-rata for annual plans, unused credit refund within 7 days.',
   alternates: { canonical: '/refund-policy' },
 }
 
@@ -103,8 +103,8 @@ export default function RefundPolicyPage() {
             Refund Policy
           </h1>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', fontSize: '0.8125rem', color: 'var(--color-ink-2)' }}>
-            <span><strong>Last updated:</strong> 2026-08-17</span>
-            <span><strong>Effective date:</strong> 2026-08-17</span>
+            <span><strong>Last updated:</strong> 2026-08-25</span>
+            <span><strong>Effective date:</strong> 2026-08-25</span>
             <span><strong>Refund Contact:</strong> transaction@kdpnichefinder.net</span>
           </div>
         </div>
@@ -131,12 +131,12 @@ export default function RefundPolicyPage() {
               headers={['Plan', 'Initial Charge Refund', 'Renewal Refund', 'Notes']}
               rows={[
                 ['Free ($0)', 'N/A', 'N/A', 'No charge'],
-                ['Starter Monthly ($9.99/mo)', '7 days, full refund (first-time subscribers)', 'Non-refundable after 7 days', 'See §3.1'],
+                ['Starter Monthly ($9.99/mo)', '7 days, net refund (first-time subscribers)', 'Non-refundable after 7 days', 'See §3.1'],
                 ['Starter Annual ($79/yr)', '14 days, pro-rata refund (first-time, <100 AI runs)', 'Non-refundable after 14 days', 'See §3.4'],
-                ['Pro Monthly ($29.99/mo)', '7 days, full refund (first-time subscribers)', 'Non-refundable after 7 days', 'See §3.1'],
+                ['Pro Monthly ($29.99/mo)', '7 days, net refund (first-time subscribers)', 'Non-refundable after 7 days', 'See §3.1'],
                 ['Pro Annual ($229/yr)', '14 days, pro-rata refund (first-time, <100 AI runs)', 'Non-refundable after 14 days', 'See §3.4'],
-                ['Credit Mini ($4.99)', '7 days, full refund (if unused)', 'Non-refundable', 'See §3.5'],
-                ['Credit Standard ($9.99)', '7 days, full refund (if unused)', 'Non-refundable', 'See §3.5'],
+                ['Credit Mini ($4.99)', '7 days, net refund (if unused)', 'Non-refundable', 'See §3.5'],
+                ['Credit Standard ($9.99)', '7 days, net refund (if unused)', 'Non-refundable', 'See §3.5'],
               ]}
             />
             <P>
@@ -145,12 +145,15 @@ export default function RefundPolicyPage() {
           </Section>
 
           <Section id="rules" title="3. Detailed Refund Rules">
-            <H3>3.1 First-time monthly subscribers — 7-day full refund</H3>
+            <H3>3.1 First-time monthly subscribers — 7-day net refund</H3>
             <P>
-              If you are a <strong>first-time</strong> monthly subscriber (Starter or Pro) and you request a refund <strong>within 7 days of the initial charge</strong>, we will issue a <strong>full refund</strong> to your original payment method.
+              If you are a <strong>first-time</strong> monthly subscriber (Starter or Pro) and you request a refund <strong>within 7 days of the initial charge</strong>, we will issue a <strong>net refund</strong> to your original payment method.
             </P>
             <P>
-              The refund will be processed via Creem within 5–10 business days. Creem will remit the refund to your original payment method.
+              <strong>Refund amount = the actual payment amount you paid, minus any platform / payment-processor fees retained by Creem and/or the card network.</strong> In practice, this means you receive back the net amount that was actually received by us after platform fees, not the gross charge shown on your card statement. Because Creem is our Merchant of Record, the exact refund amount depends on the platform fees deducted at the time of the original transaction; we do not refund fees that were retained by the payment platform.
+            </P>
+            <P>
+              The refund will be processed via Creem within 5–10 business days. Creem will remit the net refund to your original payment method.
             </P>
 
             <H3>3.2 Subsequent renewals — non-refundable</H3>
@@ -178,7 +181,7 @@ export default function RefundPolicyPage() {
             </P>
             <Ul items={[
               'You have <strong>not exceeded 100 AI runs</strong> during those 14 days',
-              'The refund amount = (annual fee paid) × (unused full months remaining / 12)',
+              <>The refund amount = (net annual fee received, after platform fees) × (unused full months remaining / 12). Platform / payment-processor fees retained by Creem and/or the card network at the time of the original transaction are <strong>not refunded</strong>.</>,
             ]} />
             <P>
               After the 14-day window, annual renewals are non-refundable.
@@ -186,7 +189,7 @@ export default function RefundPolicyPage() {
 
             <H3>3.5 Credit Packs — unused-credit refund within 7 days</H3>
             <P>
-              Credit Pack purchases (Credit Mini / Credit Standard) are <strong>one-time purchases, not subscriptions</strong>. If <strong>no credits have been used</strong> within 7 days of purchase, you may request a <strong>full refund</strong>. Once any credit is consumed, the pack is non-refundable (except as required by mandatory consumer protection law).
+              Credit Pack purchases (Credit Mini / Credit Standard) are <strong>one-time purchases, not subscriptions</strong>. If <strong>no credits have been used</strong> within 7 days of purchase, you may request a <strong>net refund</strong> — that is, the actual payment amount you paid minus any platform / payment-processor fees retained by Creem and/or the card network at the time of the original transaction. Once any credit is consumed, the pack is non-refundable (except as required by mandatory consumer protection law).
             </P>
           </Section>
 

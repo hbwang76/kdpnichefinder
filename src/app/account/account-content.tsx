@@ -16,6 +16,9 @@ interface CreditPack {
   credits: number
   status: string
   purchased_at: number
+  amount_cents: number | null
+  fee_cents: number | null
+  net_cents: number | null
 }
 
 interface Subscription {
@@ -25,6 +28,26 @@ interface Subscription {
   current_period_end: string | null
   cancel_at_period_end: number
   creem_subscription_id: string
+  last_payment_amount_cents: number | null
+  last_payment_net_cents: number | null
+}
+
+// Creem processing fee: 3.9% + $0.40 (matches webhook-side estimate).
+// Refunds are issued on the net amount we actually received.
+const FEE_PERCENT = 0.039
+const FEE_FIXED_CENTS = 40
+function estimateNetCents(grossCents: number): number {
+  return Math.max(0, grossCents - Math.round(grossCents * FEE_PERCENT + FEE_FIXED_CENTS))
+}
+function fmtCents(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`
+}
+// Gross fallback for packs purchased before amount tracking existed (legacy: credits/10 dollars)
+function packGrossCents(pack: CreditPack): number {
+  return pack.amount_cents ?? pack.credits * 10
+}
+function packRefundCents(pack: CreditPack): number {
+  return pack.net_cents ?? estimateNetCents(packGrossCents(pack))
 }
 
 export default function AccountContent() {
@@ -179,6 +202,12 @@ export default function AccountContent() {
             <p style={{ color: 'var(--color-ink-2)', fontSize: '0.875rem', marginBottom: 20 }}>
               Your subscription will be canceled and you will be downgraded to the free plan. Credits remaining will be removed. This cannot be undone.
             </p>
+            {subscription?.last_payment_net_cents != null && (
+              <p style={{ color: 'var(--color-ink-2)', fontSize: '0.875rem', marginBottom: 20 }}>
+                Refund amount: <strong>{fmtCents(subscription.last_payment_net_cents)}</strong>
+                {' '}(net amount received after payment-platform fees; see our <Link href="/refund-policy" style={{ color: 'var(--color-signal)' }}>refund policy</Link>).
+              </p>
+            )}
             <p style={{ color: 'var(--color-ink-2)', fontSize: '0.8rem', marginBottom: 20 }}>
               <strong>Note:</strong> Subscriptions that have been used are not eligible for refunds.
             </p>
@@ -210,7 +239,9 @@ export default function AccountContent() {
           <div style={{ background: 'var(--color-surface)', borderRadius: 16, padding: 32, maxWidth: 440, width: '100%' }}>
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>Refund Credit Pack</h2>
             <p style={{ color: 'var(--color-ink-2)', fontSize: '0.875rem', marginBottom: 20 }}>
-              Refund <strong>{refundPack.credits} credits</strong> for ${(refundPack.credits / 10).toFixed(2)}? This cannot be undone.
+              Refund <strong>{refundPack.credits} credits</strong> (order <code style={{ fontSize: '0.8rem' }}>{refundPack.creem_order_id}</code>)?
+              <br />
+              Refund amount: <strong>{fmtCents(packRefundCents(refundPack))}</strong> — the net amount we received after payment-platform fees ({fmtCents(packGrossCents(refundPack))} paid − processing fee). Platform fees are non-refundable; see our <Link href="/refund-policy" style={{ color: 'var(--color-signal)' }}>refund policy</Link>. This cannot be undone.
             </p>
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontSize: '0.875rem', fontWeight: 600, display: 'block', marginBottom: 6 }}>Reason (optional)</label>
@@ -306,7 +337,7 @@ export default function AccountContent() {
                   Your subscription has been canceled. Access expires on {periodEnd}.
                 </p>
               )}
-              {(isStarter || isPro) && !isCanceled && (
+              {(isStarter || isPro) && (
                 <Link href="/pricing" style={{
                   display: 'block', marginTop: 8, background: 'var(--color-surface)', color: 'var(--color-signal)',
                   padding: '10px 20px', borderRadius: 10, fontWeight: 600,
@@ -324,19 +355,23 @@ export default function AccountContent() {
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 20 }}>
                 <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '3rem', fontWeight: 700, color: 'var(--color-ink)' }}>{credits ?? '—'}</span>
               </div>
-              {creditPacks.filter(p => p.status === 'active').length > 0 && (
+              {creditPacks.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
                   <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-ink-2)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Purchased Packs</p>
-                  {creditPacks.filter(p => p.status === 'active').map(pack => (
+                  {creditPacks.map(pack => (
                     <div key={pack.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--color-border)' }}>
                       <span style={{ fontSize: '0.875rem' }}>{pack.credits} credits</span>
                       <div style={{ display: 'flex', gap: 8 }}>
-                        <button
-                          onClick={() => { setRefundPack(pack); setShowRefundModal(true) }}
-                          style={{ fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
-                        >
-                          Refund
-                        </button>
+                        {pack.status === 'active' ? (
+                          <button
+                            onClick={() => { setRefundPack(pack); setShowRefundModal(true) }}
+                            style={{ fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                          >
+                            Refund
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-ink-3)', textTransform: 'capitalize' }}>{pack.status}</span>
+                        )}
                       </div>
                     </div>
                   ))}

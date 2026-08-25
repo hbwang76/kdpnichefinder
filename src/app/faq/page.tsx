@@ -15,7 +15,7 @@ const faqs = [
   { q: 'Are credit packs separate from subscriptions?', a: 'Yes. Credit packs are one-time purchases that do not expire. They are for users who prefer pay-as-you-go without a monthly subscription. Credits can be purchased alongside a subscription or independently.' },
   { q: 'What marketplaces are supported?', a: 'KDP Niche Finder covers 12 Amazon marketplaces including US, UK, CA, AU, DE, FR, IT, ES, NL, JP, MX, and BR.' },
   { q: 'Is my data private?', a: 'Yes. We do not sell or share your data. Your analyses are stored securely and are only accessible to you. See our Privacy Policy for full details.' },
-  { q: 'How do refunds work?', a: 'Request a full refund within 7 days of purchase by emailing support@kdpnichefinder.net. Credit card refunds are processed within 5-7 business days. Used credits are non-refundable. Unused credit packs qualify for a refund within 14 days of purchase.' },
+  { q: 'How do refunds work?', a: 'Request a net refund (actual paid amount minus platform/payment-processor fees retained by Creem) within 7 days of purchase by emailing transaction@kdpnichefinder.net. Card refunds are processed within 5–10 business days. Used credits are non-refundable. Unused credit packs qualify for a refund within 7 days of purchase. See the full Refund Policy for details.' },
 ]
 
 export default function FAQPage() {

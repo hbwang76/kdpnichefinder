@@ -341,7 +341,7 @@ export function PricingClient() {
           <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, padding: 24 }}>
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 16 }}>Refund & cancellation</h2>
             <ul style={{ fontSize: '0.875rem', color: 'var(--color-ink-2)', display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 20, listStyle: 'disc' }}>
-              <li><strong>7-day refund window.</strong> New Starter and Pro subscriptions can be canceled within 7 days for a full refund. See our refund policy.</li>
+              <li><strong>7-day refund window.</strong> New Starter and Pro subscriptions can be canceled within 7 days for a <strong>net refund</strong> (the actual amount paid minus any platform/payment-processor fees retained by Creem). See our refund policy.</li>
               <li><strong>Cancel anytime.</strong> Cancel from your account page — no email or phone call required. Your subscription stays active until the end of the current billing period.</li>
               <li><strong>Credit Packs are non-refundable once any credits have been used.</strong> Unused Credit Packs can be refunded within 14 days of purchase.</li>
               <li><strong>30-day notice for price changes.</strong> If we change pricing, we'll email you at least 30 days before the change applies to your subscription.</li>
@@ -365,7 +365,7 @@ export function PricingClient() {
               { q: 'What happens if I exceed my daily analysis limit?', a: 'Starter users can buy Credit Mini ($4.99 / 35 credits) or Credit Standard ($9.99 / 80 credits) to keep going without waiting for the next day\'s reset. Unused daily analyses do not roll over.' },
               { q: 'Can I switch between Monthly and Annual?', a: 'Yes. You can switch at any time. If you switch from Monthly to Annual, the change applies at the start of your next billing cycle. Annual plans are billed once and renew automatically — we\'ll email you 7 days before renewal.' },
               { q: 'Do Credit Packs expire?', a: 'Credit Mini expires 6 months from purchase. Credit Standard expires 12 months from purchase.' },
-              { q: 'Can I get a refund?', a: 'New Starter and Pro subscriptions can be canceled within 7 days for a full refund. See our refund policy for details.' },
+              { q: 'Can I get a refund?', a: 'New Starter and Pro subscriptions can be canceled within 7 days for a net refund (the actual amount paid minus any platform/payment-processor fees retained by Creem). See our refund policy for details.' },
             ].map((item, i) => (
               <details key={i} style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, padding: 16 }}>
                 <summary style={{ cursor: 'pointer', fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif", fontSize: '0.9375rem', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-ink)' }}>
