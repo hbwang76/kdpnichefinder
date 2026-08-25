@@ -176,7 +176,7 @@ export default function AccountContent() {
   const isFree = user.plan === 'free'
   const isStarter = user.plan === 'starter'
   const isPro = user.plan === 'pro'
-  const isCanceled = subscription?.status === 'canceled'
+  const isCanceled = subscription?.status === 'canceled' || subscription?.status === 'refunded'
   const periodEnd = subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString() : null
 
   const planLabel = isPro ? 'Pro' : isStarter ? 'Starter' : 'Free'
