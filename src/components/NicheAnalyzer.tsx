@@ -132,7 +132,7 @@ export function NicheAnalyzer() {
       const res = await fetch('/api/analyses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keyword: keyword.trim() }),
+        body: JSON.stringify({ query: keyword.trim() }),
       })
 
       if (res.status === 429) { setLimitReached(true); setLoading(false); return }
