@@ -46,9 +46,9 @@ export async function POST(request: NextRequest) {
 
   // 2. Find active subscription
   const subscription = await db.prepare(
-    'SELECT id, plan, status, creem_subscription_id FROM subscriptions WHERE user_id = ? AND status = ? ORDER BY created_at DESC LIMIT 1'
+    'SELECT id, plan, status, creem_subscription_id, raw_json FROM subscriptions WHERE user_id = ? AND status = ? ORDER BY created_at DESC LIMIT 1'
   ).bind(userId, 'active').first<{
-    id: string; plan: string; status: string; creem_subscription_id: string
+    id: string; plan: string; status: string; creem_subscription_id: string; raw_json: string | null
   }>()
   if (!subscription) {
     return NextResponse.json({ error: 'no_active_subscription' }, { status: 404 })
@@ -61,7 +61,16 @@ export async function POST(request: NextRequest) {
 
   const creditsToReclaim = pack?.credits ?? 0
 
-  // 4. Call Creem refund — find the payment transaction from subscription
+  // 4. Extract last_transaction_id from raw_json for the refund API call
+  let transactionIdForRefund: string | null = null
+  if (subscription.raw_json) {
+    try {
+      const raw = JSON.parse(subscription.raw_json)
+      transactionIdForRefund = (raw as Record<string, unknown>).last_transaction_id as string | null
+    } catch { /* ignore */ }
+  }
+
+  // 5. Call Creem refund — use last_transaction_id from raw_json (tran_xxx)
   const apiKey = env.CREEM_API_KEY ?? ''
   const isTestMode = env.CREEM_TEST_MODE === 'true'
   const apiBase = isTestMode ? 'https://test-api.creem.io' : (env.CREEM_API_BASE ?? 'https://api.creem.io')
@@ -70,21 +79,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'refund_service_unavailable', message: 'Please request refund through Creem dashboard.' }, { status: 503 })
   }
 
-  // Step 3: resolve real transaction_id from Creem Checkout API via subscription's checkout history
-  let resolvedTransactionId: string | null = null
-  try {
-    const checkoutRes = await fetch(`${apiBase}/v1/checkouts`, {
-      headers: { 'x-api-key': apiKey }
-    })
-    if (checkoutRes.ok) {
-      const checkoutsData = await checkoutRes.json() as { checkouts?: Array<{ id: string; subscription?: string; order?: { transaction?: string } }> }
-      const matching = checkoutsData.checkouts?.find(c => c.subscription === subscription.creem_subscription_id)
-      resolvedTransactionId = matching?.order?.transaction ?? null
-    }
-  } catch { /* ignore */ }
-
-  // Step 4: attempt refund with resolved transaction_id, then subscription_id as fallback
-  const refundTransactionId = resolvedTransactionId ?? subscription.creem_subscription_id
+  const refundTransactionId = transactionIdForRefund ?? subscription.creem_subscription_id
 
   const refundRes = await fetch(`${apiBase}/v1/refunds`, {
     method: 'POST',
