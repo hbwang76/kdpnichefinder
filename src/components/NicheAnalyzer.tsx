@@ -223,7 +223,17 @@ export function NicheAnalyzer() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [limitReached, setLimitReached] = useState(false)
+  const [userPlan, setUserPlan] = useState<string>('guest')
   const resultsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(data => {
+        if (data.authenticated) setUserPlan(data.user?.plan ?? 'free')
+      })
+      .catch(() => {})
+  }, [])
 
   const handleAnalyze = async () => {
     if (!keyword.trim()) return
@@ -330,7 +340,7 @@ export function NicheAnalyzer() {
                 cursor: loading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif",
               }}
             >
-              {loading ? 'Analyzing...' : 'Analyze Now — Free'}
+              {loading ? 'Analyzing...' : userPlan === 'guest' ? 'Analyze Now — Free' : userPlan === 'free' ? 'Analyze Now' : 'Analyze Now'}
             </button>
           </div>
 
