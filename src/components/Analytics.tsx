@@ -6,7 +6,7 @@ const PLAUSIBLE_SCRIPT_URL =
   process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL ||
   "https://plausible.io/js/script.js";
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? 'G-L1ZZDZHCKQ';
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
 const AHREFS_ID = process.env.NEXT_PUBLIC_AHREFS_ANALYTICS_ID;
 
