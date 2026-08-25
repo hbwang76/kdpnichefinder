@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
   if (!creemOrderId) return NextResponse.json({ error: 'order_id_required' }, { status: 400 })
 
   const packRow = await db.prepare(
-    'SELECT id, credits, status, user_id, gateway_checkout_id FROM credit_packs WHERE creem_order_id = ? AND user_id = ?'
-  ).bind(creemOrderId, session.user_id).first<{ id: string; credits: number; status: string; user_id: string; gateway_checkout_id: string | null }>()
+    'SELECT id, credits, status, user_id, gateway_checkout_id, creem_order_id FROM credit_packs WHERE creem_order_id = ? AND user_id = ?'
+  ).bind(creemOrderId, session.user_id).first<{ id: string; credits: number; status: string; user_id: string; gateway_checkout_id: string | null; creem_order_id: string }>()
   if (!packRow) return NextResponse.json({ error: 'pack_not_found' }, { status: 404 })
   if (packRow.status === 'refunded') return NextResponse.json({ error: 'already_refunded' }, { status: 409 })
 
@@ -53,47 +53,17 @@ export async function POST(request: NextRequest) {
     }, { status: 503 })
   }
 
-  // Step 1: resolve real transaction_id from Creem Checkout API
-  let resolvedTransactionId: string | null = null
-  if (packRow.gateway_checkout_id) {
-    try {
-      const checkoutRes = await fetch(`${apiBase}/v1/checkouts/${packRow.gateway_checkout_id}`, {
-        headers: { 'x-api-key': apiKey }
-      })
-      if (checkoutRes.ok) {
-        const checkoutData = await checkoutRes.json() as { order?: { transaction?: string } }
-        resolvedTransactionId = checkoutData.order?.transaction ?? null
-      }
-    } catch { /* ignore */ }
-  }
+  // Use creem_order_id (stored as tran_xxx from webhookTransactionId) as the refund transaction ID.
+  // gateway_checkout_id (ch_xxx) is NOT a valid Creem refund transaction identifier.
+  const refundTransactionId = packRow.creem_order_id
 
-  // Step 2: attempt refund with resolved transaction_id, then checkout_id as fallback
-  let refundRes: Response | null = null
-  let refundBody = ''
+  const refundRes = await fetch(`${apiBase}/v1/refunds`, {
+    method: 'POST',
+    headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ transaction_id: refundTransactionId }),
+  })
 
-  if (resolvedTransactionId) {
-    refundRes = await fetch(`${apiBase}/v1/refunds`, {
-      method: 'POST',
-      headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transaction_id: resolvedTransactionId }),
-    })
-  }
-
-  if (!refundRes || !refundRes.ok) {
-    // Fallback to checkout_id
-    const fallbackId = resolvedTransactionId ?? packRow.gateway_checkout_id
-    if (fallbackId) {
-      refundRes = await fetch(`${apiBase}/v1/refunds`, {
-        method: 'POST',
-        headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transaction_id: fallbackId }),
-      })
-    }
-  }
-
-  refundBody = await (refundRes?.text().catch(() => '') ?? Promise.resolve(''))
-  const refundStatus = refundRes?.status ?? 0
-  console.log('REFUND_DEBUG', { status: refundStatus, resolvedTransactionId, checkoutId: packRow.gateway_checkout_id, body: refundBody.slice(0, 300) })
+  const refundBody = await (refundRes?.text().catch(() => '') ?? Promise.resolve(''))
 
   if (refundRes?.ok) {
     const ts = now()
