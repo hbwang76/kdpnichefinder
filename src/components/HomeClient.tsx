@@ -229,14 +229,14 @@ export function HomeClient() {
                 type="submit"
                 className="bg-signal text-white rounded-btn px-6 py-4 font-body text-base font-semibold hover:opacity-85 transition-opacity text-center card-shadow self-start"
               >
-                Try the Niche Finder — Free Preview
+                立即分析 — 免费
               </button>
             </form>
             <p className="font-body text-sm text-ink/70">
-              No signup needed · 1 analysis/day · Cancel anytime
+              无需注册 · 每天 1 次免费分析 · 随时取消
             </p>
             <p className="font-mono text-[11px] text-ink-3 uppercase tracking-widest">
-              AI-generated recommendations are estimates based on publicly available data.
+              AI 建议仅供参考，基于公开数据
             </p>
             <p className="font-body text-[13px] text-ink/60 leading-relaxed">
               Publisher Rocket charges $199 one-time. Helium 10 starts at $37/mo and was built for Amazon FBA, not KDP. KDP Niche Finder is free to try — Starter starts at $9.99/mo, Pro at $29.99/mo.
@@ -316,7 +316,7 @@ export function HomeClient() {
         {/* § Sample output eyebrow */}
         <div className="mb-4">
           <span className="font-mono text-[11px] text-signal uppercase tracking-widest">
-            § Sample output
+            § 示例结果
           </span>
         </div>
 
@@ -344,7 +344,7 @@ export function HomeClient() {
               <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
             <div className="flex flex-col gap-1">
-              <h3 className="font-display text-lg font-bold text-ink">Your niche could be next</h3>
+              <h3 className="font-display text-lg font-bold text-ink">下一个可能就是你的 niche</h3>
               <p className="font-body text-sm text-ink/70">
                 Type one niche. Get five ranked niches with a full action plan.
               </p>
@@ -354,7 +354,7 @@ export function HomeClient() {
             onClick={() => router.push('/tools/kdp-niche-finder')}
             className="bg-signal text-white rounded-btn px-5 py-2.5 font-body text-sm font-semibold hover:opacity-85 transition-opacity shrink-0"
           >
-            Try the Niche Finder — Free Preview
+            立即分析 — 免费
           </button>
         </div>
       </section>
@@ -378,7 +378,7 @@ export function HomeClient() {
       <section className="px-4 md:px-12 pt-16 max-w-7xl mx-auto">
         <div className="bg-white rounded-card border border-border overflow-hidden max-w-3xl">
           <div className="p-4 border-b border-border bg-surface">
-            <h2 className="font-display text-xl font-bold text-ink">What you get with every analysis</h2>
+            <h2 className="font-display text-xl font-bold text-ink">每次分析包含什么</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[560px]">
@@ -410,7 +410,7 @@ export function HomeClient() {
       <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
         <div className="mb-6 max-w-2xl">
           <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-1">
-            § Field comparison
+            § 竞品对比
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight tracking-tight">
             Why KDP Niche Finder
@@ -460,7 +460,7 @@ export function HomeClient() {
       <section className="px-4 md:px-12 pt-16 pb-0 max-w-7xl mx-auto">
         <div className="mb-6 max-w-2xl">
           <span className="font-mono text-[11px] text-signal uppercase tracking-widest block mb-1">
-            § Pipeline
+            § 工作流程
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight tracking-tight">
             How KDP Niche Finder works
@@ -538,7 +538,7 @@ export function HomeClient() {
               onClick={() => router.push('/tools/kdp-niche-finder')}
               className="bg-transparent text-white border-2 border-white rounded-btn px-6 py-3.5 font-body text-base font-semibold hover:bg-white/10 transition-colors"
             >
-              Try the Niche Finder — Free Preview
+              立即分析 — 免费
             </button>
             <Link
               href="/pricing"
