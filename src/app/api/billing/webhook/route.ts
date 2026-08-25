@@ -357,6 +357,8 @@ async function handleRefund(
 }
 
 // ─── Revoke subscription access ───────────────────────────────────────────────
+// subscription.canceled/subscription.paused: only mark cancel_at_period_end=1 (access continues until period end)
+// subscription.expired/refund: actually downgrade to free and deduct credits
 async function revokeAccess(
   db: DbClient,
   userId: string,
@@ -367,12 +369,20 @@ async function revokeAccess(
   const subscriptionId = asString((object.subscription as Record<string, unknown>)?.id)
     ?? asString((object as Record<string, unknown>).subscription_id)
   const ts = now()
+
   if (subscriptionId) {
     await db.prepare(
       'UPDATE subscriptions SET status = ?, cancel_at_period_end = 1, updated_at = ? WHERE creem_subscription_id = ?'
-    ).bind('cancelled', ts, subscriptionId).run()
+    ).bind('canceled', ts, subscriptionId).run()
   }
-  await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind('free', ts, userId).run()
+
+  // subscription.canceled / subscription.paused: user keeps access until period end
+  // subscription.expired / refund events: actually downgrade
+  if (eventType === 'subscription.expired') {
+    await db.prepare('UPDATE users SET plan = ?, updated_at = ? WHERE id = ?').bind('free', ts, userId).run()
+  }
+
+  // For refund events, deduct credits is handled by handleRefund — no double deduction here
 }
 
 // ─── Webhook debug ──────────────────────────────────────────────────────────────
