@@ -306,24 +306,10 @@ export default function AccountContent() {
               )}
               {(isStarter || isPro) && !isCanceled && (
                 <button
-                  onClick={handleCancelSubscription}
-                  disabled={actionLoading}
-                  style={{
-                    display: 'block', width: '100%', background: 'var(--color-surface)', color: '#ef4444',
-                    padding: '10px 20px', borderRadius: 10, fontWeight: 600,
-                    textDecoration: 'none', textAlign: 'center', fontSize: '0.875rem',
-                    border: '2px solid #ef4444', cursor: 'pointer',
-                  }}
-                >
-                  {actionLoading ? 'Processing...' : 'Cancel Subscription'}
-                </button>
-              )}
-              {(isStarter || isPro) && !isCanceled && (
-                <button
                   onClick={() => setShowSubRefundModal(true)}
                   disabled={actionLoading}
                   style={{
-                    display: 'block', marginTop: 8, width: '100%', background: 'var(--color-surface)', color: '#ef4444',
+                    display: 'block', width: '100%', background: 'var(--color-surface)', color: '#ef4444',
                     padding: '10px 20px', borderRadius: 10, fontWeight: 600,
                     textDecoration: 'none', textAlign: 'center', fontSize: '0.875rem',
                     border: '2px solid #ef4444', cursor: 'pointer',
