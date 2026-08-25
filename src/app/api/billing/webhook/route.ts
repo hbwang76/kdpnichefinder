@@ -165,6 +165,16 @@ function webhookAmount(object: Record<string, unknown>): number {
   )
 }
 
+// Creem processing fee in cents. Creem keeps this fee even on refunds,
+// so the net received amount is gross - fee. Defaults match Creem's
+// standard rate (3.9% + $0.40); override via env if the rate changes.
+function creemFeeCents(amountCents: number, env: Record<string, string | undefined>): number {
+  if (!amountCents || amountCents <= 0) return 0
+  const percent = Number(env.CREEM_FEE_PERCENT ?? '3.9')
+  const fixed = Number(env.CREEM_FEE_FIXED_CENTS ?? '40')
+  return Math.round(amountCents * (percent / 100) + fixed)
+}
+
 function webhookCurrency(object: Record<string, unknown>): string {
   const order = asRecord(object.order)
   const transaction = asRecord(object.last_transaction)
@@ -241,6 +251,9 @@ async function recordPurchase(
   const amount = webhookAmount(object)
   const currency = webhookCurrency(object)
   const ts = now()
+  const feeCents = creemFeeCents(amount, env)
+  const netCents = amount > 0 ? amount - feeCents : null
+  console.log('CREDIT_PACK_AMOUNTS', JSON.stringify({ eventType, plan, amountCents: amount, feeCents, netCents, currency }))
 
   // ── checkout.completed → one-time credit packs only, no subscription record ──
   // ── subscription.paid    → subscription record + optional credit pack ───────
@@ -253,12 +266,16 @@ async function recordPurchase(
 
     if (subscriptionId) {
       await db.prepare(`
-        INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, raw_json, created_at, updated_at)
-        VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?, ?)
+        INSERT INTO subscriptions (id, user_id, plan, creem_subscription_id, status, current_period_start, current_period_end, cancel_at_period_end, raw_json, last_payment_amount_cents, last_payment_fee_cents, last_payment_net_cents, last_payment_currency, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 'active', ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(creem_subscription_id) DO UPDATE SET
           plan = excluded.plan, status = excluded.status,
           current_period_end = excluded.current_period_end,
           raw_json = excluded.raw_json,
+          last_payment_amount_cents = excluded.last_payment_amount_cents,
+          last_payment_fee_cents = excluded.last_payment_fee_cents,
+          last_payment_net_cents = excluded.last_payment_net_cents,
+          last_payment_currency = excluded.last_payment_currency,
           updated_at = excluded.updated_at
       `).bind(
         id(), userId, config.plan,
@@ -266,6 +283,10 @@ async function recordPurchase(
         periodStart,
         periodEnd,
         JSON.stringify(object),
+        amount > 0 ? amount : null,
+        amount > 0 ? feeCents : null,
+        netCents,
+        amount > 0 ? currency : null,
         ts, ts
       ).run()
     }
@@ -281,10 +302,11 @@ async function recordPurchase(
     // keyed by subscription_id so handleRefund can find it by subscription_id
     if (subscriptionId && creditsGranted > 0) {
       await db.prepare(`
-        INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at)
-        VALUES (?, ?, ?, ?, 'active', ?)
+        INSERT INTO credit_packs (id, user_id, creem_order_id, credits, status, purchased_at, amount_cents, fee_cents, net_cents, currency)
+        VALUES (?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)
         ON CONFLICT(creem_order_id) DO NOTHING
-      `).bind(id(), userId, subscriptionId, creditsGranted, ts).run()
+      `).bind(id(), userId, subscriptionId, creditsGranted, ts,
+        amount > 0 ? amount : null, amount > 0 ? feeCents : null, netCents, amount > 0 ? currency : null).run()
 
       const ledgerRow = await db.prepare(
         'SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?'
@@ -302,10 +324,11 @@ async function recordPurchase(
   // checkout.completed → one-time credit packs only
   if (config.pricingModel === 'one_time_credits' && creditsGranted > 0) {
     await db.prepare(`
-      INSERT INTO credit_packs (id, user_id, creem_order_id, gateway_checkout_id, credits, status, purchased_at)
-      VALUES (?, ?, ?, ?, ?, 'active', ?)
+      INSERT INTO credit_packs (id, user_id, creem_order_id, gateway_checkout_id, credits, status, purchased_at, amount_cents, fee_cents, net_cents, currency)
+      VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)
       ON CONFLICT(creem_order_id) DO NOTHING
-    `).bind(id(), userId, purchaseId, checkoutId, creditsGranted, ts).run()
+    `).bind(id(), userId, purchaseId, checkoutId, creditsGranted, ts,
+      amount > 0 ? amount : null, amount > 0 ? feeCents : null, netCents, amount > 0 ? currency : null).run()
 
     // Update ledger
     const ledgerRow = await db.prepare(
@@ -346,6 +369,9 @@ async function handleRefund(
   if (!pack || pack.status === 'refunded') return
 
   const ts = now()
+  // Actual refunded amount from Creem (refund_amount is in cents on RefundEntity).
+  // For partial refunds this is less than the original gross amount.
+  const refundAmountCents = Number(object.refund_amount ?? 0) || null
 
   // Deduct from ledger
   const ledgerRow = await db.prepare(
@@ -357,8 +383,9 @@ async function handleRefund(
     VALUES (?, ?, ?, ?, 'refund', ?, ?)
   `).bind(id(), pack.user_id, -pack.credits, newBalance, orderId, ts).run()
 
-  // Mark pack as refunded
-  await db.prepare('UPDATE credit_packs SET status = ? WHERE id = ?').bind('refunded', pack.id).run()
+  // Mark pack as refunded and record the actual refunded amount
+  await db.prepare('UPDATE credit_packs SET status = ?, refund_amount_cents = COALESCE(?, refund_amount_cents) WHERE id = ?')
+    .bind('refunded', refundAmountCents, pack.id).run()
 }
 
 // ─── Revoke subscription access ───────────────────────────────────────────────
