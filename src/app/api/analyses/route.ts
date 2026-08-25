@@ -35,15 +35,35 @@ export async function POST(request: NextRequest) {
   const query = body.query?.trim()
   if (!query) return NextResponse.json({ error: 'query is required' }, { status: 400 })
 
-  // Free tier limit
+  // --- Credit deduction for plan='free' users who have credits ---
   if (!user || tier === 'free') {
     const dayStart = ts - (ts % 86400)
-    const uid = user?.user_id
-    const existing = uid
-      ? await db.prepare('SELECT id FROM analyses WHERE user_id = ? AND created_at >= ? LIMIT 1').bind(uid, dayStart).first()
-      : await db.prepare('SELECT id FROM analyses WHERE query = ? AND created_at >= ? AND tier = ?').bind(`free_ip_${ip}_${dayStart}`, dayStart, 'free').first()
-    if (existing) {
-      return NextResponse.json({ error: 'Free daily limit reached. Login to check your plan or purchase credits.', code: 'FREE_LIMIT_REACHED' }, { status: 429 })
+
+    // Check if user has a credit balance
+    let creditBalance = 0
+    if (user?.user_id) {
+      const bal = await db
+        .prepare("SELECT COALESCE(SUM(amount), 0) as balance FROM credit_ledger WHERE user_id = ?")
+        .bind(user.user_id)
+        .first<{ balance: number }>()
+      creditBalance = bal?.balance ?? 0
+    }
+
+    if (creditBalance > 0) {
+      // Has credits — deduct 1 and allow
+      const balanceAfter = creditBalance - 1
+      await db.prepare('INSERT INTO credit_ledger (id, user_id, amount, reason, balance_after, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(generateId('cl_'), user?.user_id, -1, 'consume', balanceAfter, ts)
+        .run()
+      // fall through to analysis
+    } else {
+      // No credits — enforce 1/day free limit
+      const existing = user?.user_id
+        ? await db.prepare('SELECT id FROM analyses WHERE user_id = ? AND created_at >= ? LIMIT 1').bind(user.user_id, dayStart).first()
+        : await db.prepare('SELECT id FROM analyses WHERE query = ? AND created_at >= ? AND tier = ?').bind(`free_ip_${ip}_${dayStart}`, dayStart, 'free').first()
+      if (existing) {
+        return NextResponse.json({ error: 'Free daily limit reached. Login to check your plan or purchase credits.', code: 'FREE_LIMIT_REACHED' }, { status: 429 })
+      }
     }
   }
 
