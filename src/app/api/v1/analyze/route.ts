@@ -1,18 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
+  let body: { query?: string } = {}
   try {
-    const { query } = await req.json();
-    if (!query || typeof query !== 'string') {
-      return NextResponse.json({ error: 'query is required' }, { status: 400 });
-    }
-    // TODO: implement niche analysis logic
-    return NextResponse.json({
-      niches: [
-        { id: 1, name: query, score: 75, competition: 'MED', bsr: '15k-40k' }
-      ]
-    });
-  } catch (e) {
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'body must be valid JSON' }, { status: 400 })
   }
+
+  const query = body.query?.trim()
+  if (!query) {
+    return NextResponse.json({ error: 'query is required' }, { status: 400 })
+  }
+
+  // TODO: implement niche analysis logic
+  return NextResponse.json({
+    niches: [
+      { id: 1, name: query, score: 75, competition: 'MED', bsr: '15k-40k' }
+    ]
+  })
 }
