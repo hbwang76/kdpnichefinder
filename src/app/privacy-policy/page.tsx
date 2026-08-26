@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy',
+  title: 'Privacy Policy — KDP Niche Finder',
   description: 'How KDP Niche Finder collects, uses, and protects your personal information. GDPR and CCPA compliant.',
   alternates: { canonical: '/privacy-policy' },
 }

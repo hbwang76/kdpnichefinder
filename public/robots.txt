@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+Disallow: /account
+Disallow: /login
+Disallow: /api/
+
 Sitemap: https://kdpnichefinder.net/sitemap.xml

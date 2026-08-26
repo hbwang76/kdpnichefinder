@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Sign In — KDP Niche Finder',
-  description: 'Sign in to your KDP Niche Finder account to access saved analyses and unlimited searches.',
+  title: 'Sign In to KDP Niche Finder',
+  description: 'Sign in with Google to access your saved analyses and unlock unlimited KDP niche searches.',
   alternates: { canonical: '/login' },
   robots: { index: false, follow: true },
   openGraph: { url: 'https://kdpnichefinder.net/login' },

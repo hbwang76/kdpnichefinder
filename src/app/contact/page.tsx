@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Contact — KDP Niche Finder',
-  description: 'Get in touch with the KDP Niche Finder team.',
+  title: 'Contact Us — KDP Niche Finder',
+  description: 'Get in touch with the KDP Niche Finder team. We respond within 48 hours on business days.',
   alternates: { canonical: '/contact' },
   openGraph: { url: 'https://kdpnichefinder.net/contact' },
 }

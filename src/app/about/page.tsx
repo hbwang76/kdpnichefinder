@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'About KDP Niche Finder',
-  description: 'Learn about KDP Niche Finder — AI-powered niche research tool for KDP authors.',
+  title: 'About — KDP Niche Finder',
+  description: 'KDP Niche Finder is an independent AI-powered niche research tool for KDP self-publishers. Not affiliated with Amazon or any referenced brands.',
   alternates: { canonical: '/about' },
   openGraph: { url: 'https://kdpnichefinder.net/about' },
 }

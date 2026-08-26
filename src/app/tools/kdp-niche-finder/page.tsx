@@ -32,9 +32,31 @@ function LoadingAnalyzer() {
 }
 
 export default function ToolPage() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'KDP Niche Finder — AI-Powered Niche Research Tool',
+    description: 'Find profitable KDP niches with AI scoring, estimated BSR, competition analysis, and action plans. Free preview available.',
+    url: 'https://kdpnichefinder.net/tools/kdp-niche-finder',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web Browser',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      description: 'Free preview — 1 analysis per day',
+    },
+  }
+
   return (
-    <Suspense fallback={<LoadingAnalyzer />}>
-      <NicheAnalyzer />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Suspense fallback={<LoadingAnalyzer />}>
+        <NicheAnalyzer />
+      </Suspense>
+    </>
   )
 }
