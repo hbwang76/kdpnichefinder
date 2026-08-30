@@ -6,6 +6,14 @@ interface DbClient {
   prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; run(): Promise<unknown> } }
 }
 
+interface LoginUser {
+  id: string
+  email: string
+  name: string | null
+  password_hash: string
+  plan: string
+}
+
 async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
   try {
     const [saltB64, hash] = storedHash.split(':')
@@ -38,7 +46,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'email and password are required' }, { status: 400 })
   }
 
-  const user = await db.prepare('SELECT id, email, name, password_hash, plan FROM users WHERE email = ?').bind(email).first()
+  const user = await db.prepare('SELECT id, email, name, password_hash, plan FROM users WHERE email = ?').bind(email).first<LoginUser>()
   if (!user) {
     return NextResponse.json({ error: 'invalid credentials' }, { status: 401 })
   }

@@ -6,12 +6,26 @@ interface DbClient {
   prepare: (sql: string) => { bind: (...vals: unknown[]) => { first<T>(): Promise<T | null>; all<T>(): Promise<{ results: T[] }> } }
 }
 
+interface SessionUser {
+  id: string
+  user_id: string
+  email: string
+  name: string | null
+  plan: string
+}
+
+interface SubscriptionSummary {
+  status: string
+  cancel_at_period_end: number
+  current_period_end: number | null
+}
+
 async function getSessionUser(db: DbClient, request: NextRequest) {
   const sessionId = cookie(request, 'session_id')
   if (!sessionId) return null
   return db.prepare(
     'SELECT s.id, s.user_id, u.email, u.name, u.plan FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = ? AND s.expires_at > ?'
-  ).bind(sessionId, now()).first()
+  ).bind(sessionId, now()).first<SessionUser>()
 }
 
 export async function GET(request: NextRequest) {
@@ -35,7 +49,7 @@ export async function GET(request: NextRequest) {
 
   const subscription = await db.prepare(
     'SELECT status, cancel_at_period_end, current_period_end FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
-  ).bind(user.user_id).first()
+  ).bind(user.user_id).first<SubscriptionSummary>()
 
   return NextResponse.json({
     plan: user.plan,
