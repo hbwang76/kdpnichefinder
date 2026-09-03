@@ -4,7 +4,7 @@ import { NicheAnalyzer } from '@/components/NicheAnalyzer'
 
 export const metadata: Metadata = {
   title: 'KDP Niche Finder — AI-Powered Niche Research Tool',
-  description: 'Find profitable KDP niches with AI scoring, estimated BSR, competition analysis, and action plans. Free preview available.',
+  description: 'Find profitable KDP niches with AI scoring, estimated BSR, competition analysis, and step-by-step action plans. Free preview available, no signup required.',
   alternates: { canonical: '/tools/kdp-niche-finder' },
 }
 

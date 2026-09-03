@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'FAQ — KDP Niche Finder',
-  description: 'Answers to common questions about KDP Niche Finder: pricing, data sources, AI accuracy, refunds, and account access.',
+  description: 'Answers to common questions about KDP Niche Finder: pricing plans, data sources, AI accuracy, refunds, and how to access your account details.',
   alternates: { canonical: '/faq' },
   openGraph: { url: 'https://kdpnichefinder.net/faq' },
 }

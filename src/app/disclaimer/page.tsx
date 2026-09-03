@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Disclaimer',
-  description: 'KDP Niche Finder is an independent third-party tool. Not affiliated with Amazon.com, Inc. or any third-party brands referenced. AI-generated content is for informational purposes only.',
+  description: 'KDP Niche Finder is an independent third-party tool. Not affiliated with Amazon.com, Inc. or any third-party brands referenced on this site.',
   alternates: { canonical: '/disclaimer' },
 }
 

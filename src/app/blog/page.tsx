@@ -6,10 +6,10 @@ import { BlogCardGrid } from '@/components/blog/BlogCardGrid'
 export const metadata: Metadata = {
   title: 'KDP Blog — Niche Research Guides, Data & Alternatives | KDPNicheFinder',
   description:
-    'In-depth KDP niche guides, BSR data, and tool comparisons. Updated monthly. Find profitable niches for your next book.',
+    'In-depth KDP niche guides, BSR data, and tool comparisons for self-publishers. Updated monthly. Find profitable niches for your next book today.',
   openGraph: {
     title: 'KDP Blog — Niche Research Guides & Data',
-    description: 'In-depth KDP niche guides, BSR data, and tool comparisons. Updated monthly.',
+    description: 'In-depth KDP niche guides, BSR data, and tool comparisons for self-publishers. Updated monthly with practical market research insights and ideas.',
     type: 'website',
     url: 'https://kdpnichefinder.net/blog',
     siteName: 'KDP Niche Finder',

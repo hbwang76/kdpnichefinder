@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — KDP Niche Finder',
-  description: 'How KDP Niche Finder collects, uses, and protects your personal information. GDPR and CCPA compliant.',
+  description: 'How KDP Niche Finder collects, uses, and protects your personal information. GDPR and CCPA compliant. Read our full privacy policy here today.',
   alternates: { canonical: '/privacy-policy' },
 }
 

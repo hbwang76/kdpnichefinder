@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Refund Policy',
-  description: 'KDP Niche Finder refund policy. Net refund (actual paid amount after platform fees) within 7 days for first-time monthly subscribers, 14-day pro-rata for annual plans, unused credit refund within 7 days.',
+  description: 'KDP Niche Finder refund policy. Net refund within 7 days for first-time monthly subscribers, 14-day pro-rata for annual plans, credits refundable within 7 days.',
   alternates: { canonical: '/refund-policy' },
 }
 

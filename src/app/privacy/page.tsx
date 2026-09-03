@@ -3,7 +3,7 @@ import PrivacyPolicyPage from '../privacy-policy/page'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'How KDP Niche Finder collects, uses, and protects your personal information. GDPR and CCPA compliant.',
+  description: 'How KDP Niche Finder collects, uses, and protects your personal information. GDPR and CCPA compliant. Read our full privacy policy here today.',
   alternates: { canonical: '/privacy' },
 }
 

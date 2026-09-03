@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Sign In to KDP Niche Finder',
-  description: 'Sign in with Google to access your saved analyses and unlock unlimited KDP niche searches.',
+  description: 'Sign in with Google to access your saved niche analyses, view your subscription plan, and unlock unlimited KDP niche searches on KDP Niche Finder.',
   alternates: { canonical: '/login' },
   robots: { index: false, follow: true },
   openGraph: { url: 'https://kdpnichefinder.net/login' },

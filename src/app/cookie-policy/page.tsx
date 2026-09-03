@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Cookie Policy',
-  description: 'How KDP Niche Finder uses cookies and similar technologies. Strictly necessary, analytics, and marketing cookies explained.',
+  description: 'How KDP Niche Finder uses cookies and similar technologies. Strictly necessary, analytics, and marketing cookies explained with your choices.',
   alternates: { canonical: '/cookie-policy' },
 }
 

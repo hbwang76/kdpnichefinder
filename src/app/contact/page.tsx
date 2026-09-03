@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Contact Us — KDP Niche Finder',
-  description: 'Get in touch with the KDP Niche Finder team. We respond within 48 hours on business days.',
+  description: 'Get in touch with the KDP Niche Finder team. Questions about pricing, data sources, AI accuracy, refunds, or account access — we respond within 48 hours.',
   alternates: { canonical: '/contact' },
   openGraph: { url: 'https://kdpnichefinder.net/contact' },
 }

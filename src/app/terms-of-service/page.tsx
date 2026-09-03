@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'Terms and conditions for using KDP Niche Finder. Governed by the laws of the Republic of Estonia.',
+  description: 'Terms and conditions for using KDP Niche Finder. Governed by the laws of the Republic of Estonia. Read our complete terms of service right now.',
   alternates: { canonical: '/terms-of-service' },
 }
 
