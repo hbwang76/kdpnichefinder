@@ -2,10 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  const hostname = request.headers.get('host')?.split(':')[0].toLowerCase()
+  const hostCandidates = [
+    request.nextUrl.hostname,
+    request.headers.get('x-forwarded-host')?.split(',')[0]?.trim(),
+    request.headers.get('host')?.split(':')[0],
+  ].filter(Boolean).map(host => host!.toLowerCase())
 
   // Keep one canonical host so Google does not index duplicate www URLs.
-  if (hostname === 'www.kdpnichefinder.net') {
+  if (hostCandidates.includes('www.kdpnichefinder.net')) {
     const url = request.nextUrl.clone()
     url.hostname = 'kdpnichefinder.net'
     return NextResponse.redirect(url, 308)
