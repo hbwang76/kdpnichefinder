@@ -3,8 +3,8 @@ import { Suspense } from 'react'
 import { NicheAnalyzer } from '@/components/NicheAnalyzer'
 
 export const metadata: Metadata = {
-  title: 'KDP Niche Finder — AI-Powered Niche Research Tool',
-  description: 'Find profitable KDP niches with AI scoring, estimated BSR, competition analysis, and step-by-step action plans. Free preview available, no signup required.',
+  title: 'KDP Niche Finder — Profitable Amazon KDP Niche Research',
+  description: 'Find profitable KDP niches with BSR scoring, competition analysis, and step-by-step action plans. Free preview available, no signup required.',
   alternates: { canonical: '/tools/kdp-niche-finder' },
 }
 

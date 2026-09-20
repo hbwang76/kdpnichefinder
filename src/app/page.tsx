@@ -2,13 +2,13 @@ import type { Metadata } from 'next'
 import { HomeClient } from '@/components/HomeClient'
 
 export const metadata: Metadata = {
-  title: 'KDP Niche Finder — Find Profitable Amazon KDP Niches with AI',
+  title: 'KDP Niche Finder — Find Profitable Amazon KDP Niches',
   description:
-    'AI-powered niche research for KDP authors. Find low-competition, high-demand book ideas with estimated BSR, competition scores, and action plans.',
+    'Find low-competition, high-demand KDP book ideas with estimated BSR, competition scores, and step-by-step action plans. Free preview, no signup.',
   alternates: { canonical: 'https://kdpnichefinder.net' },
   openGraph: {
-    title: 'KDP Niche Finder — Find Profitable Amazon KDP Niches with AI',
-    description: 'AI-powered niche research for KDP authors. Find low-competition book ideas, compare demand signals, and get practical next steps with a free preview.',
+    title: 'KDP Niche Finder — Find Profitable Amazon KDP Niches',
+    description: 'Find low-competition, high-demand KDP book ideas with estimated BSR, competition scores, and action plans. Free preview, no signup.',
     type: 'website',
     url: 'https://kdpnichefinder.net',
     siteName: 'KDP Niche Finder',
