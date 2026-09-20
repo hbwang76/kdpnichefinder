@@ -316,11 +316,12 @@ export function NicheAnalyzer() {
               <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
             <input
+              id="niche-input"
               type="text"
               value={keyword}
               onChange={e => setKeyword(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAnalyze()}
-              placeholder="Try: ADHD planner for adults, 5x8 inch journal, habit tracker for moms..."
+              placeholder="Try: ADHD planner for adults, 5x8 inch journal, habit tracker for moms"
               style={{
                 width: '100%', height: 56, paddingLeft: 48, paddingRight: 160,
                 border: '2px solid var(--color-border)', borderRadius: 12,
@@ -340,7 +341,7 @@ export function NicheAnalyzer() {
                 cursor: loading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', fontFamily: "'Manrope', sans-serif",
               }}
             >
-              {loading ? 'Analyzing...' : userPlan === 'guest' ? 'Analyze Now — Free' : userPlan === 'free' ? 'Analyze Now' : 'Analyze Now'}
+              {loading ? 'Analyzing…' : userPlan === 'guest' ? 'Analyze Now — Free' : 'Analyze Now'}
             </button>
           </div>
 
@@ -400,7 +401,7 @@ export function NicheAnalyzer() {
             {loading ? (
               <>
                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>Analyzing your topic...</h2>
+                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>Analyzing your topic…</h2>
                   <p style={{ color: 'var(--color-ink-2)', fontSize: '0.9375rem' }}>Generating 5 recommended niches, each with an action plan</p>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 20 }}>

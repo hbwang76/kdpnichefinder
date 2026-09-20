@@ -198,18 +198,19 @@ export function HomeClient() {
           <div className="flex flex-col gap-5">
             {/* Tag line */}
             <div className="flex items-center gap-2">
-              <span className="bg-signal/10 text-signal font-mono text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-widest">
+              <span
+                className="font-mono text-[11px] text-ink-3 uppercase tracking-widest"
+                data-tooltip="Start with the topic, audience, or format you want to explore."
+              >
                 For KDP Authors
               </span>
             </div>
 
             <h1 className="font-display text-4xl md:text-[3.5rem] font-bold text-ink leading-[1.05] tracking-tight">
-              Check before you write —
-              <br />
-              <span className="text-signal">30 seconds to know if it's worth writing.</span>
+              Find your next profitable KDP niche in almost 30 seconds
             </h1>
             <p className="font-body text-lg text-ink/75 leading-relaxed">
-              Enter your book topic — we tell you how competitive the niche is, how many copies it sells, and the first thing you need to do.
+              Type a niche idea. Get 5 ranked recommendations plus a written action plan — cover style, title ideas, pricing range, and a 3-step launch plan. Takes 25–35 seconds. No signup.
             </p>
             <form onSubmit={handleSearch} className="flex flex-col gap-3">
               <div className="bg-white rounded-card border border-border flex items-center gap-2 px-4 py-1 card-shadow focus-within:border-signal focus-within:outline focus-within:outline-2 focus-within:outline-signal focus-within:outline-offset-2 transition-colors">
@@ -218,25 +219,29 @@ export function HomeClient() {
                   <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
                 <input
+                  id="niche-input"
                   type="text"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="Try any topic, e.g.: ADHD planner, camping guide, kids coloring book..."
+                  placeholder="Try any niche idea — ADHD planner, camping guide, kids coloring book"
+                  aria-label="Book topic or niche idea"
+                  data-tooltip="Type a topic, audience, or format — one line is enough."
                   className="w-full h-14 bg-transparent text-ink placeholder:text-ink-3 font-body text-base border-none outline-none"
                 />
               </div>
               <button
                 type="submit"
+                data-tooltip="Click to see five ranked niche recommendations. Takes 25–35 seconds."
                 className="bg-signal text-white rounded-btn px-6 py-4 font-body text-base font-semibold hover:opacity-85 transition-opacity text-center card-shadow self-start"
               >
-                Analyze Now — Free
+                Find My First Niche — Free
               </button>
             </form>
             <p className="font-body text-sm text-ink/70">
-              No signup needed · 1 free analysis per day · Cancel anytime
+              Preview without signing in · 1 free analysis every 24 hours · Cancel anytime
             </p>
             <p className="font-mono text-[11px] text-ink-3 uppercase tracking-widest">
-              AI recommendations are estimates based on publicly available data
+              AI-generated recommendations are estimates based on publicly available data. Actual Amazon sales performance depends on many factors and may differ significantly from our estimates. See our <Link href="/disclaimer" className="underline underline-offset-2">Disclaimer</Link>.
             </p>
             <p className="font-body text-[13px] text-ink/60 leading-relaxed">
               Publisher Rocket charges $199 one-time. Helium 10 starts at $37/mo and was built for Amazon FBA, not KDP. KDP Niche Finder is free to try — Starter starts at $9.99/mo, Pro at $29.99/mo.
@@ -531,14 +536,14 @@ export function HomeClient() {
             Free preview · No signup
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white relative z-10 leading-tight tracking-tight">
-            Stop guessing. Find your niche in 30 seconds.
+            Ready to find your niche?
           </h2>
           <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10">
             <button
               onClick={() => router.push('/tools/kdp-niche-finder')}
               className="bg-transparent text-white border-2 border-white rounded-btn px-6 py-3.5 font-body text-base font-semibold hover:bg-white/10 transition-colors"
             >
-              Analyze Now — Free
+              Find My First Niche — Free
             </button>
             <Link
               href="/pricing"

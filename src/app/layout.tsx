@@ -3,6 +3,7 @@ import './globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { AnalyticsScripts } from '@/components/Analytics'
+import { FirstVisitModal } from '@/components/onboarding/FirstVisitModal'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://kdpnichefinder.net'),
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main>{children}</main>
         <Footer />
+        <FirstVisitModal />
       </body>
     </html>
   )
