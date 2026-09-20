@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import HomePage from '../../page'
 
 export const metadata: Metadata = {
-  title: 'AI KDP Niche Finder — Find Profitable Niches Fast',
+  title: 'AI KDP Niche Finder — Fast Rankings',
   description: 'Find KDP niches ranked by BSR, competition, and demand signals. Get 5 ranked niches with step-by-step action plans. Free preview, no signup needed.',
   alternates: { canonical: '/tools/ai-kdp-niche-finder' },
 }

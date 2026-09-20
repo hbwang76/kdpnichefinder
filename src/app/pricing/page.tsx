@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { PricingClient } from '@/components/pricing/PricingClient'
 
 export const metadata: Metadata = {
-  title: 'Pricing — KDP Niche Finder Plans from $9.99/mo',
+  title: 'Pricing — Plans from $9.99/mo',
   description: 'Simple pricing for KDP niche research. Free preview available with 1 daily analysis. Starter $9.99/mo, Pro $29.99/mo. Cancel anytime, 7-day refund.',
   alternates: { canonical: '/pricing' },
   openGraph: { url: 'https://kdpnichefinder.net/pricing' },
