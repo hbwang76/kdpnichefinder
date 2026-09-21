@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     type: 'website',
     url: 'https://kdpnichefinder.net',
     siteName: 'KDP Niche Finder',
+    images: [{ url: '/assets/og-image.webp', width: 1200, height: 630 }],
   },
 }
 
