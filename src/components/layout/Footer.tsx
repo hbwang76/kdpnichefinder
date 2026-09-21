@@ -95,6 +95,30 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/tools/free-kdp-niche-finder"
+                  style={{ color: 'white', textDecoration: 'none', fontSize: '0.875rem' }}
+                >
+                  Free Niche Finder
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/tools/ai-kdp-niche-finder"
+                  style={{ color: 'white', textDecoration: 'none', fontSize: '0.875rem' }}
+                >
+                  AI Niche Finder
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/tools/niche-research"
+                  style={{ color: 'white', textDecoration: 'none', fontSize: '0.875rem' }}
+                >
+                  Niche Research
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/pricing"
                   style={{ color: 'white', textDecoration: 'none', fontSize: '0.875rem' }}
                 >
