@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://kdpnichefinder.net',
     siteName: 'KDP Niche Finder',
     images: [{ url: '/og-image.webp', width: 1200, height: 630 }],
   },
