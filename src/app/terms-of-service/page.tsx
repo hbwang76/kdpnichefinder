@@ -373,9 +373,9 @@ export default function TermsOfServicePage() {
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Source References</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
               {([
-                ['Creem Merchant Terms of Service V2.0', 'creem.io/terms'],
-                ['Creem Buyer Terms of Service V2.0', 'creem.io/buyer-terms'],
-                ['Creem Privacy Notice V2.0', 'creem.io/privacy'],
+                ['Creem Merchant Terms of Service V2.0', 'www.creem.io/terms'],
+                ['Creem Buyer Terms of Service V2.0', 'www.creem.io/buyer-terms'],
+                ['Creem Privacy Notice V2.0', 'www.creem.io/privacy'],
                 ['Google API Services User Data Policy', 'developers.google.com/terms/api-services-user-data-policy'],
               ] as [string, string][]).map(([label, url]) => (
                 <li key={label} style={{ fontSize: '0.8125rem' }}>
