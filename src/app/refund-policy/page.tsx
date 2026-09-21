@@ -4,6 +4,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Refund Policy',
   description: 'KDP Niche Finder refund policy. Net refund within 7 days for first-time monthly subscribers, 14-day pro-rata for annual plans, credits refundable within 7 days.',
+  openGraph: { url: 'https://kdpnichefinder.net/refund-policy' },
   alternates: { canonical: '/refund-policy' },
 }
 
@@ -253,8 +254,8 @@ export default function RefundPolicyPage() {
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Source References</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
               {([
-                ['Creem Merchant Terms of Service V2.0', 'creem.io/terms'],
-                ['Creem Buyer Terms of Service V2.0', 'creem.io/buyer-terms'],
+                ['Creem Merchant Terms of Service V2.0', 'www.creem.io/terms'],
+                ['Creem Buyer Terms of Service V2.0', 'www.creem.io/buyer-terms'],
                 ['EU Consumer Rights Directive 2011/83/EU', 'eur-lex.europa.eu/eli/dir/2011/83/oj'],
               ] as [string, string][]).map(([label, url]) => (
                 <li key={label} style={{ fontSize: '0.8125rem' }}>

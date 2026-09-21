@@ -4,6 +4,7 @@ import HomePage from '../../page'
 export const metadata: Metadata = {
   title: 'Niche Research Tool — Deep KDP Market Research',
   description: 'Deep KDP niche research combining multiple data signals for comprehensive market analysis. BSR, competition, and trend data all in one place.',
+  openGraph: { url: 'https://kdpnichefinder.net/tools/niche-research' },
   alternates: { canonical: '/tools/niche-research' },
 }
 

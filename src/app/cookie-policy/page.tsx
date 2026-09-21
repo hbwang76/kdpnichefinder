@@ -4,6 +4,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Cookie Policy',
   description: 'How KDP Niche Finder uses cookies and similar technologies. Strictly necessary, analytics, and marketing cookies explained with your choices.',
+  openGraph: { url: 'https://kdpnichefinder.net/cookie-policy' },
   alternates: { canonical: '/cookie-policy' },
 }
 
@@ -219,7 +220,7 @@ export default function CookiePolicyPage() {
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
               {([
                 ['Creem Privacy Notice V2.0 §7 (Cookies)', 'www.creem.io/privacy'],
-                ['ePrivacy Directive 2002/58/EC', 'eur-lex.europa.eu/eli/dir/2002/58/oj/'],
+                ['ePrivacy Directive 2002/58/EC', 'eur-lex.europa.eu/eli/dir/2002/58/oj'],
                 ['GDPR Art. 6 (lawful bases)', 'gdpr-info.eu/art-6-gdpr/'],
               ] as [string, string][]).map(([label, url]) => (
                 <li key={label} style={{ fontSize: '0.8125rem' }}>

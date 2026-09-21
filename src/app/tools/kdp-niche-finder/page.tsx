@@ -5,6 +5,7 @@ import { NicheAnalyzer } from '@/components/NicheAnalyzer'
 export const metadata: Metadata = {
   title: 'KDP Niche Finder — Profitable Niches',
   description: 'Find profitable KDP niches with BSR scoring, competition analysis, and step-by-step action plans. Free preview available, no signup required.',
+  openGraph: { url: 'https://kdpnichefinder.net/tools/kdp-niche-finder' },
   alternates: { canonical: '/tools/kdp-niche-finder' },
 }
 
