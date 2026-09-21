@@ -4,7 +4,12 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Disclaimer',
   description: 'KDP Niche Finder is an independent third-party tool. Not affiliated with Amazon.com, Inc. or any third-party brands referenced on this site.',
-  openGraph: { url: 'https://kdpnichefinder.net/disclaimer' },
+  openGraph: {
+    url: 'https://kdpnichefinder.net/disclaimer',
+    type: 'website',
+    siteName: 'KDP Niche Finder',
+    images: [{ url: '/assets/og-image.webp', width: 1200, height: 630 }],
+  },
   alternates: { canonical: '/disclaimer' },
 }
 

@@ -4,7 +4,12 @@ export const metadata: Metadata = {
   title: 'Contact Us — KDP Niche Finder',
   description: 'Get in touch with the KDP Niche Finder team. Questions about pricing, data sources, scoring accuracy, refunds, or account access. We respond within 48 hours.',
   alternates: { canonical: '/contact' },
-  openGraph: { url: 'https://kdpnichefinder.net/contact' },
+  openGraph: {
+    url: 'https://kdpnichefinder.net/contact',
+    type: 'website',
+    siteName: 'KDP Niche Finder',
+    images: [{ url: '/assets/og-image.webp', width: 1200, height: 630 }],
+  },
 }
 
 export default function ContactPage() {

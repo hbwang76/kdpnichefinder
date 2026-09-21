@@ -5,7 +5,12 @@ export const metadata: Metadata = {
   title: 'About — KDP Niche Finder',
   description: 'KDP Niche Finder is an independent niche research tool for KDP self-publishers. Not affiliated with Amazon or any referenced brands. Updated 2026.',
   alternates: { canonical: '/about' },
-  openGraph: { url: 'https://kdpnichefinder.net/about' },
+  openGraph: {
+    url: 'https://kdpnichefinder.net/about',
+    type: 'website',
+    siteName: 'KDP Niche Finder',
+    images: [{ url: '/assets/og-image.webp', width: 1200, height: 630 }],
+  },
 }
 
 export default function AboutPage() {

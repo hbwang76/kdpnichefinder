@@ -5,7 +5,12 @@ export const metadata: Metadata = {
   title: 'Pricing — Plans from $9.99/mo',
   description: 'Simple pricing for KDP niche research. Free preview available with 1 daily analysis. Starter $9.99/mo, Pro $29.99/mo. Cancel anytime, 7-day refund.',
   alternates: { canonical: '/pricing' },
-  openGraph: { url: 'https://kdpnichefinder.net/pricing' },
+  openGraph: {
+    url: 'https://kdpnichefinder.net/pricing',
+    type: 'website',
+    siteName: 'KDP Niche Finder',
+    images: [{ url: '/assets/og-image.webp', width: 1200, height: 630 }],
+  },
 }
 
 export default function PricingPage() {

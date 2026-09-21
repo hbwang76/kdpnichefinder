@@ -4,7 +4,12 @@ export const metadata: Metadata = {
   title: 'FAQ — KDP Niche Finder',
   description: 'Answers to common questions about KDP Niche Finder: pricing plans, data sources, scoring accuracy, refunds, and account access. Updated for 2026.',
   alternates: { canonical: '/faq' },
-  openGraph: { url: 'https://kdpnichefinder.net/faq' },
+  openGraph: {
+    url: 'https://kdpnichefinder.net/faq',
+    type: 'website',
+    siteName: 'KDP Niche Finder',
+    images: [{ url: '/assets/og-image.webp', width: 1200, height: 630 }],
+  },
 }
 
 const faqs = [

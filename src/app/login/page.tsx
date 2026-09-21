@@ -6,7 +6,12 @@ export const metadata: Metadata = {
   description: 'Sign in with Google to access your saved niche analyses, view your subscription plan, and unlock unlimited KDP niche searches on KDP Niche Finder.',
   alternates: { canonical: '/login' },
   robots: { index: false, follow: true },
-  openGraph: { url: 'https://kdpnichefinder.net/login' },
+  openGraph: {
+    url: 'https://kdpnichefinder.net/login',
+    type: 'website',
+    siteName: 'KDP Niche Finder',
+    images: [{ url: '/assets/og-image.webp', width: 1200, height: 630 }],
+  },
 }
 
 export default function LoginPage() {

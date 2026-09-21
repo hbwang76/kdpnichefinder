@@ -7,7 +7,12 @@ export const metadata: Metadata = {
   description: 'Manage your KDP Niche Finder account, view your subscription plan, purchase credits, and access your full niche analysis history in one place.',
   alternates: { canonical: '/account' },
   robots: { index: false, follow: true },
-  openGraph: { url: 'https://kdpnichefinder.net/account' },
+  openGraph: {
+    url: 'https://kdpnichefinder.net/account',
+    type: 'website',
+    siteName: 'KDP Niche Finder',
+    images: [{ url: '/assets/og-image.webp', width: 1200, height: 630 }],
+  },
 }
 
 export default function AccountPage() {

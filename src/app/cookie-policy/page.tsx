@@ -4,7 +4,12 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Cookie Policy',
   description: 'How KDP Niche Finder uses cookies and similar technologies. Strictly necessary, analytics, and marketing cookies explained with your choices.',
-  openGraph: { url: 'https://kdpnichefinder.net/cookie-policy' },
+  openGraph: {
+    url: 'https://kdpnichefinder.net/cookie-policy',
+    type: 'website',
+    siteName: 'KDP Niche Finder',
+    images: [{ url: '/assets/og-image.webp', width: 1200, height: 630 }],
+  },
   alternates: { canonical: '/cookie-policy' },
 }
 
