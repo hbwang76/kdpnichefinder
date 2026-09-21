@@ -158,9 +158,9 @@ export default function CookiePolicyPage() {
             <DocTable
               headers={['Service', 'Privacy Policy']}
               rows={[
-                ['Cloudflare, Inc.', <a href="https://www.cloudflare.com/privacypolicy/" style={{ color: 'var(--color-signal)' }}>cloudflare.com/privacypolicy</a>],
+                ['Cloudflare, Inc.', <a href="https://www.cloudflare.com/privacypolicy/" style={{ color: 'var(--color-signal)' }}>www.cloudflare.com/privacypolicy/</a>],
                 ['Google LLC (Sign-In, Analytics)', <a href="https://policies.google.com/privacy" style={{ color: 'var(--color-signal)' }}>policies.google.com/privacy</a>],
-                ['Creem (Armitage Labs OÜ)', <a href="https://www.creem.io/privacy" style={{ color: 'var(--color-signal)' }}>creem.io/privacy</a>],
+                ['Creem (Armitage Labs OÜ)', <a href="https://www.creem.io/privacy" style={{ color: 'var(--color-signal)' }}>www.creem.io/privacy</a>],
                 ['Plausible Analytics (if enabled)', <a href="https://plausible.io/data-policy" style={{ color: 'var(--color-signal)' }}>plausible.io/data-policy</a>],
               ]}
             />
@@ -218,9 +218,9 @@ export default function CookiePolicyPage() {
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Source References</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
               {([
-                ['Creem Privacy Notice V2.0 §7 (Cookies)', 'creem.io/privacy'],
-                ['ePrivacy Directive 2002/58/EC', 'eur-lex.europa.eu/eli/dir/2002/58/oj'],
-                ['GDPR Art. 6 (lawful bases)', 'gdpr-info.eu/art-6-gdpr'],
+                ['Creem Privacy Notice V2.0 §7 (Cookies)', 'www.creem.io/privacy'],
+                ['ePrivacy Directive 2002/58/EC', 'eur-lex.europa.eu/eli/dir/2002/58/oj/'],
+                ['GDPR Art. 6 (lawful bases)', 'gdpr-info.eu/art-6-gdpr/'],
               ] as [string, string][]).map(([label, url]) => (
                 <li key={label} style={{ fontSize: '0.8125rem' }}>
                   <a href={`https://${url}`} style={{ color: 'var(--color-signal)' }} target="_blank" rel="noopener noreferrer">{label}</a>

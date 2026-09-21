@@ -179,7 +179,7 @@ export default function PrivacyPolicyPage() {
             <H3>4.1 Cloudflare (Hosting / Edge Compute)</H3>
             <Ul items={[
               <><strong>Purpose:</strong> Serve the Site, run API requests, protect against abuse</>,
-              <><strong>Privacy policy:</strong> <a href="https://www.cloudflare.com/privacypolicy/" style={{ color: 'var(--color-signal)' }}>cloudflare.com/privacypolicy</a></>,
+              <><strong>Privacy policy:</strong> <a href="https://www.cloudflare.com/privacypolicy/" style={{ color: 'var(--color-signal)' }}>www.cloudflare.com/privacypolicy/</a></>,
             ]} />
 
             <H3>4.2 Creem (Merchant of Record — Payments and Tax)</H3>
@@ -188,7 +188,7 @@ export default function PrivacyPolicyPage() {
               <><strong>Role:</strong> Creem is the <strong>merchant of record</strong>. Creem is the legal seller of your purchase and independently handles billing data, VAT/sales tax, and invoicing</>,
               <><strong>Buyer data Creem collects:</strong> name, email, billing address, payment details, order details, device ID, IP address</>,
               <><strong>We receive from Creem:</strong> transaction IDs, product IDs, subscription status, payout amounts. We do not receive your full card number.</>,
-              <><strong>Creem Privacy Notice:</strong> <a href="https://www.creem.io/privacy" style={{ color: 'var(--color-signal)' }}>creem.io/privacy</a></>,
+              <><strong>Creem Privacy Notice:</strong> <a href="https://www.creem.io/privacy" style={{ color: 'var(--color-signal)' }}>www.creem.io/privacy</a></>,
               <><strong>Creem support:</strong> support@creem.io</>,
             ]} />
 
@@ -326,12 +326,12 @@ export default function PrivacyPolicyPage() {
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Source References</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
               {([
-                ['Creem Privacy Notice V2.0', 'creem.io/privacy'],
-                ['Creem Merchant Terms of Service V2.0', 'creem.io/terms'],
-                ['Creem Buyer Terms of Service V2.0', 'creem.io/buyer-terms'],
+                ['Creem Privacy Notice V2.0', 'www.creem.io/privacy'],
+                ['Creem Merchant Terms of Service V2.0', 'www.creem.io/terms'],
+                ['Creem Buyer Terms of Service V2.0', 'www.creem.io/buyer-terms'],
                 ['Google API Services User Data Policy', 'developers.google.com/terms/api-services-user-data-policy'],
-                ['Cloudflare Privacy Policy', 'cloudflare.com/privacypolicy'],
-                ['GDPR (EU 2016/679)', 'gdpr-info.eu'],
+                ['Cloudflare Privacy Policy', 'www.cloudflare.com/privacypolicy/'],
+                ['GDPR (EU 2016/679)', 'gdpr-info.eu/art-6-gdpr/'],
               ] as [string, string][]).map(([label, url]) => (
                 <li key={label} style={{ fontSize: '0.8125rem' }}>
                   <a href={`https://${url}`} style={{ color: 'var(--color-signal)' }} target="_blank" rel="noopener noreferrer">{label}</a>
